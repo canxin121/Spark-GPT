@@ -23,7 +23,7 @@
 
 ---
 
-[![残心小站-文档库](https://github.com/canxin121/nonebot_poe_chat/blob/main/source/spark/cx.png )](https://canxin121.github.io/docs/docs/Spark_GPT.html )
+[![残心小站-文档库](https://github.com/canxin121/Spark-GPT/blob/main/source/display.png )](https://canxin121.github.io/docs/docs/Spark_GPT.html )
 
 > 详细教程（必看，否则不会使用） 点击链接跳转👇 点击图片跳转☝️
   
