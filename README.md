@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://github.com/canxin121">
-    <img src="https://socialify.git.ci/canxin121/Spark-GPT/image?forks=1&issues=1&language=1&logo=https%3A%2F%2Fcanxin121.github.io%2Fdocs%2Flogo.png&name=1&owner=1&pattern=Charlie%20Brown&pulls=1&stargazers=1&theme=auto" width="700" height="350">
+    <img src="https://socialify.git.ci/canxin121/Spark-GPT/image?font=Raleway&forks=1&issues=1&language=1&logo=https%3A%2F%2Fcanxin121.github.io%2Fdocs%2Flogo.png&name=1&owner=1&pattern=Charlie%20Brown&pulls=1&stargazers=1&theme=Auto" width="700" height="350">
   </a>
   <h1>Spark-GPT</h1>
   <p><em>Spark-GPT</em></p>
