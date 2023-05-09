@@ -40,6 +40,6 @@
 
 | Image 1 | Image 2 |
 |:-------:|:-------:|
-| ![1](https://github.com/canxin121/Spark-GPT/tree/main/source/spark/demo (1).png) | ![2](https://github.com/canxin121/Spark-GPT/tree/main/source/spark/demo (2).png) |
-| ![1](https://github.com/canxin121/Spark-GPT/tree/main/source/spark/demo (3).png) | ![2](https://github.com/canxin121/Spark-GPT/tree/main/source/spark/demo (4).png) |
-| ![1](https://github.com/canxin121/Spark-GPT/tree/main/source/spark/demo (5).png) |                                   |
+| ![1](https://github.com/canxin121/Spark-GPT/tree/main/source/spark/demo(1).png) | ![2](https://github.com/canxin121/Spark-GPT/tree/main/source/spark/demo(2).png) |
+| ![1](https://github.com/canxin121/Spark-GPT/tree/main/source/spark/demo(3).png) | ![2](https://github.com/canxin121/Spark-GPT/tree/main/source/spark/demo(4).png) |
+| ![1](https://github.com/canxin121/Spark-GPT/tree/main/source/spark/demo(5).png) |                                   |
