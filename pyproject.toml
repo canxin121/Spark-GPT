@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Spark-GPT,提供完善预设管理系统，便捷对话，成熟控制的对接多个来源的机器人"
 authors = ["canxin121 <1969730106@qq.com>"]
 readme = "README.md"
-packages = [{include = "spark_gpt"}]
+packages = [{include = "nonebot_plugin_spark_gpt"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
