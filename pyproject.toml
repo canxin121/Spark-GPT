@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "spark-gpt"
+version = "0.1.0"
+description = ""
+authors = ["canxin121"]
+readme = "README.md"
+packages = [{include = "spark_gpt"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+nonebot = "^1.9.1"
+aiofiles = "^23.1.0"
+aiohttp = "^3.8.4"
+bidict = "^0.22.1"
+edgegpt = "^0.3.6"
+httpx = "^0.24.0"
+imagegen = "^0.2"
+jinja2 = "^3.1.2"
+markdown = "^3.4.3"
+nonebot-plugin-guild-patch = "^0.2.3"
+playwright = "^1.33.0"
+pydantic = "^1.10.7"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
