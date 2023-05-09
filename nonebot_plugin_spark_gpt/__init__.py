@@ -5,6 +5,7 @@ from .newbing import main
 from .chatgpt_web import main
 from .common import main
 from nonebot.matcher import Matcher
+from nonebot.plugin import PluginMetadata
 from nonebot.adapters.onebot.v11 import (
     Event,
     Bot,
@@ -12,6 +13,15 @@ from nonebot.adapters.onebot.v11 import (
 )
 
 from .common.render.render import md_to_pic
+
+__version__ = "0.1.1"
+__plugin_meta__ = PluginMetadata(
+    "Spark-GPT",
+    "将多来源的gpt接入qq及更多平台，使用便捷，管理完善，功能强大",
+    "通过/help /帮助 /说明 /使用说明  命令来获取详细使用说明",
+    {"Author": "canxin121"},
+)
+
 
 poe_help = nonebot.on_command(
     "help", aliases={"帮助", "使用说明", "说明"}, priority=4, block=False
