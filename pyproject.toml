@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "spark-gpt"
 version = "0.1.0"
-description = ""
-authors = ["canxin121"]
+description = "Spark-GPT,提供完善预设管理系统，便捷对话，成熟控制的对接多个来源的机器人"
+authors = ["canxin121 <1969730106@qq.com>"]
 readme = "README.md"
 packages = [{include = "spark_gpt"}]
 
@@ -17,10 +17,12 @@ httpx = "^0.24.0"
 imagegen = "^0.2"
 jinja2 = "^3.1.2"
 markdown = "^3.4.3"
-nonebot-plugin-guild-patch = "^0.2.3"
+nonebot-plugin-guild-patch = "*"
 playwright = "^1.33.0"
 pydantic = "^1.10.7"
 
+[tool.poetry.extras]
+onebot = ["nonebot-adapter-onebot"]
 
 [build-system]
 requires = ["poetry-core"]
