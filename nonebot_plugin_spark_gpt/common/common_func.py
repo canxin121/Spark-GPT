@@ -30,6 +30,19 @@ def reply_out(
         return MessageSegment.reply(event.message_id) + MessageSegment.image(content)
     return MessageSegment.reply(event.message_id) + content
 
+async def delete_messages(bot, user_id: str, dict_list: dict):
+    await asyncio.sleep(1)
+    if user_id in dict_list:
+        if isinstance(dict_list[user_id], list):
+            for eachmsg in dict_list[user_id]:
+                await bot.delete_msg(message_id=eachmsg["message_id"])
+            del dict_list[user_id]
+        else:
+            await bot.delete_msg(message_id=dict_list[user_id]["message_id"])
+    else:
+        for eachmsg in dict_list:
+            await bot.delete_msg(message_id=eachmsg["message_id"])
+        del dict_list
 
 async def get_url(text):
     """将 Markdown 文本保存到 Mozilla Pastebin，并获得 URL"""

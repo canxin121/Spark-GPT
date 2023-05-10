@@ -142,7 +142,7 @@ class SparkPersistor(BaseModel):
     mode: str = "black"
     prompts_dict: Dict[str, str] = {
         "猫娘": "现在你将模仿一只猫娘，与我对话每一句话后面都要加上“喵”，如果你能明白我的意思，请回复“喵~你好主人”",
-        "默认": "一个ai语言模型",
+        "默认": "你是一个ai语言模型",
     }
 
     def __init__(self, **data):

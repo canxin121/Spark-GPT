@@ -10,6 +10,7 @@ from .config import spark_persistor, get_user_info_and_data
 from .common_func import is_auto_prompt
 from ..chatgpt_web.config import gptweb_persistor
 from ..poe.config import poe_persistor
+from ..claude_slack.config import claude_slack_persistor
 
 spark_addprompt = on_command("添加预设", aliases={"ap"}, priority=4, block=False)
 
@@ -103,14 +104,21 @@ async def __spark_removeprompt__(event: Event, matcher: Matcher):
             gw_bot_str += f"    {i+1}:{gw_bots[i]}\n"
     except:
         gw_bot_str = "没有可用的gpt_web机器人\n"
-    poe_bots = list(poe_persistor.user_dict[current_userinfo]["all"].keys())
     try:
+        poe_bots = list(poe_persistor.user_dict[current_userinfo]["all"].keys())
         poe_bot_str = "poe机器人有:\n"
         for i in range(len(poe_bots)):
             poe_bot_str += f"    {i+1}:{poe_bots[i]}\n"
     except:
         poe_bot_str = "没有可用的poe机器人\n"
-    msg = "所有机器人信息如下:\n\n" + gw_bot_str + poe_bot_str
+    try:
+        claude_slack_bots = list(claude_slack_persistor.user_dict[current_userinfo]["all"].keys())
+        claude_slack_bot_str = "claude_slack机器人有:\n"
+        for i in range(len(claude_slack_bots)):
+            claude_slack_bot_str += f"    {i+1}:{claude_slack_bots[i]}\n"
+    except:
+        claude_slack_bot_str = "没有可用的poe机器人\n"
+    msg = "所有机器人信息如下:\n\n" + gw_bot_str + poe_bot_str + claude_slack_bot_str
     await matcher.finish(reply_out(event, msg))
 
 

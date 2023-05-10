@@ -54,33 +54,7 @@ def is_email(email) -> bool:
     return bool(re.match(pattern, email))
 
 
-async def delete_messages(bot, user_id: str, dict_list: dict):
-    await asyncio.sleep(1)
-    if user_id in dict_list:
-        if isinstance(dict_list[user_id], list):
-            for eachmsg in dict_list[user_id]:
-                await bot.delete_msg(message_id=eachmsg["message_id"])
-            del dict_list[user_id]
-        else:
-            await bot.delete_msg(message_id=dict_list[user_id]["message_id"])
-    else:
-        for eachmsg in dict_list:
-            await bot.delete_msg(message_id=eachmsg["message_id"])
-        del dict_list
 
-
-async def mdlink_2_str(md_text):
-    result = []
-    pattern = r"\[([^\]]+)\]\(([^)]+)\)(\s*-\s*([^[]+))?"  # 匹配超链接及其描述
-    matches = re.findall(pattern, md_text)
-    for i, match in enumerate(matches):
-        # 提取标题
-        title = match[0].strip() if not match[3] else match[3].strip()
-        # 组合字符串
-        result.append(f"{i+1}. {title} - {match[1].strip()}")
-
-    output_str = "\n\n".join(result)
-    return output_str
 
 
 def is_useable(event, mode=poe_persistor.mode):

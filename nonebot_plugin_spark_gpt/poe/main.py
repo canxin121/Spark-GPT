@@ -19,14 +19,13 @@ from .config import (
 )
 from .poe_func import (
     generate_truename,
-    reply_out,
-    delete_messages,
     is_useable,
     send_msg,
     close_page,
     is_vip,
 )
 from .poe_api import poe_chat, poe_create, poe_clear
+from ..common.common_func import delete_messages, reply_out
 from ..common.config import spark_persistor
 from ..common.render.render import md_to_pic
 from ..chatgpt_web.config import gptweb_persistor
@@ -119,7 +118,7 @@ async def __poe_create___(
         await delete_messages(bot, str(event.user_id), create_msgs)
         await poe_create_.finish()
 
-    infos = infos.split(" ", 2)
+    infos = infos.split(" ", 1)
     if not (len(infos) == 3 and infos[1] in ["1", "2"]):
         create_msgs.append(await matcher.send(reply_out(event, "输入信息有误，请检查后重新输入")))
         await poe_create_.reject()
@@ -394,9 +393,7 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
                 else:
                     return False
                 try:
-                    last_suggests = msg_bot_bidict[
-                        event.reply.message_id
-                    ].last_suggests
+                    last_suggests = msg_bot_bidict[event.reply.message_id].last_suggests
                 except:
                     last_suggests = []
                     #  mode,raw_message,last_msgid,last_suggests,nickname,truename,current_userinfo,current_userdata = temp
@@ -428,9 +425,7 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
             return False
         mode = "private"
         try:
-            botinfo = list(
-                poe_persistor.user_dict[current_userinfo]["now"].values()
-            )[0]
+            botinfo = list(poe_persistor.user_dict[current_userinfo]["now"].values())[0]
             nickname = botinfo.nickname
             truename = botinfo.truename
         except:
@@ -519,9 +514,7 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
                         return False
                     mode = "public"
                     try:
-                        last_msgid = current_userdata.last_reply_message_id[
-                            nickname
-                        ]
+                        last_msgid = current_userdata.last_reply_message_id[nickname]
                         last_suggests = msg_bot_bidict[last_msgid].last_suggests
                     except:
                         last_msgid = 0
@@ -541,6 +534,7 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
         except:
             return False
 
+
 #############################################################
 chat_lock = asyncio.Semaphore(3)
 poe_base_lock = asyncio.Lock()
@@ -553,6 +547,11 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
     if temp == False:
         await matcher.finish()
     if temp == "none":
+        current_userinfo, current_userdata = set_userdata(
+            event=event, user_data_dict=user_data_dict
+        )
+        if current_userdata.is_waiting:
+            await matcher.finish(reply_out(event, "你已经有一个请求进行中了，请等结束后再发送"))
         mode = "private"
         user_id = str(event.user_id)
         raw_message = (
@@ -567,12 +566,11 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
         truename = str(generate_truename(user_id, nickname))
         prompt_nickname = poe_persistor.auto_prompt
         prompt = spark_persistor.prompts_dict[prompt_nickname]
+        current_userdata.is_waiting = True
         page = await pwfw.new_page()
         is_created = await poe_create(page, truename, 1, prompt)
         await page.close()
-        current_userinfo, current_userdata = set_userdata(
-            event=event, user_data_dict=user_data_dict
-        )
+        current_userdata.is_waiting = False
         if is_created:
             # # 将更新后的字典写回到JSON文件中
             botinfo = BotInfo(
@@ -623,7 +621,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
             await matcher.send(reply_out(event, "请稍等,你前面已有3个用户,你的回答稍后就来"))
 
         async with chat_lock:
-            if text in ["清除对话", "清空对话", "清除历史", "清空历史", "清除记录", "清空历史对话", "刷新对话"]:
+            if text in ["清除对话", "清空对话", "清除历史", "清空历史", "清空历史对话", "刷新对话"]:
                 current_userdata.is_waiting = True
                 page = await pwfw.new_page()
                 is_cleared = await poe_clear(page=page, truename=truename)
@@ -710,7 +708,7 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 - 对话问答功能均支持以下特性：
 
 - 可以通过回复机器人的最后一个回答来继续对话，而无需命令。
-- 可以回复 "(清除/清空)(对话/历史)" 或 刷新对话, 清除对话历史 或 "pd", "poedump", "pdump" 来清空对话。
+- 可以回复 "(清除/清空)(对话/历史)" 或"刷新对话"或"清除对话历史"来清空对话。
 - 可以通过建议回复的数字索引来使用建议回复。
 
 ************************

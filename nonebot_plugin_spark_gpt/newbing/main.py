@@ -14,10 +14,12 @@ from nonebot.adapters.onebot.v11 import (
     MessageSegment,
 )
 from ImageGen import ImageGenAsync
-from .newbing_func import is_useable, reply_out, sendmsg
+from .newbing_func import is_useable, sendmsg
 from .config import newbing_persistor, NewBingTemper, set_userdata
 from EdgeGPT import Chatbot, ConversationStyle
 from ..common.render.render import md_to_pic
+from ..common.common_func import reply_out
+
 
 logger.info("开始加载Newbing")
 newbingtemper = NewBingTemper()
@@ -144,13 +146,15 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         style = ConversationStyle.balanced
     else:
         style = ConversationStyle.precise
-    current_userdata.is_waiting = True
+
     try:
+        current_userdata.is_waiting = True
         raw_json = await chatbot.ask(
             prompt=raw_message,
             conversation_style=style,
             wss_link="wss://sydney.bing.com/sydney/ChatHub",
         )
+        current_userdata.is_waiting = False
     except:
         current_userdata.is_waiting = False
         await matcher.send(reply_out(event, "出错喽，多次重试都出错的话，联系机器人主人"))
@@ -158,22 +162,17 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
     value = raw_json["item"]["result"]["value"]
     if value != "Success":
         if value == "Throttled":
-            current_userdata.is_waiting = False
             await matcher.finish(reply_out(event, "该账号cookie问答次数已达到今日上限捏"))
         elif value == "InvalidSession":
-            current_userdata.is_waiting = False
             await matcher.finish(reply_out(event, "无效会话捏"))
         else:
-            current_userdata.is_waiting = False
             await matcher.finish(reply_out(event, "出错喽，多次重试都出错的话，联系机器人主人"))
     try:
         is_offense = raw_json["item"]["messages"][0]["offense"]
 
         if is_offense == "Offensive":
-            current_userdata.is_waiting = False
             await matcher.finish(reply_out(event, "你的询问太冒犯了,newbing拒绝回答"))
         if "hiddenText" in raw_json["item"]["messages"][1]:
-            current_userdata.is_waiting = False
             await matcher.finish(reply_out(event, "你的询问太敏感了,newbing拒绝回答"))
     except:
         pass
@@ -185,7 +184,6 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         reply = re.sub(r"\[\^(\d+)\^\]", r"[\1]", reply)
         reply = re.sub(r"\[?\^(\d+)\^\]?", r"[\1]", reply)
     except:
-        current_userdata.is_waiting = False
         await matcher.finish(reply_out(event, "出错喽，多次重试都出错的话，联系机器人主人"))
     msg_text = MessageSegment.text(reply + "  \n")
     if newbing_persistor.suggest_able == "True":
