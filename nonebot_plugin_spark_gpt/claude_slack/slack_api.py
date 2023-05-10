@@ -12,9 +12,13 @@ CLAUDE_ID = claude_slack_persistor.claude_id
 RECEIVE_INTERVAL = 2
 
 # 实例化一个Client
-client = AsyncWebClient(token=SLACK_USER_TOKEN)
+if claude_slack_persistor.proxy:
+    client = AsyncWebClient(token=SLACK_USER_TOKEN, proxy=claude_slack_persistor.proxy)
+else:
+    client = AsyncWebClient(token=SLACK_USER_TOKEN, proxy=claude_slack_persistor.proxy)
 
-async def receive_message(time_stamp,thread_ts,channel_id):
+
+async def receive_message(time_stamp, thread_ts, channel_id):
     try:
         # 使用Web客户端调用conversations.replies方法
         result = await client.conversations_replies(
@@ -47,18 +51,14 @@ async def send_msg(msg: str, thread_ts: str = None):
         raise SlackApiError
 
 
-async def get_msg(time_stamp,thread_ts):
+async def get_msg(time_stamp, thread_ts):
     response = "_Typing…_"
     start_time = time.time()
     max_retries = 5
     reties = 0
     while response.strip().endswith("_Typing…_"):
         time.sleep(RECEIVE_INTERVAL)
-        replies = await receive_message(
-            time_stamp,
-            thread_ts,
-            CHANNEL_ID
-        )
+        replies = await receive_message(time_stamp, thread_ts, CHANNEL_ID)
         # 如果replies['ok']为False或消息列表长度小于等于1，则表示没有响应
         if not replies:
             raise SlackApiError("未收到Claude响应，请重试。")
@@ -102,12 +102,12 @@ async def get_msg(time_stamp,thread_ts):
 async def claude_chat(msg, botinfo: BotInfo):
     thread_ts = botinfo.thread_ts
     try:
-        #new_ts可以理解为新发送的消息的id，而thread_ts则是一个消息列的id
+        # new_ts可以理解为新发送的消息的id，而thread_ts则是一个消息列的id
         new_ts = await send_msg(msg, thread_ts)
         botinfo.time_stamp = new_ts
         if not botinfo.thread_ts:
             botinfo.thread_ts = new_ts
     except Exception as e:
         return e
-    response = await get_msg(new_ts,botinfo.thread_ts)
+    response = await get_msg(new_ts, botinfo.thread_ts)
     return response, botinfo

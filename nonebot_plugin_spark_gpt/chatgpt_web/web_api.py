@@ -130,4 +130,5 @@ class ChatGPT_web:
                     f"刷新会话失败: <r>HTTP{response.status_code}</r> {response.text}"
                 )
 
+
 gptweb_api = ChatGPT_web()

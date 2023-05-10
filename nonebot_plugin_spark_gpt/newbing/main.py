@@ -289,6 +289,7 @@ newbing_change_mode = on_command(
     "bc", aliases={"bingchange", "bing切换"}, priority=1, block=False
 )
 
+
 @newbing_change_mode.handle()
 async def __newbing_change_mode__(
     matcher: Matcher,

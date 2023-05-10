@@ -310,9 +310,7 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
             if nickname:
                 if not is_useable(event):
                     return False
-                botinfo = gptweb_persistor.user_dict[current_userinfo]["all"][
-                    nickname
-                ]
+                botinfo = gptweb_persistor.user_dict[current_userinfo]["all"][nickname]
                 raw_message = (
                     str(event.message)
                     .replace("/" + nickname + " ", "")
@@ -335,7 +333,6 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
                 return False
         except:
             return False
-
 
 
 #############################################################
@@ -374,7 +371,6 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
         if creat_lock.locked():
             waitmsg = await matcher.send(reply_out(event, "有人正在创建中，稍后自动为你创建"))
         async with creat_lock:
-            
             try:
                 current_userdata.is_waiting = True
                 result = await gptweb_api.gpt_web_chat(truename, parentname, prompt)
@@ -382,7 +378,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
             except:
                 current_userdata.is_waiting = False
                 await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
-                
+
             if isinstance(result, str):
                 text_error = result
             elif isinstance(result, tuple):
@@ -467,7 +463,12 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     gptweb_persistor.user_dict[current_userinfo]["all"][
                         nickname
                     ] = botinfo
-                    if botinfo.nickname == list(gptweb_persistor.user_dict[current_userinfo]["now"].values())[0].nickname:
+                    if (
+                        botinfo.nickname
+                        == list(
+                            gptweb_persistor.user_dict[current_userinfo]["now"].values()
+                        )[0].nickname
+                    ):
                         gptweb_persistor.user_dict[current_userinfo]["now"] = {
                             nickname: botinfo
                         }
@@ -483,9 +484,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     current_userdata.last_reply_message_id[nickname] = reply_msgid[
                         "message_id"
                     ]
-                    msg_bot_bidict.inv[botinfo] = reply_msgid[
-                        "message_id"
-                    ]
+                    msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
                     current_userdata.is_waiting = False
                     await matcher.finish()
                 else:
@@ -513,8 +512,13 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 msg_bot_bidict[lastmsg_id] = botinfo
 
                 gptweb_persistor.user_dict[current_userinfo]["all"][nickname] = botinfo
-                if botinfo == list(gptweb_persistor.user_dict[current_userinfo]["now"].values())[0]:
-                    gptweb_persistor.user_dict[current_userinfo]["now"] = { 
+                if (
+                    botinfo
+                    == list(
+                        gptweb_persistor.user_dict[current_userinfo]["now"].values()
+                    )[0]
+                ):
+                    gptweb_persistor.user_dict[current_userinfo]["now"] = {
                         nickname: botinfo
                     }
                 gptweb_persistor.save()
@@ -620,7 +624,7 @@ gw_auto_change_prompt = on_command(
 
 
 @gw_auto_change_prompt.handle()
-async def __poe_auto_change_prompt__(matcher:Matcher,event: Event):
+async def __poe_auto_change_prompt__(matcher: Matcher, event: Event):
     if not is_useable(event):
         await matcher.finish()
     global gptweb_persistor

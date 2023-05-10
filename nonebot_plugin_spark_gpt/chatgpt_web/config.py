@@ -143,7 +143,7 @@ class GPT_WebPersistor(BaseModel):
     model: str = "text-davinci-002-render-sha"
     mode: str = "black"
     api_url: str = "https://chat.loli.vet/"
-    proxy:str = None
+    proxy: str = None
     cookie_dict: dict = {}
     superusers = []
     blacklist = []

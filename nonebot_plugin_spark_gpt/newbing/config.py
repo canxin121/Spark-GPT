@@ -2,9 +2,10 @@ from typing import Dict, List, Optional
 import nonebot
 from nonebot.adapters.onebot.v11 import MessageEvent
 from pathlib import Path
-from pydantic import BaseModel,Extra
+from pydantic import BaseModel, Extra
 from EdgeGPT import Chatbot
 from ..common.config import spark_persistor
+
 
 class UserInfo(BaseModel):
     platform: str
@@ -125,7 +126,10 @@ class NerBingPersistor(BaseModel):
         self.suggest_able = getattr(
             get_config, "newbing_suggestable", spark_persistor.suggest_able
         )
-        self.num_limit = int(getattr(get_config, "newbing_limit", spark_persistor.num_limit))
+        self.num_limit = int(
+            getattr(get_config, "newbing_limit", spark_persistor.num_limit)
+        )
+
 
 # 这里的配置即使在多平台，也应只初始化一次
 newbing_persistor = NerBingPersistor()
