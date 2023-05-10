@@ -36,10 +36,17 @@
 )
 ---
 
-- 目前支持将Poe,NewBing,Dalle,ChatGPT (session token)接入qq
+- 目前支持将Poe,NewBing,Dalle,ChatGPT (session token),Claude(slack)接入qq
 
 | Image 1 | Image 2 |
 |:-------:|:-------:|
 | ![1](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(1).png) | ![2](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(2).png) |
-| ![3](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(3).png) | ![4](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(5).png) |
-| ![5](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(4).png) |                                   |
+| ![3](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(3).png) | ![4](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(4).png) |
+| ![5](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(5).png) | ![6](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(6).png) |
+
+
+## 更新
+
+- 2023.5.11:
+    1.增加claude_slack
+    2.修复一些小bug
