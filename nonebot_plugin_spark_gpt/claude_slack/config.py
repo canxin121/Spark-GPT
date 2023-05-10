@@ -135,14 +135,14 @@ def get_user_info_and_data(event: MessageEvent) -> Tuple[UserInfo, UserData]:
 # 储存Claude_slack_的持久数据,提供一键保存和加载功能
 class Claude_slack_Persistor(BaseModel):
     path_: str = str(Path()) + "/data/spark_gpt/claude_slack_data.json"
-    slack_user_token :str = ""
-    claude_id :str = ""
-    channel_id :str = ""
+    slack_user_token: str = ""
+    claude_id: str = ""
+    channel_id: str = ""
     pic_able: str = None
     url_able: str = "True"
     num_limit: int = 350
     mode: str = "black"
-    proxy:str = None
+    proxy: str = ""
     cookie_dict: dict = {}
     superusers = []
     blacklist = []
@@ -180,16 +180,20 @@ class Claude_slack_Persistor(BaseModel):
             and get_config.claude_slack_mode in ["white", "black"]
             else spark_persistor.mode
         )
-        self.pic_able = getattr(get_config, "claude_slack_picable", spark_persistor.pic_able)
-        self.url_able = getattr(get_config, "claude_slack_urlable", spark_persistor.url_able)
+        self.pic_able = getattr(
+            get_config, "claude_slack_picable", spark_persistor.pic_able
+        )
+        self.url_able = getattr(
+            get_config, "claude_slack_urlable", spark_persistor.url_able
+        )
         self.num_limit = int(
             getattr(get_config, "claude_slack_limit", spark_persistor.num_limit)
         )
-                
+
         self.slack_user_token = getattr(get_config, "slack_user_token", "")
         self.claude_id = getattr(get_config, "claude_id", "")
         self.channel_id = getattr(get_config, "channel_id", "")
-        # self.proxy = getattr(get_config, "claude_slack_proxy", None)
+        self.proxy = getattr(get_config, "claude_slack_proxy", "")
         self.save()
 
     def save(self):

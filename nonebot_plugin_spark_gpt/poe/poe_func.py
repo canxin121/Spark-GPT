@@ -54,9 +54,6 @@ def is_email(email) -> bool:
     return bool(re.match(pattern, email))
 
 
-
-
-
 def is_useable(event, mode=poe_persistor.mode):
     if poe_persistor.poe_cookie:
         if mode == "black":

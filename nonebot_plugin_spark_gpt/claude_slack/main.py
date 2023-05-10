@@ -92,7 +92,9 @@ async def __claude_slack_create___(
 
     current_userinfo, current_userdata = set_userdata(event, user_data_dict)
     if current_userinfo not in list(claude_slack_persistor.user_dict.keys()):
-        claude_slack_persistor.user_dict.setdefault(current_userinfo, {"all": {}, "now": {}})
+        claude_slack_persistor.user_dict.setdefault(
+            current_userinfo, {"all": {}, "now": {}}
+        )
 
     # 查看对应用户下是不是有重名的bot
     if (
@@ -106,11 +108,10 @@ async def __claude_slack_create___(
             await matcher.send(reply_out(event, "已经有同名的bot了，换一个名字重新输入吧"))
         )
         await matcher.reject()
-    
-    
+
     if creat_lock.locked():
         waitmsg = await matcher.send(reply_out(event, "有人正在创建中，稍后自动为你创建"))
-        
+
     async with creat_lock:
         botinfo = BotInfo(
             nickname=nickname,
@@ -122,17 +123,19 @@ async def __claude_slack_create___(
             owner="qq-" + str(event.user_id),
         )
         try:
-            result,botinfo = await claude_chat(prompt,botinfo)
+            result, botinfo = await claude_chat(prompt, botinfo)
         except Exception as e:
             await delete_messages(bot, user_id, create_msgs)
             await matcher.finish(reply_out(event, f"出错了:{e}，多次出错请尝试换一个预设，还不行请联系机器人主人"))
         if result:
             # 将更新后的字典写回到JSON文件中
-            claude_slack_persistor.user_dict.setdefault(current_userinfo, {}).setdefault(
-                "all", {}
-            )[nickname] = botinfo
+            claude_slack_persistor.user_dict.setdefault(
+                current_userinfo, {}
+            ).setdefault("all", {})[nickname] = botinfo
 
-            claude_slack_persistor.user_dict[current_userinfo]["now"] = {nickname: botinfo}
+            claude_slack_persistor.user_dict[current_userinfo]["now"] = {
+                nickname: botinfo
+            }
 
             claude_slack_persistor.save()
             try:
@@ -328,7 +331,6 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
             return False
 
 
-
 #############################################################
 chat_lock = asyncio.Semaphore(3)
 
@@ -371,31 +373,34 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
             )
         try:
             current_userdata.is_waiting = True
-            result,botinfo = await claude_chat(prompt,botinfo)
+            result, botinfo = await claude_chat(prompt, botinfo)
             current_userdata.is_waiting = False
         except Exception as e:
             current_userdata.is_waiting = False
             await matcher.finish(reply_out(event, f"出错了:{e}，多次出错请联系机器人管理员"))
         if result:
-            claude_slack_persistor.user_dict.setdefault(current_userinfo, {}).setdefault(
-                "all", {}
-            )[nickname] = botinfo
-            claude_slack_persistor.user_dict.setdefault(current_userinfo, {}).setdefault(
-                "now", {}
-            )[nickname] = botinfo
+            claude_slack_persistor.user_dict.setdefault(
+                current_userinfo, {}
+            ).setdefault("all", {})[nickname] = botinfo
+            claude_slack_persistor.user_dict.setdefault(
+                current_userinfo, {}
+            ).setdefault("now", {})[nickname] = botinfo
             claude_slack_persistor.save()
             try:
                 await bot.delete_msg(message_id=waitmsg["message_id"])
             except:
                 pass
             await matcher.send(
-                reply_out(event, f"自动创建成功并切换到新建bot:cdefault\n自动创建回复:\n{result}\n下面将自动回答你的问题,无需再次询问")
+                reply_out(
+                    event,
+                    f"自动创建成功并切换到新建bot:cdefault\n自动创建回复:\n{result}\n下面将自动回答你的问题,无需再次询问",
+                )
             )
         else:
             await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
     else:
         lastmsg_id, raw_message, botinfo, current_userinfo, current_userdata = temp
-        
+
     if current_userdata.is_waiting:
         await matcher.finish(reply_out(event, "你已经有一个请求进行中了，请等结束后再发送"))
     if chat_lock.locked():
@@ -419,13 +424,20 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 current_userdata.is_waiting = True
                 botinfo.thread_ts = ""
                 botinfo.time_stamp = ""
-                result, botinfo = await claude_chat(prompt,botinfo)
+                result, botinfo = await claude_chat(prompt, botinfo)
                 current_userdata.is_waiting = False
                 if result:
                     claude_slack_persistor.user_dict[current_userinfo]["all"][
                         nickname
                     ] = botinfo
-                    if botinfo == list(claude_slack_persistor.user_dict[current_userinfo]["now"].values())[0]:
+                    if (
+                        botinfo
+                        == list(
+                            claude_slack_persistor.user_dict[current_userinfo][
+                                "now"
+                            ].values()
+                        )[0]
+                    ):
                         claude_slack_persistor.user_dict[current_userinfo]["now"] = {
                             nickname: botinfo
                         }
@@ -435,45 +447,48 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                         await bot.delete_msg(message_id=waitmsg["message_id"])
                     except:
                         pass
-                    
+
                     reply_msgid = await matcher.send(
                         reply_out(event, f"刷新对话成功\n刷新回复:\n{result}")
                     )
                     current_userdata.last_reply_message_id[nickname] = reply_msgid[
                         "message_id"
                     ]
-                    msg_bot_bidict.inv[botinfo] = reply_msgid[
-                        "message_id"
-                    ]
+                    msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
                     await matcher.finish()
                 else:
                     await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
-                    
+
         else:
             nickname = botinfo.nickname
-            
+
             current_userdata.is_waiting = True
             try:
-                result,botinfo = await claude_chat(raw_message,botinfo)
+                result, botinfo = await claude_chat(raw_message, botinfo)
             except:
                 current_userdata.is_waiting = False
                 await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人主人"))
             current_userdata.is_waiting = False
         if result:
-                msg_bot_bidict[lastmsg_id] = botinfo
-                claude_slack_persistor.user_dict[current_userinfo]["all"][nickname] = botinfo
-                
-                if botinfo == list(claude_slack_persistor.user_dict[current_userinfo]["now"].values())[0]:
-                    claude_slack_persistor.user_dict[current_userinfo]["now"] = { 
-                        nickname: botinfo
-                    }
-                claude_slack_persistor.save()
-                reply_msgid = await sendmsg(result, matcher, event)
-                current_userdata.last_reply_message_id[nickname] = reply_msgid[
-                    "message_id"
-                ]
-                msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
-                await matcher.finish()
+            msg_bot_bidict[lastmsg_id] = botinfo
+            claude_slack_persistor.user_dict[current_userinfo]["all"][
+                nickname
+            ] = botinfo
+
+            if (
+                botinfo
+                == list(
+                    claude_slack_persistor.user_dict[current_userinfo]["now"].values()
+                )[0]
+            ):
+                claude_slack_persistor.user_dict[current_userinfo]["now"] = {
+                    nickname: botinfo
+                }
+            claude_slack_persistor.save()
+            reply_msgid = await sendmsg(result, matcher, event)
+            current_userdata.last_reply_message_id[nickname] = reply_msgid["message_id"]
+            msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
+            await matcher.finish()
 
 
 # ######################################################
@@ -501,7 +516,9 @@ async def __claude_slack_remove__(
         nickname = str(args[0])
         if nickname not in claude_slack_persistor.user_dict[userinfo]["all"]:
             await matcher.finish(reply_out(event, "没有这个机器人呢"))
-        if nickname == str(list(claude_slack_persistor.user_dict[userinfo]["now"].keys())[0]):
+        if nickname == str(
+            list(claude_slack_persistor.user_dict[userinfo]["now"].keys())[0]
+        ):
             await matcher.finish(reply_out(event, "不能删除正在使用的bot哦"))
         del claude_slack_persistor.user_dict[userinfo]["all"][nickname]
         msg = f"已删除{nickname}"
@@ -543,7 +560,9 @@ async def __claude_slack_remove____(
         await matcher.finish()
     infos = infos.split(" ")
     nickname_delete = infos[0]
-    nickname_now = str(list(claude_slack_persistor.user_dict[userinfo]["now"].keys())[0])
+    nickname_now = str(
+        list(claude_slack_persistor.user_dict[userinfo]["now"].keys())[0]
+    )
     if not (nickname_delete in bots):
         remove_msgs.append(await matcher.send(reply_out(event, "输入信息有误，请检查后重新输入")))
         await claude_slack_remove.reject()
@@ -567,7 +586,7 @@ c_auto_change_prompt = on_command(
 
 
 @c_auto_change_prompt.handle()
-async def __poe_auto_change_prompt__(matcher:Matcher,event: Event):
+async def __poe_auto_change_prompt__(matcher: Matcher, event: Event):
     if not is_useable(event):
         await matcher.finish()
     global claude_slack_persistor
@@ -580,9 +599,7 @@ async def __poe_auto_change_prompt__(matcher:Matcher,event: Event):
     for key, value in prompts_dict.items():
         str_prompts += f"*******************\n{i}:预设名称：{key}\n预设内容：{value}\n"
         i += 1
-    await c_auto_change_prompt.send(
-        f"现在的自动创建预设是:{now_prompt}\n当前可用预设有：\n{str_prompts}"
-    )
+    await c_auto_change_prompt.send(f"现在的自动创建预设是:{now_prompt}\n当前可用预设有：\n{str_prompts}")
 
 
 @c_auto_change_prompt.got("name", prompt="请输入要切换到的预设名称\n输入取消 或 算了可以终止创建")

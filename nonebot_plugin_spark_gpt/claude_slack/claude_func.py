@@ -7,14 +7,19 @@ from nonebot_plugin_guild_patch import GuildMessageEvent
 from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment
 from .config import claude_slack_persistor
 from ..common.render.render import md_to_pic
-from ..common.common_func import get_url,reply_out
+from ..common.common_func import get_url, reply_out
+
 
 def random_uuid4():
     return str(uuid.uuid4())[:8]
 
 
 def is_useable(event, mode=claude_slack_persistor.mode):
-    if claude_slack_persistor.channel_id and claude_slack_persistor.claude_id and claude_slack_persistor.slack_user_token:
+    if (
+        claude_slack_persistor.channel_id
+        and claude_slack_persistor.claude_id
+        and claude_slack_persistor.slack_user_token
+    ):
         if mode == "black":
             try:
                 if str(event.user_id) in claude_slack_persistor.blacklist:
@@ -45,6 +50,7 @@ def is_useable(event, mode=claude_slack_persistor.mode):
     else:
         logger.warning("没有配置Claude_slack的相关配置，无法使用，跳过")
         return False
+
 
 async def sendmsg(msg, matcher, event):
     if claude_slack_persistor.pic_able is not None:

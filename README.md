@@ -44,9 +44,8 @@
 | ![3](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(3).png) | ![4](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(4).png) |
 | ![5](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(5).png) | ![6](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(6).png) |
 
-
 ## 更新
 
-- 2023.5.11:
-    1.增加claude_slack
-    2.修复一些小bug
+- 2023.5.11:  
+    1.增加claude_slack  
+    2.修复一些小bug  

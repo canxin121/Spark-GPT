@@ -2,7 +2,7 @@ from nonebot.plugin import on_command
 from nonebot.params import ArgStr
 from nonebot.typing import T_State
 from nonebot.matcher import Matcher
-from nonebot.adapters.onebot.v11 import Event,Message
+from nonebot.adapters.onebot.v11 import Event, Message
 from nonebot.params import ArgStr, CommandArg
 from .render.render import md_to_pic
 from .common_func import reply_out
@@ -112,7 +112,9 @@ async def __spark_removeprompt__(event: Event, matcher: Matcher):
     except:
         poe_bot_str = "没有可用的poe机器人\n"
     try:
-        claude_slack_bots = list(claude_slack_persistor.user_dict[current_userinfo]["all"].keys())
+        claude_slack_bots = list(
+            claude_slack_persistor.user_dict[current_userinfo]["all"].keys()
+        )
         claude_slack_bot_str = "claude_slack机器人有:\n"
         for i in range(len(claude_slack_bots)):
             claude_slack_bot_str += f"    {i+1}:{claude_slack_bots[i]}\n"
