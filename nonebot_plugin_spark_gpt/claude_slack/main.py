@@ -638,6 +638,7 @@ async def __c_help__(bot: Bot, matcher: Matcher, event: Event):
 | 命令 | 描述 |
 | --- | --- |
 | `/ctalk / ct + 你要询问的内容` | 对话功能，如果没创建机器人，对话将自动创建默认机器人。 |
+| `/机器人名字 + 空格 + 你要询问的内容` | 指定机器人对话。 |
 
 ## 机器人管理命令
 
@@ -646,11 +647,10 @@ async def __c_help__(bot: Bot, matcher: Matcher, event: Event):
 | `/ccreate / cc` | 创建机器人。 |
 | `/cremove / cr (+ 机器人名称)` | 删除指定名称的机器人。 |
 | `/cswitch / cs (+ 机器人名称)` | 切换到指定名称的机器人。 |
-| `/机器人名字 + 空格 + 你要询问的内容` | 指定机器人对话。 |
 
 ## 管理员命令
 
-- 仅限poe管理员使用
+- 仅限claude_slack管理员使用
 
 | 命令 | 描述 |
 | --- | --- |

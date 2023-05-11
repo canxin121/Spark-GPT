@@ -690,7 +690,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
 
 
 ######################################################
-poe_help = on_command("poehelp", aliases={"poe帮助", "ph"}, priority=4, block=False)
+poe_help = on_command("poehelp", aliases={"p帮助", "ph"}, priority=4, block=False)
 
 
 @poe_help.handle()
@@ -718,10 +718,10 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 | 命令 | 描述 |
 | --- | --- |
 | `/ptalk / pt + 你要询问的内容` | 对话功能，如果没创建机器人，对话将自动创建默认机器人。 |
+| `你的机器人的名字 + 空格 + 你要询问的内容` | 指定机器人对话。 |
 | `/poecreate / pc` | 创建机器人。 |
 | `/poeremove / pr (+ 机器人名称)` | 删除指定名称的机器人。 |
 | `/poeswitch / ps (+ 机器人名称)` | 切换到指定名称的机器人。 |
-| `你的机器人的名字 + 空格 + 你要询问的内容` | 指定机器人对话。 |
 
 ************************
 
