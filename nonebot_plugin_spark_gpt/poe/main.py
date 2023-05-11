@@ -118,7 +118,7 @@ async def __poe_create___(
         await delete_messages(bot, str(event.user_id), create_msgs)
         await poe_create_.finish()
 
-    infos = infos.split(" ", 1)
+    infos = infos.split(" ", 2)
     if not (len(infos) == 3 and infos[1] in ["1", "2"]):
         create_msgs.append(await matcher.send(reply_out(event, "输入信息有误，请检查后重新输入")))
         await poe_create_.reject()

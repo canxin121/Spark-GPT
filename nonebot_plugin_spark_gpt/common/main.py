@@ -2,7 +2,7 @@ from nonebot.plugin import on_command
 from nonebot.params import ArgStr
 from nonebot.typing import T_State
 from nonebot.matcher import Matcher
-from nonebot.adapters.onebot.v11 import Event, Message
+from nonebot.adapters.onebot.v11 import Event, Message,MessageSegment
 from nonebot.params import ArgStr, CommandArg
 from .render.render import md_to_pic
 from .common_func import reply_out
@@ -43,9 +43,8 @@ async def __spark_addprompt____(
     global spark_persistor
     if infos in ["取消", "算了"]:
         await spark_addprompt.finish("终止添加")
-    infos = infos.split(" ")
     name = state["key"]
-    prompt = infos[0]
+    prompt = infos
     # # 将更新后的字典写回到JSON文件中
     spark_persistor.prompts_dict[name] = prompt
     spark_persistor.save()
@@ -68,7 +67,12 @@ async def __spark_removeprompt__(event: Event):
         for key, value in spark_persistor.prompts_dict.items():
             str_prompts += f"************************\n{i}:预设名称：{key}\n预设内容：{value}\n"
             i += 1
-        await spark_removeprompt.send(f"当前预设有：\n{str_prompts}")
+        if len(str_prompts)>600:
+            pic = await md_to_pic(f"当前预设有：\n{str_prompts}")
+            pic = MessageSegment.image(pic)
+            await spark_removeprompt.send(pic)
+        else:
+            await spark_removeprompt.send(f"当前预设有：\n{str_prompts}")
 
 
 @spark_removeprompt.got("name", prompt="请输入要删除的预设名称\n输入取消 或 算了可以终止创建")
