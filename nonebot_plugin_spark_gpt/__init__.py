@@ -5,6 +5,7 @@ from .newbing import main
 from .chatgpt_web import main
 from .common import main
 from .claude_slack import main
+from .Spark_desk import main
 from nonebot.matcher import Matcher
 from nonebot.plugin import PluginMetadata
 from nonebot.adapters.onebot.v11 import (
@@ -59,7 +60,13 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 
 | 命令 | 描述 |
 | --- | --- |
-| `/chelp / ch` | 获取GPT_Web帮助说明。 |
+| `/chelp / ch` | 获取Claude_Slack帮助说明。 |
+
+## Spark_desk帮助命令
+
+| 命令 | 描述 |
+| --- | --- |
+| `/shelp / sh` | 获取Spark_desk帮助说明。 |
 
 # 通用命令
 
