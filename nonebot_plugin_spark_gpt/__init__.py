@@ -15,7 +15,7 @@ from nonebot.adapters.onebot.v11 import (
 
 from .common.render.render import md_to_pic
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __plugin_meta__ = PluginMetadata(
     "Spark-GPT",
     "将多来源的gpt接入qq及更多平台，使用便捷，管理完善，功能强大",
