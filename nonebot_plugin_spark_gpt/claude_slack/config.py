@@ -1,3 +1,4 @@
+import asyncio
 import json
 from typing import Dict, Optional, Tuple
 from bidict import bidict
@@ -24,7 +25,11 @@ class BotInfo(BaseModel):
     prompt: Optional[str]
     # 这里做owner主要是用来hash，以区分不同用户的可能重名的bot
     owner: Optional[str]
-
+    # 是否允许别人来回复你的bot
+    share: Optional[bool]
+    
+    
+    
     def to_dict(self) -> dict:
         return self.dict()
 

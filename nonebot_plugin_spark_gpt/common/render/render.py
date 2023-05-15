@@ -7,7 +7,7 @@ import aiofiles
 import markdown
 import pymdownx
 from nonebot.log import logger
-from ...poe.pwframework import pwfw
+from ...poe_pw.pwframework import pwfw
 
 TEMPLATES_PATH = str(Path(__file__).parent / "templates")
 
@@ -41,6 +41,8 @@ async def md_to_pic(
             md = await read_file(md_path)
         else:
             raise Exception("必须输入 md 或 md_path")
+    else:
+        md = md.replace("\n","  \n")
     # logger.debug(md)
     md = markdown.markdown(
         md,

@@ -126,7 +126,7 @@ async def send_msg(result, matcher, event):
                 else:
                     msgid_container = await matcher.send(reply_out(event, pic))
             else:
-                msgid_container = await matcher.send(reply_out(event, pic))
+                msgid_container = await matcher.send(reply_out(event, msg))
         else:
             if len(msg) > poe_persistor.num_limit:
                 pic = await md_to_pic(msg)

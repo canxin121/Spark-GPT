@@ -20,7 +20,7 @@ from EdgeGPT import Chatbot, ConversationStyle
 from ..common.render.render import md_to_pic
 from ..common.common_func import reply_out
 
-
+sourcepath = Path(__file__).parent.parent / "source"
 logger.info("开始加载Newbing")
 newbingtemper = NewBingTemper()
 user_data_dict = newbingtemper.user_data_dict
@@ -64,6 +64,8 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
                 "/bh",
                 "/bl",
                 "/bot",
+                "/bard帮助",
+                "/bard"
             )
         ):
             raw_message = (
@@ -148,12 +150,19 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         style = ConversationStyle.precise
 
     try:
+        wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
         current_userdata.is_waiting = True
-        raw_json = await chatbot.ask(
-            prompt=raw_message,
-            conversation_style=style,
-            wss_link="wss://sydney.bing.com/sydney/ChatHub",
-        )
+        if newbing_persistor.wss_link:
+            raw_json = await chatbot.ask(
+                prompt=raw_message,
+                conversation_style=style,
+                wss_link=newbing_persistor.wss_link
+            )
+        else:
+            raw_json = await chatbot.ask(
+                prompt=raw_message,
+                conversation_style=style
+            )
         current_userdata.is_waiting = False
     except:
         current_userdata.is_waiting = False
@@ -181,32 +190,16 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         max_num = raw_json["item"]["throttling"]["maxNumUserMessagesInConversation"]
         now_num = raw_json["item"]["throttling"]["numUserMessagesInConversation"]
         reply = raw_json["item"]["messages"][1]["text"]
-        reply = re.sub(r"\[\^(\d+)\^\]", r"[\1]", reply)
-        reply = re.sub(r"\[?\^(\d+)\^\]?", r"[\1]", reply)
+        reply = reply.replace("&#91;","[").replace("&#93;","]").replace("[^","[").replace("^]","]")
     except:
         await matcher.finish(reply_out(event, "出错喽，多次重试都出错的话，联系机器人主人"))
-    msg_text = MessageSegment.text(reply + "  \n")
-    if newbing_persistor.suggest_able == "True":
-        try:
-            suggests = [
-                raw_json["item"]["messages"][1]["suggestedResponses"][i]["text"]
-                for i in range(
-                    len(raw_json["item"]["messages"][1]["suggestedResponses"])
-                )
-            ]
-            suggest_str = "\n".join(
-                [f"{i+1}. {suggestion}  " for i, suggestion in enumerate(suggests)]
-            )
-            msg_text += MessageSegment.text("  \n建议回复:  \n" + suggest_str)
-        except:
-            pass
-    else:
-        suggests = []
-    forward_rawmsg = None
-    forward_msg = None
-
-    # 尝试解析图片或其他资源
+    ##纯文本正文部分
+    msg_text = reply + "\n"
+    
+    #尝试解析图片或其他资源
     try:
+        forward_msg = None
+        html_resource = ""
         image_sources = [
             a["seeMoreUrl"]
             for a in raw_json["item"]["messages"][1]["sourceAttributions"]
@@ -226,28 +219,54 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
             source_link = image_sources[i]
             display_name = image_names[i]
             each_msg = MessageSegment.text(f"[{i+1}] {display_name}:\n{source_link}\n")
-            if len(image_links) - i:
+            html_each_msg = f"[{i+1}]:<a href=\"{source_link}\">{display_name}</a>\n"
+            if len(image_links) - i>0:
                 image_link = image_links[i]
                 each_msg += MessageSegment.image(image_link)
+                html_each_msg += f"<img src={image_link} alt={i+1}>\n"
             forward_msg += MessageSegment.node_custom(
                 user_id=current_userdata.sender.user_id,
                 nickname=current_userdata.sender.user_name,
                 content=each_msg,
             )
-            forward_rawmsg += each_msg
+            html_resource += html_each_msg
     except:
         pass
+    
+    ##处理建议回复
+    suggest_str = "\n建议回复:\n"
+    if newbing_persistor.suggest_able == "True":
+        try:
+            suggests = [
+                raw_json["item"]["messages"][1]["suggestedResponses"][i]["text"]
+                for i in range(
+                    len(raw_json["item"]["messages"][1]["suggestedResponses"])
+                )
+            ]
+            suggest_str +="\n".join(
+                [f"{i+1}. {suggestion}  " for i, suggestion in enumerate(suggests)]
+            )
+        except:
+            pass
+    else:
+        suggests = []
 
-    msg_text += MessageSegment.text(f"\n回复上限:{now_num}/{max_num}  ")
-
+    ##加上回复上限
+    fianl_msg = f"\n回复上限:{now_num}/{max_num}  "
+    is_forward = False
+    if ( newbing_persistor.pic_able == None and len(msg_text + html_resource + suggest_str + fianl_msg) ) or newbing_persistor.pic_able == "True":
+        msg = msg_text + html_resource + suggest_str + fianl_msg
+    else:
+        msg = msg_text + suggest_str + fianl_msg
+        is_forward = True
     current_userdata.is_waiting = False
-
-    reply_msgid_container = await sendmsg(str(msg_text), matcher, event)
+    await bot.delete_msg(message_id = wait_msg["message_id"])
+    reply_msgid_container = await sendmsg(msg, matcher, event)
 
     current_userdata.last_reply_message_id = reply_msgid_container["message_id"]
     current_userdata.last_suggests = suggests
-    if forward_msg or forward_rawmsg:
-        is_send = False
+    
+    if forward_msg and is_forward:
         try:
             # 尝试合并转发
             if forward_msg and event.message_type == "group":
@@ -259,20 +278,8 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
                     user_id=event.user_id, messages=forward_msg
                 )
             current_userdata.last_reply_message_id = reply_msgid_container["message_id"]
-            is_send = True
         except:
-            if not is_send:
-                try:
-                    reply_msgid_container = await matcher.send(
-                        reply_out(event, forward_rawmsg)
-                    )
-                    current_userdata.last_reply_message_id = reply_msgid_container[
-                        "message_id"
-                    ]
-                except:
-                    pass
-            else:
-                pass
+            pass
 
     if now_num == max_num:
         await matcher.send(reply_out(event, "已达到单次对话上限，自动为您刷新对话"))
@@ -386,27 +393,30 @@ async def __newbing_change_mode__(
         logger.warning("newbing cookie未配置,无法使用，跳过")
         await matcher.finish()
     current_userdata.is_waiting = True
+    from pathlib import Path
+
     try:
         async with ImageGenAsync(auth_cookie) as image_generator:
             image_links = await image_generator.get_images(prompt)
             max_retry = 3  # 最大重试次数
             retry_count = 0  # 当前重试次数
-            while retry_count < max_retry:
-                try:
-                    temp_path = "./data/spark_gpt/temp/"
-                    jpeg_files = list(Path(temp_path).glob("*.jpeg"))
-                    # 删除所有JPEG格式的文件
-                    for file_path in jpeg_files:
-                        file_path.unlink()
+            if newbing_persistor.predownload == "True":
+                while retry_count < max_retry:
+                    try:
+                        temp_path = Path("./data/spark_gpt/temp/")
+                        jpeg_files = list(temp_path.glob("*.jpeg"))
+                        # 删除所有JPEG格式的文件
+                        for file_path in jpeg_files:
+                            file_path.unlink()
 
-                    await image_generator.save_images(image_links, temp_path)
-                    break  # 如果保存成功，则跳出循环
-                except Exception as e:
-                    retry_count += 1
-                    print(f"Error occurred while saving images: {e}")
-                    if retry_count == max_retry:
-                        # 如果达到最大重试次数还是保存失败，则抛出异常
-                        await matcher.finish(reply_out(event, f"下载图片出错，多次出错请联系机器人主人"))
+                        await image_generator.save_images(image_links, temp_path)
+                        break  # 如果保存成功，则跳出循环
+                    except Exception as e:
+                        retry_count += 1
+                        print(f"Error occurred while saving images: {e}")
+                        if retry_count == max_retry:
+                            # 如果达到最大重试次数还是保存失败，则抛出异常
+                            await matcher.finish(reply_out(event, f"下载图片出错，多次出错请联系机器人主人"))
     except:
         current_userdata.is_waiting = False
         await matcher.finish(reply_out(event, f"生成图片出错，多次出错请联系机器人主人"))
@@ -421,26 +431,39 @@ async def __newbing_change_mode__(
         )
         image_msg = MessageSegment.text("绘图结果如下:\n")
         for i in range(4):
-            image_msg += MessageSegment.image(Path(temp_path + f"{i}.jpeg"))
-            forward_msg += MessageSegment.node_custom(
-                user_id=current_userdata.sender.user_id,
-                nickname=current_userdata.sender.user_name,
-                content=MessageSegment.image(Path(temp_path + f"{i}.jpeg")),
-            )
-
+            if newbing_persistor.predownload == "True":
+                image_msg += MessageSegment.image(temp_path / f"{i}.jpeg")
+                forward_msg += MessageSegment.node_custom(
+                    user_id=current_userdata.sender.user_id,
+                    nickname=current_userdata.sender.user_name,
+                    content=MessageSegment.image(temp_path / f"{i}.jpeg"),
+                )
+            else:
+                image_msg += MessageSegment.image(image_links[i])
+                forward_msg += MessageSegment.node_custom(
+                    user_id=current_userdata.sender.user_id,
+                    nickname=current_userdata.sender.user_name,
+                    content=MessageSegment.image(image_links[i]),
+                )
+    
+    except Exception as e:
+        await matcher.finish(reply_out(event, f"发送图片出错: {e}"))
     except:
         await matcher.finish(reply_out(event, "发送失败，多次失败请联系机器人主人"))
-    try:
-        # 尝试合并转发
-        if forward_msg and event.message_type == "group":
-            await bot.send_group_forward_msg(
-                group_id=event.group_id, messages=forward_msg
-            )
-        elif forward_msg and event.message_type == "private":
-            await bot.send_private_forward_msg(
-                user_id=event.user_id, messages=forward_msg
-            )
-    except:
+    if newbing_persistor.forward == "True":
+        try:
+            # 尝试合并转发
+            if forward_msg and event.message_type == "group":
+                await bot.send_group_forward_msg(
+                    group_id=event.group_id, messages=forward_msg
+                )
+            elif forward_msg and event.message_type == "private":
+                await bot.send_private_forward_msg(
+                    user_id=event.user_id, messages=forward_msg
+                )
+        except:
+            await matcher.finish(reply_out(event, image_msg))
+    else:
         await matcher.finish(reply_out(event, image_msg))
 
 
@@ -479,6 +502,6 @@ async def __newbing_help__(matcher: Matcher):
 | 命令 | 描述 |
 | --- | --- |
 | `/bingdraw / bd / bing绘图(bing画图) + 要画的东西(中文/英文)` | Dall-e画图功能，可以画出指定的中文或英文内容。 |"""
-    pic = await md_to_pic(msg)
-    await matcher.send(MessageSegment.image(pic))
+    # pic = await md_to_pic(msg)
+    await matcher.send(MessageSegment.image(sourcepath / Path("demo(3).png")))
     await matcher.finish()

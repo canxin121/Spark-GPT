@@ -1,4 +1,5 @@
 import asyncio
+from pathlib import Path
 from nonebot.plugin import on_command, on_message
 from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
@@ -24,7 +25,7 @@ from .chatgpt_web_func import sendmsg
 from .web_api import gptweb_api
 from ..common.config import spark_persistor
 from ..common.common_func import delete_messages, reply_out
-from ..poe.config import poe_persistor
+from ..poe_pw.config import poe_persistor
 from nonebot import logger
 
 # 初始化两个需要使用的实例
@@ -36,7 +37,7 @@ from ..common.render.render import md_to_pic
 
 logger.info("开始加载gpt_web")
 
-
+sourcepath = Path(__file__).parent.parent / "source"
 ######################################################
 creat_lock = asyncio.Lock()
 gpt_web_create_ = on_command("gwcreate", aliases={"gwc"}, priority=4, block=False)
@@ -340,7 +341,6 @@ chat_lock = asyncio.Semaphore(3)
 
 gw_chat_ = on_message(priority=1, block=False)
 
-
 @gw_chat_.handle()
 async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
     temp = await _is_chat_(event, bot)
@@ -367,49 +367,46 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
             gptweb_persistor.user_dict.setdefault(
                 current_userinfo, {"all": {}, "now": {}}
             )
+        try:
+            current_userdata.is_waiting = True
+            wait_msg = await matcher.send(reply_out(event, "正在自动创建，请稍等"))
+            result = await gptweb_api.gpt_web_chat(truename, parentname, prompt)
+            current_userdata.is_waiting = False
+        except:
+            current_userdata.is_waiting = False
+            await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
 
-        if creat_lock.locked():
-            waitmsg = await matcher.send(reply_out(event, "有人正在创建中，稍后自动为你创建"))
-        async with creat_lock:
+        if isinstance(result, str):
+            text_error = result
+        elif isinstance(result, tuple):
+            answer, parentname, truename = result
+            # 将更新后的字典写回到JSON文件中
+            botinfo = BotInfo(
+                nickname=nickname,
+                truename=truename,
+                parentname=parentname,
+                source="gpt_web",
+                prompt_nickname=prompt_nickname,
+                prompt=prompt,
+                owner="qq-" + str(event.user_id),
+            )
+            gptweb_persistor.user_dict.setdefault(current_userinfo, {}).setdefault(
+                "all", {}
+            )[nickname] = botinfo
+            gptweb_persistor.user_dict.setdefault(current_userinfo, {}).setdefault(
+                "now", {}
+            )[nickname] = botinfo
+            gptweb_persistor.save()
             try:
-                current_userdata.is_waiting = True
-                result = await gptweb_api.gpt_web_chat(truename, parentname, prompt)
-                current_userdata.is_waiting = False
+                await bot.delete_msg(message_id=wait_msg["message_id"])
             except:
-                current_userdata.is_waiting = False
-                await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
-
-            if isinstance(result, str):
-                text_error = result
-            elif isinstance(result, tuple):
-                answer, parentname, truename = result
-                # 将更新后的字典写回到JSON文件中
-                botinfo = BotInfo(
-                    nickname=nickname,
-                    truename=truename,
-                    parentname=parentname,
-                    source="gpt_web",
-                    prompt_nickname=prompt_nickname,
-                    prompt=prompt,
-                    owner="qq-" + str(event.user_id),
-                )
-                gptweb_persistor.user_dict.setdefault(current_userinfo, {}).setdefault(
-                    "all", {}
-                )[nickname] = botinfo
-                gptweb_persistor.user_dict.setdefault(current_userinfo, {}).setdefault(
-                    "now", {}
-                )[nickname] = botinfo
-                gptweb_persistor.save()
-                try:
-                    await bot.delete_msg(message_id=waitmsg["message_id"])
-                except:
-                    pass
-                await matcher.send(
-                    reply_out(event, f"自动创建成功并切换到新建bot:gwdefault\n自动创建回复:\n{answer}")
-                )
-            else:
-                current_userdata.is_waiting = False
-                await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
+                pass
+            await matcher.send(
+                reply_out(event, f"自动创建成功并切换到新建bot:gwdefault\n自动创建回复:\n{answer}\n接下来将自动回答你的问题,不需要再次提问")
+            )
+        else:
+            current_userdata.is_waiting = False
+            await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
     else:
         lastmsg_id, raw_message, botinfo, current_userinfo, current_userdata = temp
     nickname = botinfo.nickname
@@ -438,51 +435,49 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 gptweb_persistor.user_dict.setdefault(
                     current_userinfo, {"all": {}, "now": {}}
                 )
-
-            if creat_lock.locked():
-                waitmsg = await matcher.send(reply_out(event, "请稍等，马上就好"))
-            async with creat_lock:
-                current_userdata.is_waiting = True
-                result = await gptweb_api.gpt_web_chat(truename, parentname, prompt)
+            current_userdata.is_waiting = True
+            wait_msg = await matcher.send(reply_out(event, "正在刷新，请稍等"))
+            result = await gptweb_api.gpt_web_chat(truename, parentname, prompt)
+            current_userdata.is_waiting = False
+            if isinstance(result, str):
+                text_error = result
+            elif isinstance(result, tuple):
+                answer, parentname, truename = result
+                # 将更新后的字典写回到JSON文件中
+                botinfo.parentname = parentname
+                gptweb_persistor.user_dict[current_userinfo]["all"][
+                    nickname
+                ] = botinfo
+                if (
+                    botinfo.nickname
+                    == list(
+                        gptweb_persistor.user_dict[current_userinfo]["now"].values()
+                    )[0].nickname
+                ):
+                    gptweb_persistor.user_dict[current_userinfo]["now"] = {
+                        nickname: botinfo
+                    }
+                gptweb_persistor.save()
+                msg_bot_bidict[lastmsg_id] = botinfo
+                try:
+                    await bot.delete_msg(message_id=wait_msg["message_id"])
+                except:
+                    pass
+                reply_msgid = await matcher.send(
+                    reply_out(event, f"刷新对话成功\n刷新回复:\n{answer}")
+                )
+                current_userdata.last_reply_message_id[nickname] = reply_msgid[
+                    "message_id"
+                ]
+                msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
                 current_userdata.is_waiting = False
-                if isinstance(result, str):
-                    text_error = result
-                elif isinstance(result, tuple):
-                    answer, parentname, truename = result
-                    # 将更新后的字典写回到JSON文件中
-                    botinfo.parentname = parentname
-                    gptweb_persistor.user_dict[current_userinfo]["all"][
-                        nickname
-                    ] = botinfo
-                    if (
-                        botinfo.nickname
-                        == list(
-                            gptweb_persistor.user_dict[current_userinfo]["now"].values()
-                        )[0].nickname
-                    ):
-                        gptweb_persistor.user_dict[current_userinfo]["now"] = {
-                            nickname: botinfo
-                        }
-                    gptweb_persistor.save()
-                    msg_bot_bidict[lastmsg_id] = botinfo
-                    try:
-                        await bot.delete_msg(message_id=waitmsg["message_id"])
-                    except:
-                        pass
-                    reply_msgid = await matcher.send(
-                        reply_out(event, f"刷新对话成功\n刷新回复:\n{answer}")
-                    )
-                    current_userdata.last_reply_message_id[nickname] = reply_msgid[
-                        "message_id"
-                    ]
-                    msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
-                    current_userdata.is_waiting = False
-                    await matcher.finish()
-                else:
-                    current_userdata.is_waiting = False
-                    await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
+                await matcher.finish()
+            else:
+                current_userdata.is_waiting = False
+                await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
         else:
             current_userdata.is_waiting = True
+            wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
             try:
                 result = await gptweb_api.gpt_web_chat(
                     truename, parentname, raw_message
@@ -490,6 +485,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 current_userdata.is_waiting = False
             except:
                 current_userdata.is_waiting = False
+                await bot.delete_msg(message_id=wait_msg["message_id"])
                 await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人主人"))
             if isinstance(result, str):
                 text_error = result
@@ -513,6 +509,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                         nickname: botinfo
                     }
                 gptweb_persistor.save()
+                await bot.delete_msg(message_id = wait_msg["message_id"])
 
                 reply_msgid = await sendmsg(answer, matcher, event)
                 current_userdata.last_reply_message_id[nickname] = reply_msgid[
@@ -687,6 +684,6 @@ async def __gw_help__(bot: Bot, matcher: Matcher, event: Event):
 | 命令 | 描述 |
 | --- | --- |
 | `/gwcp / gwchangeprompt` | 切换自动创建的默认预设。 |"""
-    pic = await md_to_pic(msg)
-    await gw_help.send(MessageSegment.image(pic))
+    # pic = await md_to_pic(msg)
+    await gw_help.send(MessageSegment.image(sourcepath / Path("demo(4).png")))
     await gw_help.finish()

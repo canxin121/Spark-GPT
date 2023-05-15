@@ -94,9 +94,12 @@ class NerBingPersistor(BaseModel):
     url_able: str = "True"
     suggest_able: str = "True"
     num_limit: int = 350
+    proxy: str=""
+    predownload : str = "True"
+    forward : str = "True"
     blacklist: List[str] = []
     whitelist: List[str] = []
-    proxy: str = ""
+    wss_link:str = "wss://sydney.bing.com/sydney/ChatHub"
     mode: str = "black"
 
     def __init__(self, **data):
@@ -120,12 +123,20 @@ class NerBingPersistor(BaseModel):
             and get_config.newbing_mode in ["white", "black"]
             else spark_persistor.mode
         )
+        self.predownload = getattr(
+            get_config, "newbing_predownload", self.predownload
+        )
+        self.forward = getattr(
+            get_config, "newbing_forward", self.forward
+        )
         self.proxy = getattr(get_config, "newbing_proxy", self.proxy)
         self.pic_able = getattr(get_config, "newbing_picable", spark_persistor.pic_able)
         self.url_able = getattr(get_config, "newbing_urlable", spark_persistor.url_able)
+        self.wss_link = getattr(get_config, "newbing_wss_link", self.wss_link)
         self.suggest_able = getattr(
             get_config, "newbing_suggestable", spark_persistor.suggest_able
         )
+
         self.num_limit = int(
             getattr(get_config, "newbing_limit", spark_persistor.num_limit)
         )

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot_plugin_spark_gpt"
-version = "0.1.4"
+version = "0.1.8"
 description = "Spark-GPT,将多来源的gpt接入qq及更多平台,使用便捷,管理完善,功能强大"
 authors = ["canxin121 <1969730106@qq.com>"]
 readme = "README.md"
@@ -24,6 +24,7 @@ nonebot-adapter-onebot = { version = "^2.0.0-beta.1", optional = true }
 pymdown-extensions = "^9.11"
 python-markdown-math = "^0.8"
 slack-sdk = "^3.21.3"
+poe-api = "^0.3.1"
 
 [tool.poetry.extras]
 onebot = ["nonebot-adapter-onebot"]
