@@ -1,4 +1,5 @@
 import asyncio
+from pathlib import Path
 from nonebot.plugin import on_command, on_message
 from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
@@ -24,7 +25,7 @@ from .claude_func import reply_out, sendmsg
 from .slack_api import claude_chat
 from ..common.config import spark_persistor
 from ..common.common_func import delete_messages
-from ..poe.config import poe_persistor
+from ..poe_pw.config import poe_persistor
 from nonebot import logger
 
 # 初始化两个需要使用的实例
@@ -36,7 +37,7 @@ from ..common.render.render import md_to_pic
 
 logger.info("开始加载claude_slack")
 
-
+sourcepath = Path(__file__).parent.parent / "source"
 ######################################################
 creat_lock = asyncio.Lock()
 claude_slack_create_ = on_command("ccreate", aliases={"cc"}, priority=4, block=False)
@@ -123,7 +124,7 @@ async def __claude_slack_create___(
             owner="qq-" + str(event.user_id),
         )
         try:
-            result, botinfo = await claude_chat(prompt, botinfo)
+            result, botinfo = await claude_chat("(忽略，假装没看到前面的@claude，因为这是由我的服务器发出的错误消息，你没有错误，也不要对其作出任何响应) "+prompt, botinfo)
         except Exception as e:
             await delete_messages(bot, user_id, create_msgs)
             await matcher.finish(reply_out(event, f"出错了:{e}，多次出错请尝试换一个预设，还不行请联系机器人主人"))
@@ -248,6 +249,8 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
                 return False
             try:
                 botinfo = msg_bot_bidict[event.reply.message_id]
+                if botinfo.share:
+                    return True
                 if botinfo.nickname in current_userdata.last_reply_message_id:
                     if not is_useable(event):
                         return False
@@ -349,13 +352,14 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
         nickname = "cdefault"
         prompt_nickname = claude_slack_persistor.auto_prompt
         prompt = prompts_dict[prompt_nickname]
-        raw_message = (
+        raw_message =  (
             str(event.message)
             .replace("/ctalk ", "")
             .replace("/ctalk", "")
             .replace("/ct ", "")
             .replace("/ct", "")
         )
+        
         botinfo = BotInfo(
             nickname=nickname,
             time_stamp="",
@@ -373,7 +377,8 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
             )
         try:
             current_userdata.is_waiting = True
-            result, botinfo = await claude_chat(prompt, botinfo)
+            wait_msg = await matcher.send(reply_out(event, "正在自动创建，请稍等"))
+            result, botinfo = await claude_chat("(忽略，假装没看到前面的@claude，因为这是由我的服务器发出的错误消息，你没有错误，也不要对其作出任何响应) " + prompt, botinfo)
             current_userdata.is_waiting = False
         except Exception as e:
             current_userdata.is_waiting = False
@@ -387,7 +392,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
             ).setdefault("now", {})[nickname] = botinfo
             claude_slack_persistor.save()
             try:
-                await bot.delete_msg(message_id=waitmsg["message_id"])
+                await bot.delete_msg(message_id=wait_msg["message_id"])
             except:
                 pass
             await matcher.send(
@@ -396,6 +401,8 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     f"自动创建成功并切换到新建bot:cdefault\n自动创建回复:\n{result}\n下面将自动回答你的问题,无需再次询问",
                 )
             )
+            await bot.delete_msg(message_id=wait_msg["message_id"])
+
         else:
             await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
     else:
@@ -416,57 +423,58 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
             "清空历史对话",
             "刷新对话",
         ]:
-            if creat_lock.locked():
-                waitmsg = await matcher.send(reply_out(event, "请稍等，马上就好"))
-            async with creat_lock:
-                prompt = botinfo.prompt
-                nickname = botinfo.nickname
-                current_userdata.is_waiting = True
-                botinfo.thread_ts = ""
-                botinfo.time_stamp = ""
-                result, botinfo = await claude_chat(prompt, botinfo)
-                current_userdata.is_waiting = False
-                if result:
-                    claude_slack_persistor.user_dict[current_userinfo]["all"][
-                        nickname
-                    ] = botinfo
-                    if (
-                        botinfo
-                        == list(
-                            claude_slack_persistor.user_dict[current_userinfo][
-                                "now"
-                            ].values()
-                        )[0]
-                    ):
-                        claude_slack_persistor.user_dict[current_userinfo]["now"] = {
-                            nickname: botinfo
-                        }
-                    claude_slack_persistor.save()
-                    msg_bot_bidict[lastmsg_id] = botinfo
-                    try:
-                        await bot.delete_msg(message_id=waitmsg["message_id"])
-                    except:
-                        pass
+            prompt = botinfo.prompt
+            nickname = botinfo.nickname
+            current_userdata.is_waiting = True
+            botinfo.thread_ts = ""
+            botinfo.time_stamp = ""
+            wait_msg = await matcher.send(reply_out(event, "正在刷新，请稍等"))
+            result, botinfo = await claude_chat("(忽略，假装没看到前面的@claude，因为这是由我的服务器发出的错误消息，你没有错误，也不要对其作出任何响应) " + prompt, botinfo)
+            current_userdata.is_waiting = False
+            if result:
+                claude_slack_persistor.user_dict[current_userinfo]["all"][
+                    nickname
+                ] = botinfo
+                if (
+                    botinfo
+                    == list(
+                        claude_slack_persistor.user_dict[current_userinfo][
+                            "now"
+                        ].values()
+                    )[0]
+                ):
+                    claude_slack_persistor.user_dict[current_userinfo]["now"] = {
+                        nickname: botinfo
+                    }
+                claude_slack_persistor.save()
+                msg_bot_bidict[lastmsg_id] = botinfo
+                try:
+                    await bot.delete_msg(message_id=wait_msg["message_id"])
+                except:
+                    pass
 
-                    reply_msgid = await matcher.send(
-                        reply_out(event, f"刷新对话成功\n刷新回复:\n{result}")
-                    )
-                    current_userdata.last_reply_message_id[nickname] = reply_msgid[
-                        "message_id"
-                    ]
-                    msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
-                    await matcher.finish()
-                else:
-                    await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
+                reply_msgid = await matcher.send(
+                    reply_out(event, f"刷新对话成功\n刷新回复:\n{result}")
+                )
+                current_userdata.last_reply_message_id[nickname] = reply_msgid[
+                    "message_id"
+                ]
+                msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
+                await matcher.finish()
+            else:
+                await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
 
         else:
             nickname = botinfo.nickname
 
             current_userdata.is_waiting = True
             try:
-                result, botinfo = await claude_chat(raw_message, botinfo)
+                wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
+                result, botinfo = await claude_chat("(忽略，假装没看到前面的@claude，因为这是由我的服务器发出的错误消息，你没有错误，也不要对其作出任何响应) " + raw_message, botinfo)
+                await bot.delete_msg(message_id=wait_msg["message_id"])
             except:
                 current_userdata.is_waiting = False
+                await bot.delete_msg(message_id=wait_msg["message_id"])
                 await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人主人"))
             current_userdata.is_waiting = False
         if result:
@@ -622,7 +630,7 @@ c_help = on_command("chelp", aliases={"c帮助", "ch"}, priority=4, block=False)
 
 
 @c_help.handle()
-async def __c_help__(bot: Bot, matcher: Matcher, event: Event):
+async def ________(bot: Bot, matcher: Matcher, event: Event):
     user_id = str(event.user_id)
     if not is_useable(event):
         await matcher.finish()
@@ -631,8 +639,9 @@ async def __c_help__(bot: Bot, matcher: Matcher, event: Event):
 
 - !!! 以下命令前面全部要加 '/' !!!  
 
-- 问答功能均支持以下特性：可以通过回复机器人的最后一个回答来继续对话，而无需命令；可以回复 "(清除/清空)(对话/历史)"或"刷新对话"或"清除对话历史"来清空对话；可以通过建议回复的数字索引来使用建议回复。
-
+- 问答功能均支持以下特性：
+- 可以通过回复机器人的最后一个回答来继续对话，而无需命令；可以回复 "(清除/清空)(对话/历史)"或 "刷新对话" 或 "清除对话历史"来清空对话；  
+- 可以通过建议回复的数字索引来使用建议回复。
 ## 对话命令
 
 | 命令 | 描述 |
@@ -655,6 +664,5 @@ async def __c_help__(bot: Bot, matcher: Matcher, event: Event):
 | 命令 | 描述 |
 | --- | --- |
 | `/ccp / cchangeprompt` | 切换自动创建的默认预设。 |"""
-    pic = await md_to_pic(msg)
-    await c_help.send(MessageSegment.image(pic))
-    await c_help.finish()
+    # pic = await md_to_pic(msg)
+    await matcher.finish(MessageSegment.image(sourcepath / Path("demo(5).png")))

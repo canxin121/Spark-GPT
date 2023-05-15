@@ -36,16 +36,26 @@
 )
 ---
 
-- 目前支持将Poe,NewBing,Dalle,ChatGPT (session token),Claude(slack)接入qq
+- 目前支持将Poe,NewBing,Dalle,ChatGPT (session token),Claude(slack),讯飞星火模型(Spark_desk)接入qq
 
 | Image 1 | Image 2 |
 |:-------:|:-------:|
 | ![1](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(1).png) | ![2](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(2).png) |
 | ![3](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(3).png) | ![4](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(4).png) |
 | ![5](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(5).png) | ![6](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(6).png) |
+| ![7](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(7).png) | ![8](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(8).png) |
+| ![9](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(9).png) |
 
 ## 更新
 
+- 2023.5.13 0.1.8:  
+    1.增加poe http版出错后自动重启poe客户端()
+- 2023.5.13 0.1.7:  
+    1.增加一些配置项
+    2.poe增加http api版本
+- 2023.5.11 0.1.5:  
+    1.新增Bard的使用
+    2.修复以文字发送bug和newbing html图片显示bug 
 - 2023.5.11 0.1.4:  
     1.增加讯飞星火模型(Spark_desk)  
 - 2023.5.11 0.1.3:  

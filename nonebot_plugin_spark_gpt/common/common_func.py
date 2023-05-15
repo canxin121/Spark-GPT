@@ -2,7 +2,7 @@ import asyncio
 from typing import Union
 
 import aiohttp
-from ..poe.config import poe_persistor
+from ..poe_pw.config import poe_persistor
 from ..chatgpt_web.config import gptweb_persistor
 from nonebot_plugin_guild_patch import GuildMessageEvent
 from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment

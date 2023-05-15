@@ -1,11 +1,18 @@
+from pathlib import Path
 import nonebot
 
-from .poe import main
 from .newbing import main
 from .chatgpt_web import main
 from .common import main
+from .common.config import spark_persistor
+if spark_persistor.poe_api_mode == 0:
+    from .poe_http import main
+elif spark_persistor.poe_api_mode == 1:
+    from .poe_pw import main
+
 from .claude_slack import main
 from .Spark_desk import main
+from .bard import main
 from nonebot.matcher import Matcher
 from nonebot.plugin import PluginMetadata
 from nonebot.adapters.onebot.v11 import (
@@ -13,10 +20,9 @@ from nonebot.adapters.onebot.v11 import (
     Bot,
     MessageSegment,
 )
+sourcepath = str(Path(__file__).parent / "source")
 
-from .common.render.render import md_to_pic
-
-__version__ = "0.1.2"
+__version__ = "0.1.8"
 __plugin_meta__ = PluginMetadata(
     "Spark-GPT",
     "将多来源的gpt接入qq及更多平台，使用便捷，管理完善，功能强大",
@@ -68,6 +74,12 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 | --- | --- |
 | `/shelp / sh` | 获取Spark_desk帮助说明。 |
 
+## Bard帮助命令
+
+| 命令 | 描述 |
+| --- | --- |
+| `/bardhelp / gbh` | 获取Spark_desk帮助说明。 |
+
 # 通用命令
 
 - 所有用户均可使用
@@ -84,6 +96,6 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 | `/删除预设 / rp` | 删除通用预设 |
 
 """
-    pic = await md_to_pic(msg)
-    await poe_help.send(MessageSegment.image(pic))
+    # pic = await md_to_pic(msg)
+    await poe_help.send(MessageSegment.image(sourcepath / Path("demo(1).png")))
     await poe_help.finish()

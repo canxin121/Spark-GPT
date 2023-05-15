@@ -639,15 +639,18 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 await matcher.finish()
             page = await pwfw.new_page()
             current_userdata.is_waiting = True
+            wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
             result = await poe_chat(truename, text, page)
             await page.close()
             current_userdata.is_waiting = False
-
+            
+            await bot.delete_msg(message_id=wait_msg["message_id"])
             reply_msgid, chat_suggest_temp = await send_msg(result, matcher, event)
             current_userdata.last_reply_message_id[nickname] = reply_msgid["message_id"]
             if len(chat_suggest_temp) - 0:
                 botinfo.last_suggests = chat_suggest_temp
             msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
+            
             await matcher.finish()
     elif mode == "public":
         if poe_base_lock.locked() and botinfo.num_users <= 4:

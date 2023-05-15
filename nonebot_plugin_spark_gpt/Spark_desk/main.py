@@ -1,4 +1,5 @@
 import asyncio
+from pathlib import Path
 from nonebot.plugin import on_command, on_message
 from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
@@ -23,9 +24,9 @@ from .config import (
 from .spark_api import sparkchat
 from ..common.config import spark_persistor
 from ..common.common_func import delete_messages, reply_out
-from ..poe.config import poe_persistor
+from ..poe_pw.config import poe_persistor
 from nonebot import logger
-
+sourcepath = Path(__file__).parent.parent / "source"
 # 初始化两个需要使用的实例
 temp_data = Spark_DeskTemper()
 user_data_dict = temp_data.user_data_dict
@@ -368,47 +369,46 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 current_userinfo, {"all": {}, "now": {}}
             )
 
-        if creat_lock.locked():
-            waitmsg = await matcher.send(reply_out(event, "有人正在创建中，稍后自动为你创建"))
-        async with creat_lock:
+        try:
+            current_userdata.is_waiting = True
+            chat_id = await sparkchat.generate_chat_id()
+            wait_msg = await matcher.send(reply_out(event, "正在自动创建，请稍等"))
+            result = await sparkchat.ask_question(chat_id, prompt)
+            current_userdata.is_waiting = False
+        except:
+            current_userdata.is_waiting = False
+            await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
+        if result:
+            # 将更新后的字典写回到JSON文件中
+            botinfo = BotInfo(
+                nickname=nickname,
+                chat_id=chat_id,
+                source="spark_desk",
+                model="spark",
+                prompt_nickname=prompt_nickname,
+                prompt=prompt,
+                owner="qq-" + str(event.user_id),
+            )
+            spark_desk_persistor.user_dict.setdefault(
+                current_userinfo, {}
+            ).setdefault("all", {})[nickname] = botinfo
+            spark_desk_persistor.user_dict.setdefault(
+                current_userinfo, {}
+            ).setdefault("now", {})[nickname] = botinfo
+            spark_desk_persistor.save()
             try:
-                current_userdata.is_waiting = True
-                chat_id = await sparkchat.generate_chat_id()
-                result = await sparkchat.ask_question(chat_id, prompt)
-                current_userdata.is_waiting = False
+                await bot.delete_msg(message_id=wait_msg["message_id"])
             except:
-                current_userdata.is_waiting = False
-                await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
-            if result:
-                # 将更新后的字典写回到JSON文件中
-                botinfo = BotInfo(
-                    nickname=nickname,
-                    chat_id=chat_id,
-                    source="spark_desk",
-                    model="spark",
-                    prompt_nickname=prompt_nickname,
-                    prompt=prompt,
-                    owner="qq-" + str(event.user_id),
+                pass
+            await matcher.send(
+                reply_out(
+                    event, f"自动创建成功并切换到新建bot:spark_deskdefault\n自动创建回复:\n{result}"
                 )
-                spark_desk_persistor.user_dict.setdefault(
-                    current_userinfo, {}
-                ).setdefault("all", {})[nickname] = botinfo
-                spark_desk_persistor.user_dict.setdefault(
-                    current_userinfo, {}
-                ).setdefault("now", {})[nickname] = botinfo
-                spark_desk_persistor.save()
-                try:
-                    await bot.delete_msg(message_id=waitmsg["message_id"])
-                except:
-                    pass
-                await matcher.send(
-                    reply_out(
-                        event, f"自动创建成功并切换到新建bot:spark_deskdefault\n自动创建回复:\n{result}"
-                    )
-                )
-            else:
-                current_userdata.is_waiting = False
-                await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
+            )
+            await bot.delete_msg(message_id = wait_msg["message_id"])
+        else:
+            current_userdata.is_waiting = False
+            await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
     else:
         lastmsg_id, raw_message, botinfo, current_userinfo, current_userdata = temp
     nickname = botinfo.nickname
@@ -434,54 +434,53 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     current_userinfo, {"all": {}, "now": {}}
                 )
 
-            if creat_lock.locked():
-                waitmsg = await matcher.send(reply_out(event, "请稍等，马上就好"))
-            async with creat_lock:
-                try:
-                    current_userdata.is_waiting = True
-                    chat_id = await sparkchat.generate_chat_id()
-                    result = await sparkchat.ask_question(chat_id, prompt)
-                    current_userdata.is_waiting = False
-                except Exception as e:
-                    current_userdata.is_waiting = False
-                    await matcher.send(reply_out(event, f"出错了:{e},多次尝试都出错请联系机器人管理员"))
-                if result:
-                    botinfo.chat_id = chat_id
-                    spark_desk_persistor.user_dict[current_userinfo]["all"][
-                        nickname
-                    ] = botinfo
-                    if (
-                        botinfo.nickname
-                        == list(
-                            spark_desk_persistor.user_dict[current_userinfo][
-                                "now"
-                            ].values()
-                        )[0].nickname
-                    ):
-                        spark_desk_persistor.user_dict[current_userinfo]["now"] = {
-                            nickname: botinfo
-                        }
-                    spark_desk_persistor.save()
-                    msg_bot_bidict[lastmsg_id] = botinfo
-                    try:
-                        await bot.delete_msg(message_id=waitmsg["message_id"])
-                    except:
-                        pass
-                    reply_msgid = await matcher.send(
-                        reply_out(event, f"刷新对话成功\n刷新回复:\n{result}")
-                    )
-                    current_userdata.last_reply_message_id[nickname] = reply_msgid[
-                        "message_id"
-                    ]
-                    msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
-                    await matcher.finish()
-                else:
-                    await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
+            try:
+                current_userdata.is_waiting = True
+                chat_id = await sparkchat.generate_chat_id()
+                wait_msg = await matcher.send(reply_out(event, "正在刷新，请稍等"))
+                result = await sparkchat.ask_question(chat_id, prompt)
+                current_userdata.is_waiting = False
+            except Exception as e:
+                current_userdata.is_waiting = False
+                await matcher.finish(reply_out(event, f"出错了:{e},多次尝试都出错请联系机器人管理员"))
+            if result:
+                botinfo.chat_id = chat_id
+                spark_desk_persistor.user_dict[current_userinfo]["all"][
+                    nickname
+                ] = botinfo
+                if (
+                    botinfo.nickname
+                    == list(
+                        spark_desk_persistor.user_dict[current_userinfo][
+                            "now"
+                        ].values()
+                    )[0].nickname
+                ):
+                    spark_desk_persistor.user_dict[current_userinfo]["now"] = {
+                        nickname: botinfo
+                    }
+                spark_desk_persistor.save()
+                msg_bot_bidict[lastmsg_id] = botinfo
+
+                reply_msgid = await matcher.send(
+                    reply_out(event, f"刷新对话成功\n刷新回复:\n{result}")
+                )
+                current_userdata.last_reply_message_id[nickname] = reply_msgid[
+                    "message_id"
+                ]
+                await bot.delete_msg(message_id=wait_msg["message_id"])
+
+                msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
+                await matcher.finish()
+            else:
+                await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
         else:
             current_userdata.is_waiting = True
             try:
                 chat_id = botinfo.chat_id
+                wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
                 result = await sparkchat.ask_question(chat_id, raw_message)
+                await bot.delete_msg(message_id=wait_msg["message_id"])
                 current_userdata.is_waiting = False
             except Exception as e:
                 current_userdata.is_waiting = False
@@ -636,7 +635,9 @@ async def __spark_desk_help__(bot: Bot, matcher: Matcher, event: Event):
 
 - !!! 以下命令前面全部要加 '/' !!!  
 
-- 问答功能均支持以下特性：可以通过回复机器人的最后一个回答来继续对话，而无需命令；可以回复 "(清除/清空)(对话/历史)"或 "刷新对话" 或 "清除对话历史"来清空对话；可以通过建议回复的数字索引来使用建议回复。
+- 问答功能均支持以下特性：
+- 可以通过回复机器人的最后一个回答来继续对话，而无需命令；可以回复 "(清除/清空)(对话/历史)"或 "刷新对话" 或 "清除对话历史"来清空对话；  
+- 可以通过建议回复的数字索引来使用建议回复。
 
 ## 对话命令
 
@@ -660,6 +661,6 @@ async def __spark_desk_help__(bot: Bot, matcher: Matcher, event: Event):
 | 命令 | 描述 |
 | --- | --- |
 | `/scp / schangeprompt` | 切换自动创建的默认预设。 |"""
-    pic = await md_to_pic(msg)
-    await spark_desk_help.send(MessageSegment.image(pic))
+    # pic = await md_to_pic(msg)
+    await spark_desk_help.send(MessageSegment.image(sourcepath / Path("demo(6).png")))
     await spark_desk_help.finish()
