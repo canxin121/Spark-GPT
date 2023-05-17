@@ -22,6 +22,7 @@ class BotInfo(BaseModel):
     prompt: Optional[str]
     # 这里做owner主要是用来hash，以区分不同用户的可能重名的bot
     owner: Optional[str]
+    share: Optional[bool]
 
     def to_dict(self) -> dict:
         return self.dict()

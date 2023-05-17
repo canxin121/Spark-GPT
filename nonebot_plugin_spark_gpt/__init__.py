@@ -1,10 +1,13 @@
 from pathlib import Path
 import nonebot
 
+from .common.render.render import md_to_pic
+
 from .newbing import main
 from .chatgpt_web import main
 from .common import main
 from .common.config import spark_persistor
+
 if spark_persistor.poe_api_mode == 0:
     from .poe_http import main
 elif spark_persistor.poe_api_mode == 1:
@@ -22,10 +25,10 @@ from nonebot.adapters.onebot.v11 import (
 )
 sourcepath = str(Path(__file__).parent / "source")
 
-__version__ = "0.1.8"
+__version__ = "0.1.9"
 __plugin_meta__ = PluginMetadata(
     "Spark-GPT",
-    "将多来源的gpt接入qq及更多平台，使用便捷，管理完善，功能强大",
+    "将多来源的gpt接入qq及更多平台(todo)，使用便捷，管理完善，功能强大",
     "通过/help /帮助 /说明 /使用说明  命令来获取详细使用说明",
     {"Author": "canxin121"},
 )
@@ -86,7 +89,10 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 
 | 命令 | 描述 |
 | --- | --- |
-| `/botlist / bl` | 获取你的所有机器人的列表。 |
+| `/bot列表 / botlist / bl` | 获取你的所有机器人的列表。 |
+| `/bot信息 / botinfo / bi + 名字` | 获取你的机器人的详细信息。 |
+| `/bot更改 / botchange / bc + 名字` | 更改你的机器人的信息。 |
+| `/共享bot列表 / sharebotlist / sbl` | 获取所有共享机器人的列表。 |
 
 - 只有spark管理员可以使用
 
@@ -94,8 +100,13 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 | --- | --- |
 | `/添加预设 / ap` | 添加通用预设 |
 | `/删除预设 / rp` | 删除通用预设 |
+| `/sbr / sharebotremove + 名字` | 删除共享机器人 |
+| `/sbc / sharebotchange + 名字` | 更改共享机器人 |
+
+
 
 """
     # pic = await md_to_pic(msg)
-    await poe_help.send(MessageSegment.image(sourcepath / Path("demo(1).png")))
+    # await matcher.send(MessageSegment.image(pic))
+    await poe_help.send(MessageSegment.image(Path(sourcepath / Path("demo(1).png")).absolute()))
     await poe_help.finish()

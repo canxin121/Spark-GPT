@@ -28,8 +28,6 @@ class BotInfo(BaseModel):
     # 是否允许别人来回复你的bot
     share: Optional[bool]
     
-    
-    
     def to_dict(self) -> dict:
         return self.dict()
 

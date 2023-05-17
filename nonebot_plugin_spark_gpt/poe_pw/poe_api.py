@@ -111,7 +111,6 @@ async def get_message_async(page, botname, sleep, nosuggest=False):
         else:
             consecutive_errors = 0
 
-
 # 发送并接受
 async def poe_chat(botname, question, page, nosuggest=False):
     if botname == "NeevaAI":
@@ -229,73 +228,94 @@ async def poe_create(page, botname, base_bot_index, prompt, retries=2):
     except:
         return False
 
+# 更改prompt
+async def poe_change(page, truename,prompt):
+    try:
+        await page.goto(f"https://poe.com/edit_bot?bot={truename}")
+        # 使用 prompt 来查找文本框
+        prompt_input: ElementHandle = await page.wait_for_selector(
+            'textarea[name="prompt"]'
+        )
+        # 清空文本框并输入指定文本
+        await prompt_input.fill('')
+        await prompt_input.fill(prompt)
+        
+        # 使用 Save 来查找按钮
+        save_button: ElementHandle = await page.wait_for_selector(
+            'button.Button_primary__pIDjn:has-text("Save")'
+        )
+        # 点击保存按钮
+        await save_button.click()
+        return True
+    except:
+        return False
 
-async def submit_email(page, email):
-    for i in range(5):
-        try:
-            await page.goto("https://poe.com")
-            # 点击 "Use email" 按钮
-            use_email_button = await page.query_selector('button:has-text("Use email")')
-            await use_email_button.click()
+# async def submit_email(page, email):
+#     for i in range(5):
+#         try:
+#             await page.goto("https://poe.com")
+#             # 点击 "Use email" 按钮
+#             use_email_button = await page.query_selector('button:has-text("Use email")')
+#             await use_email_button.click()
 
-            # 填写 email 地址
-            email_input = await page.wait_for_selector(
-                "input.EmailInput_emailInput__4v_bn"
-            )
-            await email_input.fill(email)
+#             # 填写 email 地址
+#             email_input = await page.wait_for_selector(
+#                 "input.EmailInput_emailInput__4v_bn"
+#             )
+#             await email_input.fill(email)
 
-            # 点击 "Go" 按钮
-            go_button = await page.query_selector('button:has-text("Go")')
-            await go_button.click()
+#             # 点击 "Go" 按钮
+#             go_button = await page.query_selector('button:has-text("Go")')
+#             await go_button.click()
 
-            # 等待跳转并检查输入框是否存在
-            await page.wait_for_selector(
-                "input.VerificationCodeInput_verificationCodeInput__YD3KV"
-            )
-            return True
-        except:
-            await page.reload()
-    return False
+#             # 等待跳转并检查输入框是否存在
+#             await page.wait_for_selector(
+#                 "input.VerificationCodeInput_verificationCodeInput__YD3KV"
+#             )
+#             return True
+#         except:
+#             await page.reload()
+#     return False
 
 
-async def submit_code(page, code, path):
-    retry_count = 0
-    while retry_count < 3:
-        try:
-            # 填写验证码
-            code_input = await page.wait_for_selector(
-                "input.VerificationCodeInput_verificationCodeInput__YD3KV"
-            )
-            await code_input.fill("")  # 清空输入框
-            await code_input.fill(code)
+# async def submit_code(page, code, path):
+#     retry_count = 0
+#     while retry_count < 3:
+#         try:
+#             # 填写验证码
+#             code_input = await page.wait_for_selector(
+#                 "input.VerificationCodeInput_verificationCodeInput__YD3KV"
+#             )
+#             await code_input.fill("")  # 清空输入框
+#             await code_input.fill(code)
 
-            # 点击 "Log In" 按钮
-            login_button = await page.query_selector('button:has-text("Log In")')
-            await login_button.click()
+#             # 点击 "Log In" 按钮
+#             login_button = await page.query_selector('button:has-text("Log In")')
+#             await login_button.click()
 
-            # 等待页面跳转，并检查页面是否有指定的输入框元素
-            await page.wait_for_selector(
-                "textarea.ChatMessageInputView_textInput__Aervw"
-            )
+#             # 等待页面跳转，并检查页面是否有指定的输入框元素
+#             await page.wait_for_selector(
+#                 "textarea.ChatMessageInputView_textInput__Aervw"
+#             )
 
-            # 获取当前页面的 cookie，并保存 poe.com 域名下的 cookie 到本地文件中
-            cookies = await page.context.cookies()
-            poe_cookies = [
-                cookie for cookie in cookies if cookie["domain"] == "poe.com"
-            ]
-            if len(poe_cookies) > 0:
-                with open(path, "w") as f:
-                    json.dump(poe_cookies[0], f)
+#             # 获取当前页面的 cookie，并保存 poe.com 域名下的 cookie 到本地文件中
+#             cookies = await page.context.cookies()
+#             poe_cookies = [
+#                 cookie for cookie in cookies if cookie["domain"] == "poe.com"
+#             ]
+#             if len(poe_cookies) > 0:
+#                 with open(path, "w") as f:
+#                     json.dump(poe_cookies[0], f)
 
-            return True
-        except:
-            # 如果页面上没有指定的输入框元素，就认为是失败了
-            if not await page.query_selector(
-                "textarea.ChatMessageInputView_textInput__Aervw"
-            ):
-                retry_count += 1
-                # 等待一段时间后再次尝试输入验证码并点击 "Log In" 按钮
-                await asyncio.sleep(1)
-            else:
-                raise
-    return False
+#             return True
+#         except:
+#             # 如果页面上没有指定的输入框元素，就认为是失败了
+#             if not await page.query_selector(
+#                 "textarea.ChatMessageInputView_textInput__Aervw"
+#             ):
+#                 retry_count += 1
+#                 # 等待一段时间后再次尝试输入验证码并点击 "Log In" 按钮
+#                 await asyncio.sleep(1)
+#             else:
+#                 raise
+#     return False

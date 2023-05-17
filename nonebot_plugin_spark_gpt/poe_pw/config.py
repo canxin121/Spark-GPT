@@ -23,6 +23,7 @@ class BotInfo(BaseModel):
     owner: Optional[str]
 
     last_suggests: Optional[List[str]] = []
+    share: Optional[bool]
 
     def to_dict(self) -> dict:
         return self.dict()

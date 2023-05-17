@@ -24,6 +24,7 @@ class BotInfo(BaseModel):
     prompt: Optional[str]
     # 这里做owner主要是用来hash，以区分不同用户的可能重名的bot
     owner: Optional[str]
+    share: Optional[bool]
 
     def to_dict(self) -> dict:
         return self.dict()
@@ -114,6 +115,21 @@ def set_userdata(
     )
     return user_info, user_data_dict.setdefault(user_info, user_data)
 
+def set_public_info_data(
+    user_data_dict: dict[UserInfo, UserData]
+) -> Tuple[UserInfo, UserData]:
+    """
+    接受一个event和一个user_data_dict(全局的，所有用户的),在user_data_dict匹配(无则初次设置)用户的过往使用信息
+    返回UserInfo和匹配后的(无则新建的)对应用户的current_user_dict结构为[UserInfo, UserData]
+    """
+    user_info = UserInfo(platform="qq", user_id=123456789)
+    user_data = UserData(
+        sender=Sender(
+            user_id=123456789,
+            user_name="public"
+        )
+    )
+    return user_info, user_data_dict.setdefault(user_info, user_data)
 
 def get_user_info_and_data(event: MessageEvent) -> Tuple[UserInfo, UserData]:
     """

@@ -53,7 +53,7 @@ def is_useable(event, mode=spark_desk_persistor.mode):
             logger.warning("用户或群聊不在白名单内，跳过")
             return False
     else:
-        logger.warning("没有配置gpt_web的cookie，无法使用，跳过")
+        logger.warning("没有配置Spark_Desk的cookie，无法使用，跳过")
         return False
 
 

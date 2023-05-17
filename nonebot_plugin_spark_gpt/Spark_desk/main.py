@@ -492,6 +492,8 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 ]
                 msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
                 await matcher.finish()
+            else:
+                await matcher.finish(reply_out(event, f"出错了:没有返回值，刷新对话试试，多次出错请联系机器人主人"))
 
 
 # ######################################################
@@ -627,6 +629,9 @@ spark_desk_help = on_command(
 
 @spark_desk_help.handle()
 async def __spark_desk_help__(bot: Bot, matcher: Matcher, event: Event):
+    if str(event.message).startswith("/share"):
+        await matcher.finish()
+        
     user_id = str(event.user_id)
     if not is_useable(event):
         await matcher.finish()
@@ -662,5 +667,6 @@ async def __spark_desk_help__(bot: Bot, matcher: Matcher, event: Event):
 | --- | --- |
 | `/scp / schangeprompt` | 切换自动创建的默认预设。 |"""
     # pic = await md_to_pic(msg)
-    await spark_desk_help.send(MessageSegment.image(sourcepath / Path("demo(6).png")))
+    await matcher.send(MessageSegment.image(Path(sourcepath / Path("demo(6).png")).absolute()))
+
     await spark_desk_help.finish()

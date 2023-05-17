@@ -144,5 +144,6 @@ async def __bard_help__(matcher: Matcher):
 
 """
     # pic = await md_to_pic(msg)
-    await matcher.send(MessageSegment.image(sourcepath / Path("demo(7).png")))
+    await matcher.send(MessageSegment.image(Path(sourcepath / Path("demo(7).png")).absolute()))
+
     await matcher.finish()
