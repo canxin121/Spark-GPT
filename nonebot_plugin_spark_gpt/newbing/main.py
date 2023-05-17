@@ -53,7 +53,6 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
         ).startswith(
             (
                 "/bc",
-                "/bingchange",
                 "/bing切换",
                 "/bingdraw",
                 "/bd",
@@ -64,8 +63,9 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
                 "/bh",
                 "/bl",
                 "/bot",
-                "/bard帮助",
-                "/bard"
+                "/bard",
+                "/bi",
+                "/bc",
             )
         ):
             raw_message = (
@@ -293,7 +293,7 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
 
 
 newbing_change_mode = on_command(
-    "bc", aliases={"bingchange", "bing切换"}, priority=1, block=False
+    "bs", aliases={"bingswitch", "bing切换"}, priority=1, block=False
 )
 
 
@@ -432,11 +432,11 @@ async def __newbing_change_mode__(
         image_msg = MessageSegment.text("绘图结果如下:\n")
         for i in range(4):
             if newbing_persistor.predownload == "True":
-                image_msg += MessageSegment.image(temp_path / f"{i}.jpeg")
+                image_msg += MessageSegment.image(Path(temp_path / f"{i}.jpeg"))
                 forward_msg += MessageSegment.node_custom(
                     user_id=current_userdata.sender.user_id,
                     nickname=current_userdata.sender.user_name,
-                    content=MessageSegment.image(temp_path / f"{i}.jpeg"),
+                    content=MessageSegment.image(Path(temp_path / f"{i}.jpeg")),
                 )
             else:
                 image_msg += MessageSegment.image(image_links[i])
@@ -495,7 +495,7 @@ async def __newbing_help__(matcher: Matcher):
 
 | 命令 | 描述 |
 | --- | --- |
-| `/bc / bingchange / bing切换 (+ 数字)` | 切换对话模式，支持以下三种模式：1. 创造力模式；2. 均衡模式；3. 精确模式。 |
+| `/bs / bingswitch / bing切换 (+ 数字)` | 切换对话模式，支持以下三种模式：1. 创造力模式；2. 均衡模式；3. 精确模式。 |
 
 ## 画图命令
 
@@ -503,5 +503,6 @@ async def __newbing_help__(matcher: Matcher):
 | --- | --- |
 | `/bingdraw / bd / bing绘图(bing画图) + 要画的东西(中文/英文)` | Dall-e画图功能，可以画出指定的中文或英文内容。 |"""
     # pic = await md_to_pic(msg)
-    await matcher.send(MessageSegment.image(sourcepath / Path("demo(3).png")))
+    # await matcher.send(MessageSegment.image(pic))
+    await matcher.send(MessageSegment.image(Path(sourcepath / Path("demo(3).png")).absolute()))
     await matcher.finish()
