@@ -90,7 +90,7 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 | 命令 | 描述 |
 | --- | --- |
 | `/bot列表 / botlist / bl` | 获取你的所有机器人的列表。 |
-| `/bot信息 / botinfo / bi + 名字` | 获取你的机器人的详细信息。 |
+| `/bot信息 / botinfo / bf + 名字` | 获取你的机器人的详细信息。 |
 | `/bot更改 / botchange / bc + 名字` | 更改你的机器人的信息。 |
 | `/共享bot列表 / sharebotlist / sbl` | 获取所有共享机器人的列表。 |
 
@@ -106,7 +106,7 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 
 
 """
-    # pic = await md_to_pic(msg)
-    # await matcher.send(MessageSegment.image(pic))
-    await poe_help.send(MessageSegment.image(Path(sourcepath / Path("demo(1).png")).absolute()))
+    pic = await md_to_pic(msg)
+    await matcher.send(MessageSegment.image(pic))
+    # await poe_help.send(MessageSegment.image(Path(sourcepath / Path("demo(1).png")).absolute()))
     await poe_help.finish()
