@@ -140,7 +140,8 @@ class NerBingPersistor(BaseModel):
         self.num_limit = int(
             getattr(get_config, "newbing_limit", spark_persistor.num_limit)
         )
-
+        if not Path(self.cookie_path_).exists():
+            Path(self.cookie_path_).touch(exist_ok=True)
 
 # 这里的配置即使在多平台，也应只初始化一次
 newbing_persistor = NerBingPersistor()

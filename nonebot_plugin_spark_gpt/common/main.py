@@ -146,12 +146,17 @@ async def spark_list___(event: Event, matcher: Matcher):
     await matcher.finish(reply_out(event, msg))
 
 
-spark_info = on_command("bot信息", aliases={"botinfo", "bi"}, priority=4, block=False)
+spark_info = on_command("bot信息", aliases={"botinfo", "bf"}, priority=4, block=False)
 
 
 @spark_info.handle()
 async def spark_info__(event: Event, matcher: Matcher, args: Message = CommandArg()):
-    nickname = str(args[0])
+    if str(event.message).startswith("/bing"):
+        await matcher.finish()
+    try:
+        nickname = str(args[0])
+    except:
+        await matcher.finish()
     try:
         botinfo, text, persistor = get_botinfo(nickname, event)
     except Exception as e:

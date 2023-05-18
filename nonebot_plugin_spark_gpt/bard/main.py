@@ -28,46 +28,47 @@ user_data_dict = bardtemper.user_data_dict
 
 #############################################################
 async def _is_chat_(event: MessageEvent, bot: Bot):
-    if is_useable(event):
-        try:
-            current_userinfo, current_userdata = set_userdata(
-                event=event, user_data_dict=user_data_dict
-            )
-        except:
-            return False
-        if bool(event.reply):
-            if (
-                str(event.reply.sender.user_id) == bot.self_id
-                and event.reply.message_id == current_userdata.last_reply_message_id
-            ):
-                raw_message = str(event.message)
-                if not raw_message:
-                    return False
-                return raw_message, current_userinfo, current_userdata
-            else:
+    try:
+        current_userinfo, current_userdata = set_userdata(
+            event=event, user_data_dict=user_data_dict
+        )
+    except:
+        return False
+    if bool(event.reply):
+        if (
+            str(event.reply.sender.user_id) == bot.self_id
+            and event.reply.message_id == current_userdata.last_reply_message_id
+        ):
+            if not is_useable(event):
                 return False
-        elif str(event.message).startswith(("/bard", "/gb")) and not str(event.message).startswith(("/bardh", "/gbh")):
-            raw_message = (
-                str(event.message)
-                .replace("/bard ", "")
-                .replace("/bard", "")
-                .replace("/gb ", "")
-                .replace("/gb", "")
-            )
+            raw_message = str(event.message)
             if not raw_message:
                 return False
-            if not current_userdata.botinfo:
-                try:
-                    at = await bardchat.get_at_token()
-                    current_userdata.botinfo = BotInfo(at=at)
-                except Exception as e:
-                    logger.error(f"Bard出错了:{e}")
-                    return False
-            
             return raw_message, current_userinfo, current_userdata
-    else:
-        return False
+        else:
+            return False
+    elif str(event.message).startswith(("/bard", "/gb")) and not str(event.message).startswith(("/bardh", "/gbh")):
+        if not is_useable(event):
+            return False
+        raw_message = (
+            str(event.message)
+            .replace("/bard ", "")
+            .replace("/bard", "")
+            .replace("/gb ", "")
+            .replace("/gb", "")
+        )
 
+        if not raw_message:
+            return False
+        if not current_userdata.botinfo:
+            try:
+                at = await bardchat.get_at_token()
+                current_userdata.botinfo = BotInfo(at=at)
+            except Exception as e:
+                logger.error(f"Bard出错了:{e}")
+                return False
+        
+        return raw_message, current_userinfo, current_userdata
 
 bard_chat__ = on_message(priority=1, block=False)
 
