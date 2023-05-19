@@ -65,7 +65,8 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
                 "/bot",
                 "/bard",
                 "/bc",
-                "/bf"
+                "/bf",
+                "/bs"
             )
         ):
             raw_message = (
