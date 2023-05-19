@@ -254,7 +254,7 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
     ##加上回复上限
     fianl_msg = f"\n回复上限:{now_num}/{max_num}  "
     is_forward = False
-    if ( newbing_persistor.pic_able == None and len(msg_text + html_resource + suggest_str + fianl_msg) ) or newbing_persistor.pic_able == "True":
+    if ( newbing_persistor.pic_able == None and len(msg_text + html_resource + suggest_str + fianl_msg)>=newbing_persistor.num_limit) or newbing_persistor.pic_able == "True":
         msg = msg_text + html_resource + suggest_str + fianl_msg
     else:
         msg = msg_text + suggest_str + fianl_msg
