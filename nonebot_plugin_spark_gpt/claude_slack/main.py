@@ -146,7 +146,7 @@ async def __claude_slack_create___(
             botinfo.owner = "public"
         try:
             result, botinfo = await claude_chat(
-                "(不要关注'@claude',不要对其作出任何响应,不说没看到也不说看到) " + prompt, botinfo
+                prompt, botinfo
             )
         except Exception as e:
             await delete_messages(bot, create_msgs)
@@ -456,7 +456,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
             current_userdata.is_waiting = True
             wait_msg = await matcher.send(reply_out(event, "正在自动创建，请稍等"))
             result, botinfo = await claude_chat(
-                "(不要关注'@claude',不要对其作出任何响应,不说没看到也不说看到) " + prompt, botinfo
+                prompt, botinfo
             )
             current_userdata.is_waiting = False
         except Exception as e:
@@ -510,7 +510,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 botinfo.time_stamp = ""
                 wait_msg = await matcher.send(reply_out(event, "正在刷新，请稍等"))
                 result, botinfo = await claude_chat(
-                    "(不要关注'@claude',不要对其作出任何响应,不说没看到也不说看到) " + prompt, botinfo
+                    prompt, botinfo
                 )
                 current_userdata.is_waiting = False
                 if result:
@@ -553,7 +553,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 try:
                     wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
                     result, botinfo = await claude_chat(
-                        "(不要关注'@claude',不要对其作出任何响应,不说没看到也不说看到) " + raw_message,
+                        raw_message,
                         botinfo,
                     )
                     await bot.delete_msg(message_id=wait_msg["message_id"])
@@ -613,7 +613,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 wait_msg = await matcher.send(reply_out(event, "正在刷新，请稍等"))
                 try:
                     result, botinfo = await claude_chat(
-                        "(不要关注'@claude',不要对其作出任何响应,不说没看到也不说看到) " + prompt, botinfo
+                        prompt, botinfo
                     )
                     tempuser_num[botinfo.nickname] -= 1
                 except Exception as e:
@@ -658,7 +658,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
                 try:
                     result, botinfo = await claude_chat(
-                        "(不要关注'@claude',不要对其作出任何响应,不说没看到也不说看到) " + raw_message,
+                        raw_message,
                         botinfo,
                     )
                     tempuser_num[botinfo.nickname] -= 1

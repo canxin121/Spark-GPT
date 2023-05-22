@@ -1,3 +1,4 @@
+import asyncio
 from slack_sdk.web.async_client import AsyncWebClient
 from slack_sdk.errors import SlackApiError
 from nonebot import logger
@@ -109,5 +110,5 @@ async def claude_chat(msg, botinfo: BotInfo):
             botinfo.thread_ts = new_ts
     except Exception as e:
         return e
-    response = await get_msg(new_ts, botinfo.thread_ts)
+    response = await asyncio.wait_for(get_msg(new_ts, botinfo.thread_ts),timeout=120)
     return response, botinfo
