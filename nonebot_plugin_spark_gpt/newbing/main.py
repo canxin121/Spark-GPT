@@ -18,7 +18,7 @@ from .newbing_func import is_useable, sendmsg
 from .config import newbing_persistor, NewBingTemper, set_userdata
 from EdgeGPT import Chatbot, ConversationStyle
 from ..common.render.render import md_to_pic
-from ..common.common_func import reply_out
+from ..common.common_func import delete_messages, reply_out
 
 sourcepath = Path(__file__).parent.parent / "source"
 logger.info("开始加载Newbing")
@@ -312,18 +312,19 @@ async def __newbing_change_mode__(
         )
     except:
         await matcher.finish()
-    if args and len(args[0]) == 1 and args[0] in ["1", "2", "3"]:
-        current_userdata.chatmode = args[0]
-        if args[0] == "1":
+    if args and len(args) == 1 and str(args) in ["1", "2", "3"]:
+        current_userdata.chatmode = str(args)
+        if str(args) == "1":
             style = "creative 创造力模式"
-        elif args[0] == "2":
+        elif str(args) == "2":
             style = "balanced 均衡模式"
         else:
             style = "precise 精确模式"
         await matcher.finish(reply_out(event, f"已切换为: {style}"))
-    msg = "请输入模式前索引数字\n1:creative 创造力模式\n2:balanced 均衡模式\n3:precise 精确模式"
-    reply = await matcher.send(reply_out(event, msg))
-    state["reply"] = reply
+    msg = "请输入模式前索引数字\n1:creative 创造力模式\n2:balanced 均衡模式\n3:precise 精确模式\n输入 取消或算了 可以终止切换"
+    replys = []
+    replys.append(await matcher.send(reply_out(event, msg)))
+    state["replys"] = replys
     state["current_userdata"] = current_userdata
 
 
@@ -336,8 +337,15 @@ async def newbing_change_mode__(
     infos: str = ArgStr("mode"),
 ):
     current_userdata = state["current_userdata"]
-    reply = state["reply"]
-    mode = infos[0]
+    replys = state["replys"]
+    if str(infos):
+        mode = str(infos)
+    else:
+        await matcher.finish()
+    if mode and mode in ["取消","算了"]:
+        await matcher.send(reply_out(event,"取消切换"))
+        await delete_messages(bot,replys)
+        await matcher.finish()
     if mode and len(mode) == 1 and mode in ["1", "2", "3"]:
         current_userdata.chatmode = mode
         if mode == "1":
@@ -347,12 +355,11 @@ async def newbing_change_mode__(
         else:
             style = "precise 精确模式"
         await matcher.send(reply_out(event, f"已切换为: {style}"))
-        await bot.delete_msg(message_id=reply["message_id"])
+        await delete_messages(bot,replys)
         await matcher.finish()
     else:
-        await matcher.send(reply_out(event, f"你输入的数字有误，请重新输入"))
+        replys.append(await matcher.send(reply_out(event, f"你输入的数字有误，请重新输入\n输入算了 或 取消 可以终止切换,终止后不会再发送本条消息")))
         await matcher.reject()
-
 
 bing_draw = on_command(
     "bingdraw", aliases={"bd", "bing绘图", "bing画画"}, priority=1, block=False

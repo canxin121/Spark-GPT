@@ -61,7 +61,7 @@ def reply_out(
     return MessageSegment.reply(event.message_id) + content
 
 
-async def delete_messages(bot, dict_list: dict):
+async def delete_messages(bot, dict_list: list):
     await asyncio.sleep(1)
     for eachmsg in dict_list:
         await bot.delete_msg(message_id=eachmsg["message_id"])

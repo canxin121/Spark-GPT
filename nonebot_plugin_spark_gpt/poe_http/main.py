@@ -117,7 +117,7 @@ async def __poe_auto_change_prompt____(
         await poe_auto_change_prompt.finish("终止切换")
     infos = infos.split(" ")
     if len(infos) != 1 or infos[0] not in prompts_dict:
-        await poe_auto_change_prompt.reject("你输入的信息有误，请检查后重新输入")
+        await poe_auto_change_prompt.reject("你输入的信息有误，请检查后重新输入\n输入取消 或 算了可以终止切换,终止后不会再发送此消息")
     # 将更新后的字典写回到JSON文件中
     poe_persistor.auto_prompt = infos[0]
     poe_persistor.save()
@@ -175,7 +175,7 @@ async def __poe_create___(
 
     infos = infos.split(" ", 2)
     if not (len(infos) == 3 and infos[1] in ["1", "2"]):
-        create_msgs.append(await matcher.send(reply_out(event, "输入信息有误，请检查后重新输入")))
+        create_msgs.append(await matcher.send(reply_out(event, "输入信息有误，请检查后重新输入\n输入取消 或 算了可以终止创建,终止后不会再发送此消息")))
         await poe_create_.reject()
 
     # 获取创建所需信息
@@ -196,7 +196,7 @@ async def __poe_create___(
             prompt = spark_persistor.prompts_dict[prompt_name]
         else:
             create_msgs.append(
-                await matcher.send(reply_out(event, "输入的本地预设名不正确，请重新输入"))
+                await matcher.send(reply_out(event, "输入的本地预设名不正确，请重新输入\n输入取消 或 算了可以终止创建,终止后不会再发送此消息"))
             )
             await poe_create_.reject()
     if state["public"]:
@@ -212,14 +212,14 @@ async def __poe_create___(
         if is_public_nickname(nickname
         ):
             create_msgs.append(
-                await matcher.send(reply_out(event, "已经有同名的bot了，换一个名字重新输入吧"))
+                await matcher.send(reply_out(event, "已经有同名的bot了，换一个名字重新输入吧\n输入取消 或 算了可以终止创建,终止后不会再发送此消息"))
             )
             await matcher.reject()
     else:
         if is_nickname(nickname,event
         ):
             create_msgs.append(
-                await matcher.send(reply_out(event, "已经有同名的bot了，换一个名字重新输入吧"))
+                await matcher.send(reply_out(event, "已经有同名的bot了，换一个名字重新输入吧\n输入取消 或 算了可以终止创建,终止后不会再发送此消息"))
             )
             await matcher.reject()
 
@@ -339,7 +339,7 @@ async def __poe_remove____(
     nickname_delete = infos[0]
     nickname_now = str(list(poe_persistor.user_dict[userinfo]["now"].keys())[0])
     if not (nickname_delete in bots):
-        remove_msgs.append(await matcher.send(reply_out(event, "输入信息有误，请检查后重新输入")))
+        remove_msgs.append(await matcher.send(reply_out(event, "输入信息有误，请检查后重新输入\n输入取消 或 算了可以终止删除,终止后不会再发送此消息")))
         await poe_remove.reject()
     if nickname_delete == nickname_now:
         remove_msgs.append(await matcher.send(reply_out(event, "不能删除正在使用的bot哦")))
@@ -425,7 +425,7 @@ async def __poe_switch____(
 
     nickname = infos.split(" ")[0]
     if nickname not in list(poe_persistor.user_dict[userinfo]["all"].keys()):
-        switch_msgs.append(await matcher.send(reply_out(event, "没有这个机器人呢，请重新输入\n输入 算了 或 取消可以终止")))
+        switch_msgs.append(await matcher.send(reply_out(event, "没有这个机器人呢，请重新输入\n输入取消 或 算了可以终止切换,终止后不会再发送此消息")))
         await poe_switch.reject()
 
     poe_persistor.user_dict[userinfo]["now"] = {

@@ -88,7 +88,7 @@ async def __gpt_web_create___(
         await delete_messages(bot, create_msgs)
         await matcher.finish()
     if len(infos) != 2:
-        create_msgs.append(await matcher.reject(reply_out(event, "你输入的信息有误，请重新输入")))
+        create_msgs.append(await matcher.reject(reply_out(event, "你输入的信息有误，请重新输入\n输入取消 或 算了可以终止创建,终止后不会再发送此消息")))
 
     nickname = str(infos[0])
     truename = None
@@ -102,7 +102,7 @@ async def __gpt_web_create___(
             prompt = prompts_dict[prompt_name]
         else:
             create_msgs.append(
-                await matcher.send(reply_out(event, "输入的本地预设名不正确，请重新输入"))
+                await matcher.send(reply_out(event, "输入的本地预设名不正确，请重新输入\n输入取消 或 算了可以终止创建,终止后不会再发送此消息"))
             )
             await matcher.reject()
     if state["public"]:
@@ -117,14 +117,14 @@ async def __gpt_web_create___(
         if is_public_nickname(nickname
         ):
             create_msgs.append(
-                await matcher.send(reply_out(event, "已经有同名的bot了，换一个名字重新输入吧"))
+                await matcher.send(reply_out(event, "已经有同名的bot了，换一个名字重新输入吧\n输入取消 或 算了可以终止创建,终止后不会再发送此消息"))
             )
             await matcher.reject()
     else:
         if is_nickname(nickname,event
         ):
             create_msgs.append(
-                await matcher.send(reply_out(event, "已经有同名的bot了，换一个名字重新输入吧"))
+                await matcher.send(reply_out(event, "已经有同名的bot了，换一个名字重新输入吧\n输入取消 或 算了可以终止创建,终止后不会再发送此消息"))
             )
             await matcher.reject()
             
@@ -251,7 +251,7 @@ async def __gptweb_switch____(
 
     nickname = infos.split(" ")[0]
     if nickname not in list(gptweb_persistor.user_dict[userinfo]["all"].keys()):
-        switch_msgs.append(await matcher.send(reply_out(event, "没有这个机器人呢")))
+        switch_msgs.append(await matcher.send(reply_out(event, "没有这个机器人，请重新输入\n输入取消 或 算了可以终止切换,终止后不会再发送此消息")))
         await gptweb_switch.reject()
 
     gptweb_persistor.user_dict[userinfo]["now"] = {
@@ -787,7 +787,7 @@ async def __gptweb_remove____(
     nickname_delete = infos[0]
     nickname_now = str(list(gptweb_persistor.user_dict[userinfo]["now"].keys())[0])
     if not (nickname_delete in bots):
-        remove_msgs.append(await matcher.send(reply_out(event, "输入信息有误，请检查后重新输入")))
+        remove_msgs.append(await matcher.send(reply_out(event, "输入信息有误，请检查后重新输入\n输入取消 或 算了可以终止删除,终止后不会再发送此消息")))
         await gptweb_remove.reject()
     if nickname_delete == nickname_now:
         remove_msgs.append(await matcher.send(reply_out(event, "不能删除正在使用的bot哦")))
@@ -835,7 +835,7 @@ async def __poe_auto_change_prompt____(
         await gw_auto_change_prompt.finish("终止切换")
     infos = infos.split(" ")
     if len(infos) != 1 or infos[0] not in prompts_dict:
-        await gw_auto_change_prompt.reject("你输入的信息有误，请检查后重新输入")
+        await gw_auto_change_prompt.reject("你输入的信息有误，请检查后重新输入\n输入取消 或 算了可以终止切换,终止后不会再发送此消息")
     # 将更新后的字典写回到JSON文件中
     gptweb_persistor.auto_prompt = infos[0]
     gptweb_persistor.save()
