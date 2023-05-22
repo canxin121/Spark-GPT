@@ -18,7 +18,7 @@ from .common_func import (
     reply_out,
     delete_messages,
     set_public_info_data,
-    get_public_botinfo
+    get_public_botinfo,
 )
 from ..chatgpt_web.config import gptweb_persistor
 
@@ -57,7 +57,9 @@ async def __spark_addprompt____(
     state["key"] = infos[0]
 
 
-@spark_addprompt.got("prompt", prompt="请输入预设\n输入取消 或 算了可以终止创建\n输入取消 或 算了可以终止添加,终止后不会再发送此消息")
+@spark_addprompt.got(
+    "prompt", prompt="请输入预设\n输入取消 或 算了可以终止创建\n输入取消 或 算了可以终止添加,终止后不会再发送此消息"
+)
 async def __spark_addprompt____(
     event: Event, state: T_State, infos: str = ArgStr("prompt")
 ):
@@ -102,7 +104,9 @@ async def __spark_removeprompt____(event: Event, infos: str = ArgStr("name")):
         await spark_removeprompt.finish("终止删除")
     infos = infos.split(" ")
     if len(infos) != 1 or infos[0] not in spark_persistor.prompts_dict:
-        await spark_removeprompt.reject("你输入的信息有误，请检查后重新输入\n输入取消 或 算了可以终止创建,终止后不会再发送此消息")
+        await spark_removeprompt.reject(
+            "你输入的信息有误，请检查后重新输入\n输入取消 或 算了可以终止创建,终止后不会再发送此消息"
+        )
     if is_auto_prompt(infos[0]):
         prompt_no = is_auto_prompt(infos[0])
         await spark_removeprompt.finish(f"不能删除{prompt_no}自动创建机器人时指定的预设")
@@ -148,6 +152,7 @@ async def spark_list___(event: Event, matcher: Matcher):
         await matcher.finish(MessageSegment.image(pic))
     await matcher.finish(reply_out(event, msg))
 
+
 spark_info = on_command("bot信息", aliases={"botinfo", "bf"}, priority=4, block=False)
 
 
@@ -163,6 +168,9 @@ async def spark_info__(event: Event, matcher: Matcher, args: Message = CommandAr
         botinfo, text, persistor = get_botinfo(nickname, event)
     except Exception as e:
         await matcher.finish(reply_out(event, str(e)))
+    if len(text) > 1000:
+        pic = await md_to_pic(text)
+        await matcher.finish(reply_out(event, pic))
     await matcher.finish(reply_out(event, text))
 
 
@@ -187,7 +195,11 @@ async def spark_change_bot__(
         state["persistor"] = persistor
     except Exception as e:
         await matcher.finish(reply_out(event, str(e)))
-    wait_msg.append(await matcher.send(reply_out(event, text)))
+    if len(text) > 1000:
+        pic = await md_to_pic(text)
+        wait_msg.append(await matcher.send(reply_out(event, pic)))
+    else:
+        wait_msg.append(await matcher.send(reply_out(event, text)))
     wait_msg.append(
         await matcher.send(
             reply_out(
@@ -247,7 +259,7 @@ async def spark_change_bot_(
                         await poe_change(page, botinfo.truename, value)
                         await matcher.send(
                             reply_out(
-                                event, f"成功预设内容将{key}修改为{value}\n再次使用该机器人时，请先清除对话(刷新对话)"
+                                event, f"成功将{key}修改为你输入的预设内容\n再次使用该机器人时，请先清除对话(刷新对话)"
                             )
                         )
                     except Exception as e:
@@ -261,7 +273,7 @@ async def spark_change_bot_(
                         await asyncio.wait_for(task, 90)
                         await matcher.send(
                             reply_out(
-                                event, f"成功预设内容将{key}修改为{value}\n再次使用该机器人时，请先清除对话(刷新对话)"
+                                event, f"成功将{key}修改为你输入的预设内容\n再次使用该机器人时，请先清除对话(刷新对话)"
                             )
                         )
                     except Exception as e:
@@ -269,7 +281,11 @@ async def spark_change_bot_(
                             reply_out(event, f"更改poe预设出错:{e}，多次出错请联系机器人管理员")
                         )
             else:
-                await matcher.send(reply_out(event, f"再次使用该机器人时，请先清除对话(刷新对话)"))
+                setattr(botinfo, key, value)
+                persistor.user_dict[current_userinfo]["all"][nickname] = botinfo
+                await matcher.send(
+                    reply_out(event, f"成功将{key}修改为你输入的预设内容\n再次使用该机器人时，请先清除对话(刷新对话)")
+                )
         elif key == "prompt_nickname":
             setattr(botinfo, key, value)
             persistor.user_dict[current_userinfo]["all"][nickname] = botinfo
@@ -313,18 +329,24 @@ async def spark_share_list___(event: Event, matcher: Matcher):
         except:
             bot_strs.append(f"没有可用的{bot_name}机器人\n")
 
-    msg = "注意共享机器人使用时应在名前加'共享'或'share',\n比如 /共享猫娘 在吗？\n所有机器人信息如下:\n\n" + "\n".join(bot_strs)
+    msg = "注意共享机器人使用时应在名前加'共享'或'share',\n比如 /共享猫娘 在吗？\n所有机器人信息如下:\n\n" + "\n".join(
+        bot_strs
+    )
     if len(msg) > 1000:
         pic = await md_to_pic(str(msg))
         await matcher.finish(MessageSegment.image(pic))
     await matcher.finish(reply_out(event, msg))
 
 
-spark_share_remove = on_command("sbr", aliases={"sharebotremove"}, priority=4, block=False)
+spark_share_remove = on_command(
+    "sbr", aliases={"sharebotremove"}, priority=4, block=False
+)
 
 
 @spark_share_remove.handle()
-async def spark_share_remove__(event: Event, matcher: Matcher, args: Message = CommandArg()):
+async def spark_share_remove__(
+    event: Event, matcher: Matcher, args: Message = CommandArg()
+):
     if str(event.user_id) not in spark_persistor.superusers:
         await matcher.finish("你不是管理员，没有权限")
     if str(args):
@@ -365,7 +387,11 @@ async def spark_change_share_bot__(
         state["persistor"] = persistor
     except Exception as e:
         await matcher.finish(reply_out(event, str(e)))
-    wait_msg.append(await matcher.send(reply_out(event, text)))
+    if len(text) > 1000:
+        pic = await md_to_pic(text)
+        wait_msg.append(await matcher.send(reply_out(event, pic)))
+    else:
+        wait_msg.append(await matcher.send(reply_out(event, text)))
     wait_msg.append(
         await matcher.send(
             reply_out(
@@ -400,10 +426,10 @@ async def spark_change_share_bot_(
         value = item[1]
         if key == "nickname":
             if value == nickname:
-                await matcher.send(reply_out(event, "更改后的nickname和原来的nickname相同"))
+                await matcher.send("更改后的nickname和原来的nickname相同")
                 continue
             if is_public_nickname(value):
-                await matcher.send(reply_out(event, "已经有这个nickname的机器人了，不能重名"))
+                await matcher.send("已经有这个nickname的机器人了，不能重名")
                 continue
             setattr(botinfo, key, value)
             if nickname == list(persistor.user_dict[current_userinfo]["now"].keys())[0]:
@@ -411,7 +437,7 @@ async def spark_change_share_bot_(
             del persistor.user_dict[current_userinfo]["all"][nickname]
             persistor.user_dict[current_userinfo]["all"][value] = botinfo
             nickname = value
-            await matcher.send(reply_out(event, f"成功将机器人名称{key}修改为{value}"))
+            await matcher.send(f"成功将机器人名称{key}修改为{value}")
 
         elif key == "prompt":
             setattr(botinfo, key, value)
@@ -422,38 +448,33 @@ async def spark_change_share_bot_(
                     try:
                         await poe_change(page, botinfo.truename, value)
                         await matcher.send(
-                            reply_out(
-                                event, f"成功预设内容将{key}修改为{value}\n再次使用该机器人时，请先清除对话(刷新对话)"
-                            )
+                            f"成功将{key}修改为你输入的预设内容\n再次使用该机器人时，请先清除对话(刷新对话)"
                         )
                     except Exception as e:
-                        await matcher.send(
-                            reply_out(event, f"更改poe预设出错:{e}，多次出错请联系机器人管理员")
-                        )
+                        await matcher.send(f"更改poe预设出错:{e}，多次出错请联系机器人管理员")
                     page.close()
                 else:
                     try:
                         task = asyncio.create_task(run_poe_change(value, botinfo))
                         await asyncio.wait_for(task, 90)
                         await matcher.send(
-                            reply_out(
-                                event, f"成功预设内容将{key}修改为{value}\n再次使用该机器人时，请先清除对话(刷新对话)"
-                            )
+                            f"成功预设内容将{key}修改为你输入的预设内容\n再次使用该机器人时，请先清除对话(刷新对话)"
                         )
                     except Exception as e:
-                        await matcher.send(
-                            reply_out(event, f"更改poe预设出错:{e}，多次出错请联系机器人管理员")
-                        )
+                        await matcher.send(f"更改poe预设出错:{e}，多次出错请联系机器人管理员")
             else:
-                await matcher.send(reply_out(event, f"再次使用该机器人时，请先清除对话(刷新对话)"))
+                setattr(botinfo, key, value)
+                persistor.user_dict[current_userinfo]["all"][nickname] = botinfo
+                await matcher.send(f"成功将{key}修改为你输入的预设内容\n再次使用该机器人时，请先清除对话(刷新对话)")
         elif key == "prompt_nickname":
             setattr(botinfo, key, value)
             persistor.user_dict[current_userinfo]["all"][nickname] = botinfo
-            await matcher.send(reply_out(event, f"成功将{key}修改为{value}"))
+            await matcher.send(f"成功将{key}修改为{value}")
         else:
-            await matcher.send(reply_out(event, f"{key}不存在或不可被修改。"))
+            await matcher.send(f"{key}不存在或不可被修改。")
         persistor.save()
     await matcher.finish()
+
 
 # test = on_command("md2pic", priority=4, block=False)
 
