@@ -266,7 +266,7 @@ async def spark_change_bot_(
                         await matcher.send(
                             reply_out(event, f"更改poe预设出错:{e}，多次出错请联系机器人管理员")
                         )
-                    page.close()
+                    await page.close()
                 else:
                     try:
                         task = asyncio.create_task(run_poe_change(value, botinfo))
@@ -452,7 +452,7 @@ async def spark_change_share_bot_(
                         )
                     except Exception as e:
                         await matcher.send(f"更改poe预设出错:{e}，多次出错请联系机器人管理员")
-                    page.close()
+                    await page.close()
                 else:
                     try:
                         task = asyncio.create_task(run_poe_change(value, botinfo))

@@ -48,6 +48,8 @@
 
 ## 更新
 
+- 2023.5.23 0.2.5:
+    1.更新poe playwright api来同步新版的poe
 - 2023.5.23 0.2.4:
     1.为claude的api设置2分钟超时
     2.修复bot更改修改prompt出错的bug

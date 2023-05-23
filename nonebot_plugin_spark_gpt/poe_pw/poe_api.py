@@ -27,7 +27,7 @@ async def send_message_async(page: Page, botname: str, input_str: str):
                 return "limited"
             # 找到输入框元素
             input_box = await page.wait_for_selector(
-                ".ChatMessageInputView_textInput__Aervw", timeout=2000
+                ".GrowingTextArea_textArea__eadlu", timeout=2000
             )
 
             # 将字符串发送到输入框中
@@ -111,6 +111,7 @@ async def get_message_async(page, botname, sleep, nosuggest=False):
         else:
             consecutive_errors = 0
 
+
 # 发送并接受
 async def poe_chat(botname, question, page, nosuggest=False):
     if botname == "NeevaAI":
@@ -141,23 +142,10 @@ async def poe_clear(page, truename):
     try:
         await page.goto(f"https://poe.com/{truename}")
 
-        # 等待元素出现
-        element = await page.wait_for_selector(
-            "div.ChatMessageInputView_paintbrushWraper__DHMNW"
+        chevron_button = await page.wait_for_selector(
+            '[class="Button_buttonBase__0QP_m Button_flat__1hj0f ChatBreakButton_button__EihE0 ChatMessageInputFooter_chatBreakButton__hqJ3v"]'
         )
-        await asyncio.sleep(1)
-        await element.wait_for_selector(
-            "svg.ChatMessageInputView_paintbrushIcon__Turkx"
-        )
-        svg_element = await page.query_selector(
-            ".ChatMessageInputView_paintbrushIcon__Turkx"
-        )
-
-        # Get the bounding box of the SVG element
-        bbox = await svg_element.bounding_box()
-        x = bbox["x"] + 10  # Replace with your desired x coordinate
-        y = bbox["y"] - 10  # Replace with your desired y coordinate
-        await page.mouse.click(x=x, y=y)
+        await chevron_button.click()
 
         return True
     except:
@@ -193,7 +181,7 @@ async def poe_create(page, botname, base_bot_index, prompt, retries=2):
             await prompt_textarea.fill(prompt)
 
             chevron_button = await page.wait_for_selector(
-                ".BotInfoForm_chevronDown__LFWWC"
+                '[class="BotInfoForm_chevronDown__LFWWC"]'
             )
             await chevron_button.click()
 
@@ -218,7 +206,7 @@ async def poe_create(page, botname, base_bot_index, prompt, retries=2):
             # 等待新页面加载完成
             try:
                 await page.wait_for_selector(
-                    "textarea.ChatMessageInputView_textInput__Aervw", timeout=5000
+                    "textarea.GrowingTextArea_textArea__eadlu", timeout=5000
                 )
                 return True
             except:
@@ -228,8 +216,9 @@ async def poe_create(page, botname, base_bot_index, prompt, retries=2):
     except:
         return False
 
+
 # 更改prompt
-async def poe_change(page, truename,prompt):
+async def poe_change(page, truename, prompt):
     try:
         await page.goto(f"https://poe.com/edit_bot?bot={truename}")
         # 使用 prompt 来查找文本框
@@ -237,9 +226,9 @@ async def poe_change(page, truename,prompt):
             'textarea[name="prompt"]'
         )
         # 清空文本框并输入指定文本
-        await prompt_input.fill('')
+        await prompt_input.fill("")
         await prompt_input.fill(prompt)
-        
+
         # 使用 Save 来查找按钮
         save_button: ElementHandle = await page.wait_for_selector(
             'button.Button_primary__pIDjn:has-text("Save")'
@@ -249,6 +238,7 @@ async def poe_change(page, truename,prompt):
         return True
     except:
         return False
+
 
 # async def submit_email(page, email):
 #     for i in range(5):
