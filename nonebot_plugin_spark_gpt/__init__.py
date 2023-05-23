@@ -35,7 +35,7 @@ from nonebot.adapters.onebot.v11 import (
 
 sourcepath = str(Path(__file__).parent / "source")
 
-__version__ = "0.2.5"
+__version__ = "0.1.9"
 __plugin_meta__ = PluginMetadata(
     "Spark-GPT",
     "将多来源的gpt接入qq及更多平台(todo)，使用便捷，管理完善，功能强大",
@@ -129,6 +129,9 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 | `/bot信息 / botinfo / bf + 名字` | 获取你的机器人的详细信息。 |
 | `/bot更改 / botchange / bc + 名字` | 更改你的机器人的信息。 |
 | `/共享bot列表 / sharebotlist / sbl` | 获取所有共享机器人的列表。 |
+| `/预设列表 / 所有预设 / pl` | 获取所有所有可用本地预设 |
+| `/预设信息 / pf + (预设名称)` | 查看预设具体内容 |
+
 
 - 只有spark管理员可以使用
 

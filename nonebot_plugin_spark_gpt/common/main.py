@@ -27,6 +27,7 @@ from ..Spark_desk.config import spark_desk_persistor
 
 if spark_persistor.poe_api_mode == 0:
     from ..poe_http.main import run_poe_change
+    from ..poe_http.config import poe_persistor
 else:
     from ..poe_pw.config import poe_persistor
     from ..poe_pw.poe_api import poe_change
@@ -37,83 +38,180 @@ sourcepath = str(Path(__file__).parent / "source")
 
 
 @spark_addprompt.handle()
-async def __spark_addprompt__(matcher: Matcher, event: Event):
+async def __spark_addprompt__(state:T_State,matcher: Matcher, event: Event):
     global spark_persistor
+    replys = []
     user_id = str(event.user_id)
     if user_id not in spark_persistor.superusers:
         await spark_addprompt.finish("你不是管理员哦")
+    replys.append(await matcher.send("请输入预设名称\n输入取消 或 算了可以终止添加"))
+    state["replys"] = replys
 
-
-@spark_addprompt.got("name", prompt="请输入预设名称\n输入取消 或 算了可以终止添加")
+@spark_addprompt.got("name")
 async def __spark_addprompt____(
-    event: Event, state: T_State, infos: str = ArgStr("name")
+    matcher:Matcher,event: Event,bot:Bot, state: T_State, infos: str = ArgStr("name")
 ):
+    replys = state["replys"]
     global spark_persistor
     if infos in ["取消", "算了"]:
+        await delete_messages(bot,replys)
         await spark_addprompt.finish("终止添加")
     infos = infos.split(" ")
     if len(infos) != 1:
-        await spark_addprompt.reject("你输入的信息有误，请检查后重新输入\n输入取消 或 算了可以终止添加,终止后不会再发送此消息")
+        replys.append(await spark_addprompt.send("你输入的信息有误，请检查后重新输入\n输入取消 或 算了可以终止添加,终止后不会再发送此消息"))
+        await matcher.reject()
+    replys.append(await matcher.send("请输入预设\n输入取消 或 算了可以终止创建"))
     state["key"] = infos[0]
+    state["replys"] = replys
 
 
 @spark_addprompt.got(
-    "prompt", prompt="请输入预设\n输入取消 或 算了可以终止创建\n输入取消 或 算了可以终止添加,终止后不会再发送此消息"
+    "prompt"
 )
 async def __spark_addprompt____(
-    event: Event, state: T_State, infos: str = ArgStr("prompt")
+    event: Event, bot:Bot,state: T_State, infos: str = ArgStr("prompt")
 ):
     global spark_persistor
+    replys = state["replys"]
     if infos in ["取消", "算了"]:
+        await delete_messages(bot,replys)
         await spark_addprompt.finish("终止添加")
     name = state["key"]
     prompt = infos
     # # 将更新后的字典写回到JSON文件中
     spark_persistor.prompts_dict[name] = prompt
     spark_persistor.save()
+    await delete_messages(bot,replys)
     await spark_addprompt.finish("成功添加prompt")
 
 
-######################################################
 spark_removeprompt = on_command("删除预设", aliases={"rp"}, priority=4, block=False)
 
 
 @spark_removeprompt.handle()
-async def __spark_removeprompt__(event: Event):
+async def __spark_removeprompt__(
+    event: Event, state: T_State, args: Message = CommandArg()
+):
     global spark_persistor
     user_id = str(event.user_id)
     if user_id not in spark_persistor.superusers:
         await spark_removeprompt.finish("你不是管理员哦")
     else:
+        if str(args) in list(spark_persistor.prompts_dict.keys()):
+            del spark_persistor.prompts_dict[str(args)]
+            spark_persistor.save()
+            await spark_removeprompt.finish(f"成功删除预设{str(args)}")
+
         str_prompts = str()
         i = 1
         for key, value in spark_persistor.prompts_dict.items():
-            str_prompts += f"************************\n{i}:预设名称：{key}\n预设内容：{value}\n"
+            str_prompts += f"{i}:{key}\n"
             i += 1
-        if len(str_prompts) > 600:
-            pic = await md_to_pic(f"当前预设有：\n{str_prompts}")
+        replys = []
+        if len(str_prompts) > 1000:
+            pic = await md_to_pic(f"当前预设有：\n{str_prompts}\n输入 取消 或 算了 可以终止删除")
             pic = MessageSegment.image(pic)
-            await spark_removeprompt.send(pic)
+            replys.append(await spark_removeprompt.send(pic))
         else:
-            await spark_removeprompt.send(f"当前预设有：\n{str_prompts}")
+            replys.append(
+                await spark_removeprompt.send(
+                    f"当前预设有：\n{str_prompts}\n输入 取消 或 算了 可以终止删除"
+                )
+            )
+
+        replys.append(await spark_removeprompt.send("请输入要删除的预设名称\n输入取消 或 算了可以终止创建"))
+        state["replys"] = replys
 
 
-@spark_removeprompt.got("name", prompt="请输入要删除的预设名称\n输入取消 或 算了可以终止创建")
-async def __spark_removeprompt____(event: Event, infos: str = ArgStr("name")):
+@spark_removeprompt.got("name")
+async def __spark_removeprompt____(
+    matcher:Matcher,bot: Bot, event: Event, state: T_State, infos: str = ArgStr("name")
+):
+    replys = state["replys"]
     if infos in ["取消", "算了"]:
-        await spark_removeprompt.finish("终止删除")
+        await delete_messages(bot, replys)
+        await matcher.finish("终止删除")
     infos = infos.split(" ")
     if len(infos) != 1 or infos[0] not in spark_persistor.prompts_dict:
-        await spark_removeprompt.reject(
-            "你输入的信息有误，请检查后重新输入\n输入取消 或 算了可以终止创建,终止后不会再发送此消息"
+        replys.append(
+            await matcher.send(
+                "你输入的信息有误，请检查后重新输入\n输入取消 或 算了可以终止创建,终止后不会再发送此消息"
+            )
         )
+        await matcher.reject()
     if is_auto_prompt(infos[0]):
         prompt_no = is_auto_prompt(infos[0])
-        await spark_removeprompt.finish(f"不能删除{prompt_no}自动创建机器人时指定的预设")
+        await delete_messages(bot, replys)
+        await matcher.finish(f"不能删除{prompt_no}自动创建机器人时指定的预设")
 
     del spark_persistor.prompts_dict[infos[0]]
     spark_persistor.save()
-    await spark_removeprompt.finish(f"成功删除预设{infos[0]}")
+    await delete_messages(bot, replys)
+    await matcher.finish(f"成功删除预设{infos[0]}")
+
+
+spark_prompt_info = on_command("预设信息", aliases={"pf"}, priority=4, block=False)
+
+
+@spark_prompt_info.handle()
+async def spark_prompt_info_(
+    matcher: Matcher, state: T_State, args: Message = CommandArg()
+):
+    replys = []
+    if str(args) in list(spark_persistor.prompts_dict.keys()):
+        prompt = spark_persistor.prompts_dict[str(args)]
+        if len(prompt) > 1000:
+            pic = await md_to_pic(prompt)
+            await matcher.finish(MessageSegment.image(pic))
+        await matcher.finish(f"预设内容为:{spark_persistor.prompts_dict[str(args)]}")
+    else:
+        replys.append(await matcher.send("请输入预设名称\n输入 取消 或 算了 可以终止查看"))
+    state["replys"] = replys
+
+
+@spark_prompt_info.got("prompt_nickname")
+async def spark_prompt_info___(
+    matcher: Matcher,
+    bot: Bot,
+    state: T_State,
+    event: Event,
+    infos: str = ArgStr("prompt_nickname"),
+):
+    replys = state["replys"]
+    if str(infos) in ["取消", "算了"]:
+        await delete_messages(bot, replys)
+        await matcher.finish("取消查询")
+    if str(infos) in list(spark_persistor.prompts_dict.keys()):
+        try:
+            await delete_messages(bot, replys)
+        except:
+            pass
+        prompt = spark_persistor.prompts_dict[str(infos)]
+        if len(prompt) > 1000:
+            pic = await md_to_pic(prompt)
+            await matcher.finish(MessageSegment.image(pic))
+        await matcher.finish(f"预设内容为:{spark_persistor.prompts_dict[str(infos)]}")
+    else:
+        replys.append(
+            await matcher.send(f"没有这个预设名称，请检查后重新输入\n输入 取消 或 算了 可以终止查询，终止后不会再发送此消息")
+        )
+        await matcher.reject()
+
+
+spark_prompt_list = on_command("预设列表", aliases={"pl", "所有预设"}, priority=4, block=False)
+
+
+@spark_prompt_list.handle()
+async def spark_prompt_list__(matcher: Matcher):
+    str_prompts = str("所有预设名称如下:  \n")
+    i = 1
+    for key, value in spark_persistor.prompts_dict.items():
+        str_prompts += f"{i}:{key}\n"
+        i += 1
+    if len(str_prompts) > 1000:
+        pic = await md_to_pic(str_prompts)
+        await matcher.finish(MessageSegment.image(pic))
+    await matcher.finish(str_prompts)
 
 
 spark_list = on_command("bot列表", aliases={"botlist", "bl"}, priority=4, block=False)

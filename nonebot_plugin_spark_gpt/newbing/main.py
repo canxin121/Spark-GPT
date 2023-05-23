@@ -235,8 +235,8 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         pass
     
     ##处理建议回复
-    suggest_str = "\n建议回复:\n"
     if newbing_persistor.suggest_able == "True":
+        suggest_str = "\n建议回复:\n"
         try:
             suggests = [
                 raw_json["item"]["messages"][1]["suggestedResponses"][i]["text"]
@@ -251,6 +251,7 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
             pass
     else:
         suggests = []
+        suggest_str = ""
 
     ##加上回复上限
     fianl_msg = f"\n回复上限:{now_num}/{max_num}  "
