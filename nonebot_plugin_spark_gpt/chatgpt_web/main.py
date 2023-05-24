@@ -570,7 +570,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     answer, parentname, truename = result
                     botinfo.truename = truename
                     botinfo.parentname = parentname
-
+                    botinfo.truename = truename
                     msg_bot_bidict.forceput(lastmsg_id, botinfo)
 
                     gptweb_persistor.user_dict[current_userinfo]["all"][nickname] = botinfo
@@ -639,6 +639,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     answer, parentname, truename = result
                     # 将更新后的字典写回到JSON文件中
                     botinfo.parentname = parentname
+                    botinfo.truename = truename
                     gptweb_persistor.user_dict[current_userinfo]["all"][
                         nickname
                     ] = botinfo

@@ -35,7 +35,7 @@ from nonebot.adapters.onebot.v11 import (
 
 sourcepath = str(Path(__file__).parent / "source")
 
-__version__ = "0.2.7"
+__version__ = "0.2.8"
 __plugin_meta__ = PluginMetadata(
     "Spark-GPT",
     "将多来源的gpt接入qq及更多平台(todo)，使用便捷，管理完善，功能强大",
