@@ -955,11 +955,11 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 
 | 命令 | 描述 |
 | --- | --- |
-| `/psn + 你要搜索的内容` | NeevaAI搜索引擎，返回链接及标题。 |
 | `/psg + 你要询问的内容` | 共享的GPT对话。 |
-| `/psc + 你要询问的内容` | 共享的CLAUDE对话。 |
-| `/pss + 你要询问的内容` | 共享的SAGE对话。 |
+| `/psc + 你要询问的内容` | 共享的Claude-Instant对话。 |
+| `/pss + 你要询问的内容` | 共享的Sage对话。 |
 | `/psd + 你要询问的内容` | 共享的Dragonfly对话。 |
+| `/psn + 你要搜索的内容` | (目前被删除，不可用)NeevaAI搜索引擎，返回链接及标题。 |
 
 ************************
 
@@ -969,6 +969,7 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 | --- | --- |
 | `/psg4 + 询问内容` | 使用GPT4对话。 |
 | `/pscp + 询问内容` | 使用CLAUDE+对话。 |
+| `/psck + 询问内容` | 使用Claude-instant-100k对话。 |
 
 ************************
 
@@ -976,7 +977,6 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 
 | 命令 | 描述 |
 | --- | --- |
-| `/repoe / poe重启` | 手动重启poe client。(当出错后没自动重启成功时可以使用) |
 | `/poechangeprompt / 切换自动预设 / pcp` | 切换自动创建的默认预设。 |
 | `/poecreate / pc public` | 创建共享的机器人。 |
 

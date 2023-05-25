@@ -6,6 +6,7 @@ from nonebot.plugin import on_command, on_message
 from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
 from nonebot.matcher import Matcher
+from nonebot.exception import FinishedException
 from nonebot.adapters.onebot.v11 import (
     Message,
     Event,
@@ -169,31 +170,36 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         current_userdata.is_waiting = False
         await matcher.send(reply_out(event, "出错喽，多次重试都出错的话，联系机器人主人"))
         await matcher.finish()
+
     value = raw_json["item"]["result"]["value"]
     if value != "Success":
         if value == "Throttled":
-            await matcher.finish(reply_out(event, "该账号cookie问答次数已达到今日上限捏"))
+            await matcher.finish(reply_out(event, "该账号cookie问答次数已达到今日上限"))
         elif value == "InvalidSession":
             await matcher.finish(reply_out(event, "无效会话捏"))
         else:
             await matcher.finish(reply_out(event, "出错喽，多次重试都出错的话，联系机器人主人"))
-    try:
-        is_offense = raw_json["item"]["messages"][0]["offense"]
 
-        if is_offense == "Offensive":
-            await matcher.finish(reply_out(event, "你的询问太冒犯了,newbing拒绝回答"))
-        if "hiddenText" in raw_json["item"]["messages"][1]:
-            await matcher.finish(reply_out(event, "你的询问太敏感了,newbing拒绝回答"))
-    except:
-        pass
-
+    reply = ""
     try:
         max_num = raw_json["item"]["throttling"]["maxNumUserMessagesInConversation"]
         now_num = raw_json["item"]["throttling"]["numUserMessagesInConversation"]
         reply = raw_json["item"]["messages"][1]["text"]
         reply = reply.replace("&#91;","[").replace("&#93;","]").replace("[^","[").replace("^]","]")
     except:
-        await matcher.finish(reply_out(event, "出错喽，多次重试都出错的话，联系机器人主人"))
+        pass
+
+    try:
+        is_offense = raw_json["item"]["messages"][0]["offense"]
+
+        if is_offense == "Offensive" and not reply:
+            await matcher.finish(reply_out(event, "你的询问太冒犯了,newbing拒绝回答"))
+        if "hiddenText" in raw_json["item"]["messages"][1] and not reply:
+            await matcher.finish(reply_out(event, "你的询问太敏感了,newbing拒绝回答"))
+    except FinishedException:
+        await bot.delete_msg(message_id = wait_msg["message_id"])
+        raise
+
     ##纯文本正文部分
     msg_text = reply + "\n"
     

@@ -108,8 +108,11 @@ class PoeTemper(BaseModel):
         "psg4": BotInfo(
             truename="beaver", nickname="GPT4", owner="_every_one_", num_users=0
         ),
-        "psc+": BotInfo(
+        "pscp": BotInfo(
             truename="a2_2", nickname="Claude+", owner="_every_one_", num_users=0
+        ),
+        "psck": BotInfo(
+            truename="a2_100k", nickname="Claude-instant-100k", owner="_every_one_", num_users=0
         ),
         "psg": BotInfo(
             truename="chinchilla", nickname="GPT3.5", owner="_every_one_", num_users=0

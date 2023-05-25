@@ -4,7 +4,7 @@ import re
 from playwright.async_api import ElementHandle
 from playwright.sync_api import Page
 from .config import poe_persistor
-
+from nonebot import logger
 
 async def send_message_async(page: Page, botname: str, input_str: str):
     # 定义重试次数和重试间隔时间
@@ -139,18 +139,34 @@ async def poe_chat(botname, question, page, nosuggest=False):
 
 # 清空聊天记录
 async def poe_clear(page, truename):
-    try:
-        await page.goto(f"https://poe.com/{truename}")
+    retry = 0
+    while(retry - 3):
+        try:
+            await page.goto(f"https://poe.com/{truename}")
 
-        chevron_button = await page.wait_for_selector(
-            '[class="Button_buttonBase__0QP_m Button_flat__1hj0f ChatBreakButton_button__EihE0 ChatMessageInputFooter_chatBreakButton__hqJ3v"]'
-        )
-        await chevron_button.click()
-
-        return True
-    except:
-        return False
-
+            chevron_button = await page.wait_for_selector(
+                '[class="Button_buttonBase__0QP_m Button_flat__1hj0f ChatBreakButton_button__EihE0 ChatMessageInputFooter_chatBreakButton__hqJ3v"]'
+            )
+            is_button_enabled = await chevron_button.is_enabled()
+            if is_button_enabled:
+                try:
+                    await chevron_button.click()
+                except:
+                    pass
+                try:
+                    await chevron_button.click(timeout=2000)
+                except:
+                    pass
+                re_is_button_enabled = await chevron_button.is_enabled()
+                if not re_is_button_enabled:
+                    return True
+                else:
+                    retry += 1
+            else:
+                return True
+        except:
+            retry += 1
+    return False
 
 # 创建机器人
 async def poe_create(page, botname, base_bot_index, prompt, retries=2):
@@ -222,7 +238,7 @@ async def poe_change(page, truename, prompt):
     try:
         await page.goto(f"https://poe.com/edit_bot?bot={truename}")
         # 使用 prompt 来查找文本框
-        prompt_input: ElementHandle = await page.wait_for_selector(
+        prompt_input = await page.wait_for_selector(
             'textarea[name="prompt"]'
         )
         # 清空文本框并输入指定文本
@@ -230,12 +246,19 @@ async def poe_change(page, truename, prompt):
         await prompt_input.fill(prompt)
 
         # 使用 Save 来查找按钮
-        save_button: ElementHandle = await page.wait_for_selector(
-            'button.Button_primary__pIDjn:has-text("Save")'
+        save_button = await page.wait_for_selector(
+            '[type="submit"]'
         )
         # 点击保存按钮
         await save_button.click()
-        return True
+        # 等待新页面加载完成
+        try:
+            await page.wait_for_selector(
+                "textarea.GrowingTextArea_textArea__eadlu", timeout=5000
+            )
+            return True
+        except:
+            return False
     except:
         return False
 

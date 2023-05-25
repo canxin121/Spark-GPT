@@ -42,6 +42,7 @@ base_botinfo_dict = temp_data.base_botinfo_dict
 prompts_dict = spark_persistor.prompts_dict
 logger.info("开始加载poe")
 templocks = {}
+base_templocks = {}
 tempuser_num = {}
 ######################################################
 poe_auto_change_prompt = on_command(
@@ -787,18 +788,24 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 
 
     elif mode == "public":
-        if poe_base_lock.locked() and botinfo.num_users <= 4:
+        if botinfo.nickname not in list(base_templocks.keys()):
+            base_templocks[botinfo.nickname] = asyncio.Lock()
+        lock = base_templocks[botinfo.nickname]
+        if lock.locked() and base_botinfo_dict[nickname].num_users <4:
             base_botinfo_dict[nickname].num_users += 1
-            waitmsg = await matcher.send(reply_out(event, "还没回答完上一个问题，稍等马上回复你"))
-        elif botinfo.num_users > 4:
-            await matcher.finish(reply_out(event, "我还有5个问题没回答呢，你等会再用吧"))
+            wait_msg = await matcher.send(reply_out(event, "稍等，我还有一个问题没回发完，马上回复你"))
+        elif lock.locked() and base_botinfo_dict[nickname].num_users >= 4:
+            wait_msg = await matcher.finish(reply_out(event, "我还有5个问题没回答呢，你等会再问吧"))
+        else:
+            base_botinfo_dict[nickname].num_users += 1
 
-        async with poe_base_lock:
+        async with base_templocks[botinfo.nickname]:
             if text in ["清除对话", "清空对话", "清除历史", "清空历史", "清空历史对话", "刷新对话"]:
                 current_userdata.is_waiting = True
                 page = await pwfw.new_page()
                 is_cleared = await poe_clear(page=page, truename=truename)
                 await page.close()
+                base_botinfo_dict[nickname].num_users -= 1
                 if is_cleared:
                     msg = f"成功清除了{truename}的历史消息"
                 else:
@@ -811,6 +818,8 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
                 await matcher.finish()
             page = await pwfw.new_page()
+            if base_botinfo_dict[nickname].num_users == 1:
+                wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
             result = await poe_chat(truename, text, page)
             await close_page(page)
             msgid, temp_suggests = await send_msg(result, matcher, event)
@@ -820,7 +829,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
 
             msg_bot_bidict.inv[botinfo] = msgid["message_id"]
             try:
-                await bot.delete_msg(message_id=waitmsg["message_id"])
+                await bot.delete_msg(message_id=wait_msg["message_id"])
             except:
                 pass
             await matcher.finish()
@@ -866,11 +875,11 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 
 | 命令 | 描述 |
 | --- | --- |
-| `/psn + 你要搜索的内容` | NeevaAI搜索引擎，返回链接及标题。 |
 | `/psg + 你要询问的内容` | 共享的GPT对话。 |
-| `/psc + 你要询问的内容` | 共享的CLAUDE对话。 |
-| `/pss + 你要询问的内容` | 共享的SAGE对话。 |
+| `/psc + 你要询问的内容` | 共享的Claude-Instant对话。 |
+| `/pss + 你要询问的内容` | 共享的Sage对话。 |
 | `/psd + 你要询问的内容` | 共享的Dragonfly对话。 |
+| `/psn + 你要搜索的内容` | (目前被删除，不可用)NeevaAI搜索引擎，返回链接及标题。 |
 
 ************************
 
@@ -880,6 +889,7 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 | --- | --- |
 | `/psg4 + 询问内容` | 使用GPT4对话。 |
 | `/pscp + 询问内容` | 使用CLAUDE+对话。 |
+| `/psck + 询问内容` | 使用Claude-instant-100k对话。 |
 
 ************************
 

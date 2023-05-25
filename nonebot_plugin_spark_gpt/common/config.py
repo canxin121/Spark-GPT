@@ -136,7 +136,7 @@ class SparkPersistor(BaseModel):
     suggest_able: str = "True"
     num_limit: int = 350
     #0为http版，1为playwright版本
-    poe_api_mode: int = 0
+    poe_api_mode: int = 1
     superusers: List[str] = []
     blacklist: List[str] = []
     whitelist: List[str] = []
@@ -175,7 +175,7 @@ class SparkPersistor(BaseModel):
             and get_config.spark_mode in ["white", "black"]
             else self.mode
         )
-        self.poe_api_mode = int(getattr(get_config, "poe_api_mode", 0))
+        self.poe_api_mode = int(getattr(get_config, "poe_api_mode", 1))
         self.pic_able = getattr(get_config, "spark_picable", None)
         self.url_able = getattr(get_config, "spark_urlable", "True")
         self.suggest_able = getattr(get_config, "spark_suggestable", "True")
