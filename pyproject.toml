@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot_plugin_spark_gpt"
-version = "0.2.9"
+version = "0.3.0"
 description = "Spark-GPT,将多来源的gpt接入qq及更多平台,使用便捷,管理完善,功能强大"
 authors = ["canxin121 <1969730106@qq.com>"]
 readme = "README.md"

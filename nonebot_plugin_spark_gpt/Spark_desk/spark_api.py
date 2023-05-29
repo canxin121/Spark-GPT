@@ -10,6 +10,7 @@ class SparkChat:
         self.cookie = spark_desk_persistor.cookie
         self.fd = spark_desk_persistor.fd
         self.GtToken = spark_desk_persistor.GtToken
+        self.sid = spark_desk_persistor.sid
         self.headers = {
             'Accept': 'text/event-stream',
             'Accept-Encoding': 'gzip, deflate, br',
@@ -88,6 +89,7 @@ class SparkChat:
             'chatId': chat_id,
             'text': question,
             'GtToken': self.GtToken,
+            'sid': self.sid,
             'clientType': '1',
             'isBot':'0'
         }

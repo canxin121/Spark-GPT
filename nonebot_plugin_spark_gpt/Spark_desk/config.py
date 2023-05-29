@@ -143,6 +143,7 @@ class Spark_Desk_Persistor(BaseModel):
     cookie: str = ""
     fd: str = ""
     GtToken: str = ""
+    sid: str = ""
     superusers = []
     blacklist = []
     whitelist = []
@@ -186,8 +187,8 @@ class Spark_Desk_Persistor(BaseModel):
         )
         self.cookie = getattr(get_config, "spark_desk_cookie", self.cookie)
         self.fd = getattr(get_config, "spark_desk_fd", self.fd)
-        self.GtToken = getattr(get_config, "spark_desk_gtToken", self.GtToken)
-        
+        self.GtToken = getattr(get_config, "spark_desk_gttoken", self.GtToken)
+        self.sid = getattr(get_config, "spark_desk_sid", self.sid)
         self.save()
 
     def save(self):
