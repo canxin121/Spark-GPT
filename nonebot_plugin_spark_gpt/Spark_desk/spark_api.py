@@ -82,13 +82,14 @@ class SparkChat:
             return ''
 
     async def ask_question(self, chat_id, question):
-        url = "https://xinghuo.xfyun.cn/iflygpt/u/chat_message/chat"
+        url = "https://xinghuo.xfyun.cn/iflygpt-chat/u/chat_message/chat"
         payload = {
             'fd': self.fd,
             'chatId': chat_id,
             'text': question,
             'GtToken': self.GtToken,
-            'clientType': '1'
+            'clientType': '1',
+            'isBot':'0'
         }
         async with aiohttp.ClientSession(headers=self.headers) as session:
             retry_count = 0
