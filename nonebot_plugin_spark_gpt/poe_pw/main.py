@@ -4,6 +4,7 @@ from nonebot.plugin import on_command, on_message
 from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
 from nonebot.matcher import Matcher
+from nonebot.exception import ActionFailed
 from nonebot.adapters.onebot.v11 import (
     Message,
     Event,
@@ -726,8 +727,12 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     ]
                     msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
                     await matcher.finish()
+                try:
+                    wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
+                except ActionFailed:
+                    current_userdata.is_waiting = False
+                    await matcher.finish()
                 page = await pwfw.new_page()
-                wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
                 current_userdata.is_waiting = True
                 result = await poe_chat(truename, text, page)
                 await page.close()
@@ -772,7 +777,11 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     await matcher.finish()
                 page = await pwfw.new_page()
                 if tempuser_num[botinfo.nickname] == 1:
-                    wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
+                    try:
+                        wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
+                    except ActionFailed:
+                        current_userdata.is_waiting = False
+                        await matcher.finish()
                 result = await poe_chat(truename, text, page)
                 await page.close()
                 tempuser_num[botinfo.nickname] -= 1
@@ -819,7 +828,11 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 await matcher.finish()
             page = await pwfw.new_page()
             if base_botinfo_dict[nickname].num_users == 1:
-                wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
+                try:
+                    wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
+                except ActionFailed:
+                    current_userdata.is_waiting = False
+                    await matcher.finish() 
             result = await poe_chat(truename, text, page)
             await close_page(page)
             msgid, temp_suggests = await send_msg(result, matcher, event)

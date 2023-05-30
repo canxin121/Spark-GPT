@@ -4,6 +4,7 @@ from nonebot.plugin import on_command, on_message
 from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
 from nonebot.matcher import Matcher
+from nonebot.exception import ActionFailed
 from nonebot.adapters.onebot.v11 import (
     Message,
     Event,
@@ -129,7 +130,10 @@ async def __gpt_web_create___(
             await matcher.reject()
             
     if creat_lock.locked():
-        waitmsg = await matcher.send(reply_out(event, "有人正在创建中，稍后自动为你创建"))
+        try:
+            waitmsg = await matcher.send(reply_out(event, "有人正在创建中，稍后自动为你创建"))
+        except:
+            await matcher.finish()
     async with creat_lock:
         try:
             current_userdata.is_waiting = True
@@ -440,9 +444,12 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
             gptweb_persistor.user_dict.setdefault(
                 current_userinfo, {"all": {}, "now": {}}
             )
+        try: 
+            wait_msg = await matcher.send(reply_out(event, "正在自动创建，请稍等"))
+        except ActionFailed:
+            await matcher.finish()
         try:
             current_userdata.is_waiting = True
-            wait_msg = await matcher.send(reply_out(event, "正在自动创建，请稍等"))
             result = await gptweb_api.gpt_web_chat(truename, parentname, prompt)
             current_userdata.is_waiting = False
         except:
@@ -509,8 +516,11 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     gptweb_persistor.user_dict.setdefault(
                         current_userinfo, {"all": {}, "now": {}}
                     )
+                try:
+                    wait_msg = await matcher.send(reply_out(event, "正在刷新，请稍等"))
+                except ActionFailed:
+                    await matcher.finish()
                 current_userdata.is_waiting = True
-                wait_msg = await matcher.send(reply_out(event, "正在刷新，请稍等"))
                 result = await gptweb_api.gpt_web_chat(truename, parentname, prompt)
                 current_userdata.is_waiting = False
                 if isinstance(result, str):
@@ -551,8 +561,11 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     current_userdata.is_waiting = False
                     await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
             else:
+                try:
+                    wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
+                except ActionFailed:
+                    await matcher.finish()
                 current_userdata.is_waiting = True
-                wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
                 try:
                     result = await gptweb_api.gpt_web_chat(
                         truename, parentname, raw_message
@@ -626,7 +639,11 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     gptweb_persistor.user_dict.setdefault(
                         current_userinfo, {"all": {}, "now": {}}
                     )
-                wait_msg = await matcher.send(reply_out(event, "正在刷新，请稍等"))
+                try:
+                    wait_msg = await matcher.send(reply_out(event, "正在刷新，请稍等"))
+                except ActionFailed:
+                    tempuser_num[botinfo.nickname] -= 1
+                    await matcher.finish()
                 try:
                     result = await gptweb_api.gpt_web_chat(truename, parentname, prompt)
                     tempuser_num[botinfo.nickname] -= 1
@@ -670,7 +687,11 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     await matcher.finish(reply_out(event, "出错了，多次出错请联系机器人管理员"))
             else:
                 if tempuser_num[botinfo.nickname] == 1:
-                    wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
+                    try:
+                        tempuser_num[botinfo.nickname] -= 1
+                        wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
+                    except ActionFailed:
+                        await matcher.finish()
                 try:
                     result = await gptweb_api.gpt_web_chat(
                         truename, parentname, raw_message

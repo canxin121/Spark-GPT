@@ -168,7 +168,7 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         current_userdata.is_waiting = False
     except:
         current_userdata.is_waiting = False
-        await matcher.send(reply_out(event, "出错喽，多次重试请尝试刷新对话"))
+        await matcher.send(reply_out(event, "出错喽，多次失败请尝试刷新对话"))
         await matcher.finish()
 
     value = raw_json["item"]["result"]["value"]
@@ -178,7 +178,7 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         elif value == "InvalidSession":
             await matcher.finish(reply_out(event, "无效会话捏"))
         else:
-            await matcher.finish(reply_out(event, "出错喽，多次重试请尝试刷新对话"))
+            await matcher.finish(reply_out(event, "出错喽，多次失败请尝试刷新对话"))
 
     reply = ""
     try:

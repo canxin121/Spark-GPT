@@ -244,7 +244,7 @@ async def spark_list___(event: Event, matcher: Matcher):
         except:
             bot_strs.append(f"没有可用的{bot_name}机器人\n")
 
-    msg = "可以直接/机器人名称 + 询问内容 来使用对应机器人\n比如\猫娘 在吗?\n所有机器人信息如下:\n\n" + "\n".join(bot_strs)
+    msg = "可以直接/机器人名称 + 询问内容 来使用对应机器人\n比如/猫娘 在吗?\n所有机器人信息如下:\n\n" + "\n".join(bot_strs)
     if len(msg) > 1000:
         pic = await md_to_pic(msg)
         await matcher.finish(MessageSegment.image(pic))
