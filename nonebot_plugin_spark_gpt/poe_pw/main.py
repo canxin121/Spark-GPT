@@ -715,11 +715,11 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     page = await pwfw.new_page()
                     is_cleared = await poe_clear(page=page, truename=truename)
                     await page.close()
+                    current_userdata.is_waiting = False
                     if is_cleared:
                         msg = f"成功清除了{nickname}的历史消息"
                     else:
                         msg = "出错了，多次错误请联系机器人主人"
-                    current_userdata.is_waiting = False
                     reply_msgid = await matcher.send(reply_out(event, msg))
                     current_userdata.last_reply_message_id[nickname] = reply_msgid[
                         "message_id"
@@ -727,8 +727,8 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
                     await matcher.finish()
                 page = await pwfw.new_page()
-                current_userdata.is_waiting = True
                 wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
+                current_userdata.is_waiting = True
                 result = await poe_chat(truename, text, page)
                 await page.close()
                 current_userdata.is_waiting = False
@@ -805,12 +805,12 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 page = await pwfw.new_page()
                 is_cleared = await poe_clear(page=page, truename=truename)
                 await page.close()
+                current_userdata.is_waiting = False
                 base_botinfo_dict[nickname].num_users -= 1
                 if is_cleared:
                     msg = f"成功清除了{truename}的历史消息"
                 else:
                     msg = "出错了，多次错误请联系机器人主人"
-                current_userdata.is_waiting = False
                 reply_msgid = await matcher.send(reply_out(event, msg))
                 current_userdata.last_reply_message_id[nickname] = reply_msgid[
                     "message_id"
