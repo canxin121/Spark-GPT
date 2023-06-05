@@ -207,18 +207,18 @@ test = ["hypothesis", "pytest", "pytest-benchmark[histogram]", "pytest-cov", "py
 
 [[package]]
 name = "bingimagecreator"
-version = "0.1.5"
+version = "0.4.1"
 description = "High quality image generation by Microsoft. Reverse engineered API."
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "BingImageCreator-0.1.5-py3-none-any.whl", hash = "sha256:ff120a255d199f5ccf39c867044fbd589190203b2913427f3abcdd3b55b600ce"},
-    {file = "BingImageCreator-0.1.5.tar.gz", hash = "sha256:15b641619f96c78b9490a241af359a4db774b343649f6c2b3fb15dc96d41428d"},
+    {file = "BingImageCreator-0.4.1-py3-none-any.whl", hash = "sha256:2045f73a23e65a6e3c6752a89e7bde15b317618ee6f6e1ce16f91b42ab3c33fe"},
+    {file = "BingImageCreator-0.4.1.tar.gz", hash = "sha256:902fa9a912d91179a644c2e1ec90b714df72b7b1cf088699d483f51f921eefcb"},
 ]
 
 [package.dependencies]
-aiohttp = "*"
+httpx = "*"
 regex = "*"
 requests = "*"
 
@@ -420,20 +420,20 @@ files = [
 
 [[package]]
 name = "edgegpt"
-version = "0.3.6"
+version = "0.6.11"
 description = "Reverse engineered Edge Chat API"
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "EdgeGPT-0.3.6-py3-none-any.whl", hash = "sha256:e9677207fd805cead3f85364576e67986abdf191e0070a8b09de401b6eaa19ef"},
-    {file = "EdgeGPT-0.3.6.tar.gz", hash = "sha256:6563bbd6c66a2aac722b9c970007b278faba8e614027c68fdac07c254d89acab"},
+    {file = "EdgeGPT-0.6.11-py3-none-any.whl", hash = "sha256:3c4c23d46fd38253046d8728f749aefa891e22d0f3eb250516f2d0bf0df6b35e"},
+    {file = "EdgeGPT-0.6.11.tar.gz", hash = "sha256:e0674e838f122307cd43b0487a606dcf3eb3649d62a7fd5a155888faa9cc94d2"},
 ]
 
 [package.dependencies]
-BingImageCreator = ">=0.1.2.1"
+BingImageCreator = ">=0.3.0"
 certifi = "*"
-httpx = "*"
+httpx = {version = ">=0.24.0", extras = ["socks"]}
 prompt-toolkit = "*"
 requests = "*"
 rich = "*"
@@ -674,6 +674,7 @@ certifi = "*"
 httpcore = ">=0.15.0,<0.18.0"
 idna = "*"
 sniffio = "*"
+socksio = {version = ">=1.0.0,<2.0.0", optional = true, markers = "extra == \"socks\""}
 
 [package.extras]
 brotli = ["brotli", "brotlicffi"]
@@ -707,6 +708,45 @@ files = [
 [package.dependencies]
 matplotlib = "*"
 networkx = "*"
+
+[[package]]
+name = "importlib-metadata"
+version = "6.6.0"
+description = "Read metadata from Python packages"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "importlib_metadata-6.6.0-py3-none-any.whl", hash = "sha256:43dd286a2cd8995d5eaef7fee2066340423b818ed3fd70adf0bad5f1fac53fed"},
+    {file = "importlib_metadata-6.6.0.tar.gz", hash = "sha256:92501cdf9cc66ebd3e612f1b4f0c0765dfa42f0fa38ffb319b6bd84dd675d705"},
+]
+
+[package.dependencies]
+zipp = ">=0.5"
+
+[package.extras]
+docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
+perf = ["ipython"]
+testing = ["flake8 (<5)", "flufl.flake8", "importlib-resources (>=1.3)", "packaging", "pyfakefs", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)", "pytest-perf (>=0.9.2)"]
+
+[[package]]
+name = "importlib-resources"
+version = "5.12.0"
+description = "Read resources from Python packages"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "importlib_resources-5.12.0-py3-none-any.whl", hash = "sha256:7b1deeebbf351c7578e09bf2f63fa2ce8b5ffec296e0d349139d43cca061a81a"},
+    {file = "importlib_resources-5.12.0.tar.gz", hash = "sha256:4be82589bf5c1d7999aedf2a45159d10cb3ca4f19b2271f8792bc8e6da7b22f6"},
+]
+
+[package.dependencies]
+zipp = {version = ">=3.1.0", markers = "python_version < \"3.10\""}
+
+[package.extras]
+docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
+testing = ["flake8 (<5)", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)"]
 
 [[package]]
 name = "jinja2"
@@ -834,6 +874,9 @@ files = [
     {file = "Markdown-3.4.3-py3-none-any.whl", hash = "sha256:065fd4df22da73a625f14890dd77eb8040edcbd68794bcd35943be14490608b2"},
     {file = "Markdown-3.4.3.tar.gz", hash = "sha256:8bf101198e004dc93e84a12a7395e31aac6a9c9942848ae1d99b9d72cf9b3520"},
 ]
+
+[package.dependencies]
+importlib-metadata = {version = ">=4.4", markers = "python_version < \"3.10\""}
 
 [package.extras]
 testing = ["coverage", "pyyaml"]
@@ -978,6 +1021,7 @@ files = [
 contourpy = ">=1.0.1"
 cycler = ">=0.10"
 fonttools = ">=4.22.0"
+importlib-resources = {version = ">=3.2.0", markers = "python_version < \"3.10\""}
 kiwisolver = ">=1.0.1"
 numpy = ">=1.20"
 packaging = ">=20.0"
@@ -1849,6 +1893,18 @@ files = [
 ]
 
 [[package]]
+name = "socksio"
+version = "1.0.0"
+description = "Sans-I/O implementation of SOCKS4, SOCKS4A, and SOCKS5."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "socksio-1.0.0-py3-none-any.whl", hash = "sha256:95dc1f15f9b34e8d7b16f06d74b8ccf48f609af32ab33c608d08761c5dcbb1f3"},
+    {file = "socksio-1.0.0.tar.gz", hash = "sha256:f88beb3da5b5c38b9890469de67d0cb0f9d494b78b106ca1845f96c10b91c4ac"},
+]
+
+[[package]]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
@@ -2102,10 +2158,26 @@ files = [
 idna = ">=2.0"
 multidict = ">=4.0"
 
+[[package]]
+name = "zipp"
+version = "3.15.0"
+description = "Backport of pathlib-compatible object wrapper for zip files"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "zipp-3.15.0-py3-none-any.whl", hash = "sha256:48904fc76a60e542af151aded95726c1a5c34ed43ab4134b597665c86d7ad556"},
+    {file = "zipp-3.15.0.tar.gz", hash = "sha256:112929ad649da941c23de50f356a2b5570c954b65150642bccdd66bf194d224b"},
+]
+
+[package.extras]
+docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
+testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)"]
+
 [extras]
 onebot = ["nonebot-adapter-onebot"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = "^3.10"
-content-hash = "f90bf53a66473bc783ddfb492f6ecf215c2726f4cc78278f1194ddcf29746594"
+python-versions = "^3.9"
+content-hash = "dda7c692a8728169d1ed151184f55f4e650e68f438d46779b66cbaaab142c7f0"

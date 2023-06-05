@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-import re
+from nonebot.exception import ActionFailed, NetworkError
 from nonebot import logger
 from nonebot.plugin import on_command, on_message
 from nonebot.params import ArgStr, CommandArg
@@ -16,14 +16,14 @@ from nonebot.adapters.onebot.v11 import (
 )
 from ImageGen import ImageGenAsync
 from .newbing_func import is_useable, sendmsg
-from .config import newbing_persistor, NewBingTemper, set_userdata
+from .config import newbing_persistor, newbingtemper, set_userdata
+from .newbing_api import Newbing_bot
 from EdgeGPT import Chatbot, ConversationStyle
 from ..common.render.render import md_to_pic
 from ..common.common_func import delete_messages, reply_out
 
 sourcepath = Path(__file__).parent.parent / "source"
 logger.info("开始加载Newbing")
-newbingtemper = NewBingTemper()
 user_data_dict = newbingtemper.user_data_dict
 
 
@@ -41,12 +41,11 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
                 str(event.reply.sender.user_id) == bot.self_id
                 and event.reply.message_id == current_userdata.last_reply_message_id
             ):
-                chatbot = current_userdata.chatbot
                 raw_message = str(event.message)
                 if not raw_message:
                     return False
                 else:
-                    return raw_message, chatbot, current_userinfo, current_userdata
+                    return raw_message, current_userinfo, current_userdata
             else:
                 return False
         elif str(event.message).startswith(("/bing", "/b")) and not str(
@@ -77,27 +76,10 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
                 .replace("/b ", "")
                 .replace("/b", "")
             )
-            if current_userdata.chatbot:
-                chatbot = current_userdata.chatbot
-            else:
-                try:
-                    if len(newbing_persistor.proxy) > 0:
-                        chatbot = await Chatbot.create(
-                            cookie_path=newbing_persistor.cookie_path_,
-                            proxy=newbing_persistor.proxy,
-                        )
-                    else:
-                        chatbot = await Chatbot.create(
-                            cookie_path=newbing_persistor.cookie_path_
-                        )
-                    current_userdata.chatbot = chatbot
-                except FileNotFoundError:
-                    logger.warning("newbing cookie未配置,无法使用，跳过")
-                    return False
             if not raw_message:
                 return False
             else:
-                return raw_message, chatbot, current_userinfo, current_userdata
+                return raw_message, current_userinfo, current_userdata
     else:
         return False
 
@@ -112,7 +94,7 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         await matcher.finish()
     else:
         if isinstance(temp_tuple, tuple):
-            raw_message, chatbot, current_userinfo, current_userdata = temp_tuple
+            raw_message, current_userinfo, current_userdata = temp_tuple
         elif isinstance(temp_tuple, str):
             await matcher.finish(reply_out(event, f"出错了:{temp_tuple}"))
 
@@ -126,15 +108,12 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         "清空历史对话",
         "刷新对话",
     ]:
-        if len(newbing_persistor.proxy) > 0:
-            chatbot = await Chatbot.create(
-                cookie_path=newbing_persistor.cookie_path_,
-                proxy=newbing_persistor.proxy,
-            )
-        else:
-            chatbot = await Chatbot.create(cookie_path=newbing_persistor.cookie_path_)
-        current_userdata.chatbot = chatbot
-        await matcher.finish(reply_out(event, "成功刷新对话"))
+            try:
+                async with Newbing_bot(event) as newbing_bot:
+                    await newbing_bot.refresh()
+                await matcher.finish(reply_out(event, "成功刷新对话"))
+            except ActionFailed:
+                await matcher.finish(reply_out(event, "刷新对话失败"))
     if (
         len(raw_message) == 1
         and raw_message in ["1", "2", "3"]
@@ -143,30 +122,15 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         raw_message = current_userdata.last_suggests[int(raw_message) - 1]
     if current_userdata.is_waiting:
         await matcher.finish(reply_out(event, "你有一个对话进行中，请等结束后再继续询问"))
-    chatmode = current_userdata.chatmode
-    if chatmode == "1":
-        style = ConversationStyle.creative
-    elif chatmode == "2":
-        style = ConversationStyle.balanced
-    else:
-        style = ConversationStyle.precise
 
     try:
         wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
         current_userdata.is_waiting = True
-        if newbing_persistor.wss_link:
-            raw_json = await chatbot.ask(
-                prompt=raw_message,
-                conversation_style=style,
-                wss_link=newbing_persistor.wss_link
-            )
-        else:
-            raw_json = await chatbot.ask(
-                prompt=raw_message,
-                conversation_style=style
-            )
+        async with Newbing_bot(event) as newbing_bot:
+            raw_json = await newbing_bot.ask(raw_message)
         current_userdata.is_waiting = False
-    except:
+    except Exception as e:
+        logger.error(e)
         current_userdata.is_waiting = False
         await matcher.send(reply_out(event, "出错喽，多次失败请尝试刷新对话"))
         await matcher.finish()
@@ -409,7 +373,7 @@ async def __newbing_change_mode__(
         await matcher.finish()
     current_userdata.is_waiting = True
     from pathlib import Path
-
+    wait_msg = await matcher.send(reply_out(event, "正在绘制，请稍等"))
     try:
         async with ImageGenAsync(auth_cookie) as image_generator:
             image_links = await image_generator.get_images(prompt)
@@ -435,6 +399,10 @@ async def __newbing_change_mode__(
     except:
         current_userdata.is_waiting = False
         await matcher.finish(reply_out(event, f"生成图片出错，多次出错请联系机器人主人"))
+    try:
+        await bot.delete_msg(message_id = wait_msg["message_id"])
+    except:
+        pass
 
     current_userdata.is_waiting = False
 
@@ -463,8 +431,7 @@ async def __newbing_change_mode__(
     
     except Exception as e:
         await matcher.finish(reply_out(event, f"发送图片出错: {e}"))
-    except:
-        await matcher.finish(reply_out(event, "发送失败，多次失败请联系机器人主人"))
+
     if newbing_persistor.forward == "True":
         try:
             # 尝试合并转发

@@ -81,7 +81,7 @@ class ChatGPT_web:
                     async for chunk in response.aiter_bytes():
                         _buffer.extend(chunk)
                     resp_text = _buffer.decode()
-                    logger.opt(colors=True).error(
+                    logger.warning(
                         f"非预期的响应内容: <r>HTTP{response.status_code}</r> {resp_text}"
                     )
                     return f"ChatGPT 服务器返回了非预期的内容: HTTP{response.status_code}\n{resp_text[:256]}"

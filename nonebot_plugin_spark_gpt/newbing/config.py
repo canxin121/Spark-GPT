@@ -1,3 +1,4 @@
+import json
 from typing import Dict, List, Optional
 import nonebot
 from nonebot.adapters.onebot.v11 import MessageEvent
@@ -90,6 +91,7 @@ def set_userdata(
 # 储存newbing的数据,不需要本地保存,每次启动从env读取覆盖即可
 class NerBingPersistor(BaseModel):
     cookie_path_: str = str(Path()) + "/data/spark_gpt/newbing_cookie.json"
+    cookies:List[dict] = []
     pic_able: str = None
     url_able: str = "True"
     suggest_able: str = "True"
@@ -142,6 +144,10 @@ class NerBingPersistor(BaseModel):
         )
         if not Path(self.cookie_path_).exists():
             Path(self.cookie_path_).touch(exist_ok=True)
-
+        try:
+            self.cookies = json.loads(open(self.cookie_path_, encoding="utf-8").read())
+        except:
+            self.cookies = []
 # 这里的配置即使在多平台，也应只初始化一次
 newbing_persistor = NerBingPersistor()
+newbingtemper = NewBingTemper()
