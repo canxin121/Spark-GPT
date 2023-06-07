@@ -46,7 +46,7 @@ class Newbing_bot:
                     )
                 return
             except Exception as e:
-                logger.error(e)
+                logger.error(str(e))
                 if retry > 0:
                     retry += 1
                 else:
@@ -64,7 +64,6 @@ class Newbing_bot:
             style = ConversationStyle.precise
         # 使用EdgeGPT进行ask询问
         retry = 3
-        raw_json = {}
         while retry > 0:
             try:
                 if newbing_persistor.wss_link:
@@ -80,15 +79,30 @@ class Newbing_bot:
                     )
                     return raw_json
             except Exception as e:
-                if str(e) == "Update web page context failed":
+                logger.warning(str(e))
+                if str(e) == "Update web page context failed" or str(e) == "Conversation not found." or str(e) == "InvalidRequest":
                     await self.refresh()
-                    try:
-                        await self.ask(question)
-                    except Exception as e:
-                        raise e
+                    while retry > 0:
+                        try:
+                            if newbing_persistor.wss_link:
+                                raw_json = await chatbot.ask(
+                                    prompt=question,
+                                    conversation_style=style,
+                                    wss_link=newbing_persistor.wss_link,
+                                )
+                                return raw_json
+                            else:
+                                raw_json = await chatbot.ask(
+                                    prompt=question, conversation_style=style
+                                )
+                                return raw_json
+                        except:
+                            if retry > 0:
+                                retry -= 1
+                            else:
+                                raise
                 else:
                     if retry > 0:
                         retry -= 1
                     else:
-                        logger.warning(str(e))
-                        raise e
+                        raise

@@ -688,7 +688,6 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
             else:
                 if tempuser_num[botinfo.nickname] == 1:
                     try:
-                        tempuser_num[botinfo.nickname] -= 1
                         wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
                     except ActionFailed:
                         await matcher.finish()

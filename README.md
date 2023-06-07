@@ -47,7 +47,9 @@
 | ![9](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(9).png) |
 
 ## 更新
-
+- 2023.6.5 0.3.3:  
+    1.修复一个gpt_web的日志错误
+    2.将EdgeGPT升到最新版并包装成上下文管理器
 - 2023.6.5 0.3.3:  
     1.修复一个gpt_web的日志错误
     2.将EdgeGPT升到最新版并包装成上下文管理器

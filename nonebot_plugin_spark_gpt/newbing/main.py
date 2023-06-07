@@ -130,9 +130,9 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
             raw_json = await newbing_bot.ask(raw_message)
         current_userdata.is_waiting = False
     except Exception as e:
-        logger.error(e)
+        logger.error(str(e))
         current_userdata.is_waiting = False
-        await matcher.send(reply_out(event, "出错喽，多次失败请尝试刷新对话"))
+        await matcher.send(reply_out(event, f"出错喽:{str(e)}，多次失败请尝试刷新对话"))
         await matcher.finish()
 
     value = raw_json["item"]["result"]["value"]
@@ -142,7 +142,7 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         elif value == "InvalidSession":
             await matcher.finish(reply_out(event, "无效会话捏"))
         else:
-            await matcher.finish(reply_out(event, "出错喽，多次失败请尝试刷新对话"))
+            await matcher.finish(reply_out(event, f"出错喽:{value}，多次失败请尝试刷新对话"))
 
     reply = ""
     try:
@@ -256,8 +256,8 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
     if now_num == max_num:
         await matcher.send(reply_out(event, "已达到单次对话上限，自动为您刷新对话"))
         try:
-            chatbot = await Chatbot.create(cookie_path=newbing_persistor.cookie_path_)
-            current_userdata.chatbot = chatbot
+            async with Newbing_bot(event) as newbing_bot:
+                await newbing_bot.refresh()
         except Exception as e:
             await matcher.finish(reply_out(event, f"自动刷新出错:{e}"))
 
