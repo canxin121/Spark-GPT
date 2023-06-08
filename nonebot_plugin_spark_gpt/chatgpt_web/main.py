@@ -294,6 +294,9 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
                         current_userdata,
                     )
                 elif botinfo.share:
+                    current_userinfo, current_userdata = set_public_info_data(
+                        user_data_dict=user_data_dict
+                    )
                     return (
                         event.reply.message_id,
                         raw_message,
