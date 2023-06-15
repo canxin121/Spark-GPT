@@ -66,7 +66,7 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
                 "/bard",
                 "/bc",
                 "/bf",
-                "/bs"
+                "/bs",
             )
         ):
             raw_message = (
@@ -108,12 +108,12 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         "清空历史对话",
         "刷新对话",
     ]:
-            try:
-                async with Newbing_bot(event) as newbing_bot:
-                    await newbing_bot.refresh()
-                await matcher.finish(reply_out(event, "成功刷新对话"))
-            except ActionFailed:
-                await matcher.finish(reply_out(event, "刷新对话失败"))
+        try:
+            async with Newbing_bot(event) as newbing_bot:
+                await newbing_bot.refresh()
+            await matcher.finish(reply_out(event, "成功刷新对话"))
+        except ActionFailed:
+            await matcher.finish(reply_out(event, "刷新对话失败"))
     if (
         len(raw_message) == 1
         and raw_message in ["1", "2", "3"]
@@ -132,7 +132,7 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
     except Exception as e:
         logger.error(str(e))
         current_userdata.is_waiting = False
-        await bot.delete_msg(message_id = wait_msg["message_id"])
+        await bot.delete_msg(message_id=wait_msg["message_id"])
         await matcher.send(reply_out(event, f"出错喽:{str(e)}，多次失败请尝试刷新对话"))
         await matcher.finish()
     try:
@@ -140,7 +140,7 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
     except Exception as e:
         logger.error(str(e))
         current_userdata.is_waiting = False
-        await bot.delete_msg(message_id = wait_msg["message_id"])
+        await bot.delete_msg(message_id=wait_msg["message_id"])
         await matcher.send(reply_out(event, f"出错喽:{str(e)}，多次失败请尝试刷新对话"))
         await matcher.finish()
     if value != "Success":
@@ -156,7 +156,12 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         max_num = raw_json["item"]["throttling"]["maxNumUserMessagesInConversation"]
         now_num = raw_json["item"]["throttling"]["numUserMessagesInConversation"]
         reply = raw_json["item"]["messages"][1]["text"]
-        reply = reply.replace("&#91;","[").replace("&#93;","]").replace("[^","[").replace("^]","]")
+        reply = (
+            reply.replace("&#91;", "[")
+            .replace("&#93;", "]")
+            .replace("[^", "[")
+            .replace("^]", "]")
+        )
     except:
         pass
 
@@ -168,13 +173,13 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         if "hiddenText" in raw_json["item"]["messages"][1] and not reply:
             await matcher.finish(reply_out(event, "你的询问太敏感了,newbing拒绝回答"))
     except FinishedException:
-        await bot.delete_msg(message_id = wait_msg["message_id"])
+        await bot.delete_msg(message_id=wait_msg["message_id"])
         raise
 
     ##纯文本正文部分
     msg_text = reply + "\n"
-    
-    #尝试解析图片或其他资源
+
+    # 尝试解析图片或其他资源
     try:
         forward_msg = None
         html_resource = ""
@@ -197,8 +202,8 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
             source_link = image_sources[i]
             display_name = image_names[i]
             each_msg = MessageSegment.text(f"[{i+1}] {display_name}:\n{source_link}\n")
-            html_each_msg = f"[{i+1}]:<a href=\"{source_link}\">{display_name}</a>\n"
-            if len(image_links) - i>0:
+            html_each_msg = f'[{i+1}]:<a href="{source_link}">{display_name}</a>\n'
+            if len(image_links) - i > 0:
                 image_link = image_links[i]
                 each_msg += MessageSegment.image(image_link)
                 html_each_msg += f"<img src={image_link} alt={i+1}>\n"
@@ -210,7 +215,7 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
             html_resource += html_each_msg
     except:
         pass
-    
+
     ##处理建议回复
     if newbing_persistor.suggest_able == "True":
         suggest_str = "\n建议回复:\n"
@@ -221,7 +226,7 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
                     len(raw_json["item"]["messages"][1]["suggestedResponses"])
                 )
             ]
-            suggest_str +="\n".join(
+            suggest_str += "\n".join(
                 [f"{i+1}. {suggestion}  " for i, suggestion in enumerate(suggests)]
             )
         except:
@@ -233,18 +238,22 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
     ##加上回复上限
     fianl_msg = f"\n回复上限:{now_num}/{max_num}  "
     is_forward = False
-    if ( newbing_persistor.pic_able == None and len(msg_text + html_resource + suggest_str + fianl_msg)>=newbing_persistor.num_limit) or newbing_persistor.pic_able == "True":
+    if (
+        newbing_persistor.pic_able == None
+        and len(msg_text + html_resource + suggest_str + fianl_msg)
+        >= newbing_persistor.num_limit
+    ) or newbing_persistor.pic_able == "True":
         msg = msg_text + html_resource + suggest_str + fianl_msg
     else:
         msg = msg_text + suggest_str + fianl_msg
         is_forward = True
     current_userdata.is_waiting = False
-    await bot.delete_msg(message_id = wait_msg["message_id"])
+    await bot.delete_msg(message_id=wait_msg["message_id"])
     reply_msgid_container = await sendmsg(msg, matcher, event)
 
     current_userdata.last_reply_message_id = reply_msgid_container["message_id"]
     current_userdata.last_suggests = suggests
-    
+
     if forward_msg and is_forward:
         try:
             # 尝试合并转发
@@ -299,7 +308,9 @@ async def __newbing_change_mode__(
         else:
             style = "precise 精确模式"
         await matcher.finish(reply_out(event, f"已切换为: {style}"))
-    msg = "请输入模式前索引数字\n1:creative 创造力模式\n2:balanced 均衡模式\n3:precise 精确模式\n输入 取消或算了 可以终止切换"
+    msg = (
+        "请输入模式前索引数字\n1:creative 创造力模式\n2:balanced 均衡模式\n3:precise 精确模式\n输入 取消或算了 可以终止切换"
+    )
     replys = []
     replys.append(await matcher.send(reply_out(event, msg)))
     state["replys"] = replys
@@ -320,9 +331,9 @@ async def newbing_change_mode__(
         mode = str(infos)
     else:
         await matcher.finish()
-    if mode and mode in ["取消","算了"]:
-        await matcher.send(reply_out(event,"取消切换"))
-        await delete_messages(bot,replys)
+    if mode and mode in ["取消", "算了"]:
+        await matcher.send(reply_out(event, "取消切换"))
+        await delete_messages(bot, replys)
         await matcher.finish()
     if mode and len(mode) == 1 and mode in ["1", "2", "3"]:
         current_userdata.chatmode = mode
@@ -333,11 +344,16 @@ async def newbing_change_mode__(
         else:
             style = "precise 精确模式"
         await matcher.send(reply_out(event, f"已切换为: {style}"))
-        await delete_messages(bot,replys)
+        await delete_messages(bot, replys)
         await matcher.finish()
     else:
-        replys.append(await matcher.send(reply_out(event, f"你输入的数字有误，请重新输入\n输入算了 或 取消 可以终止切换,终止后不会再发送本条消息")))
+        replys.append(
+            await matcher.send(
+                reply_out(event, f"你输入的数字有误，请重新输入\n输入算了 或 取消 可以终止切换,终止后不会再发送本条消息")
+            )
+        )
         await matcher.reject()
+
 
 bing_draw = on_command(
     "bingdraw", aliases={"bd", "bing绘图", "bing画画"}, priority=1, block=False
@@ -380,6 +396,7 @@ async def __newbing_change_mode__(
         await matcher.finish()
     current_userdata.is_waiting = True
     from pathlib import Path
+
     wait_msg = await matcher.send(reply_out(event, "正在绘制，请稍等"))
     try:
         async with ImageGenAsync(auth_cookie) as image_generator:
@@ -402,12 +419,14 @@ async def __newbing_change_mode__(
                         print(f"Error occurred while saving images: {e}")
                         if retry_count == max_retry:
                             # 如果达到最大重试次数还是保存失败，则抛出异常
-                            await matcher.finish(reply_out(event, f"下载图片出错，多次出错请联系机器人主人"))
+                            await matcher.finish(
+                                reply_out(event, f"下载图片出错，多次出错请联系机器人主人")
+                            )
     except Exception as e:
         current_userdata.is_waiting = False
         await matcher.finish(reply_out(event, f"生成图片出错:{str(e)}，多次出错请联系机器人主人"))
     try:
-        await bot.delete_msg(message_id = wait_msg["message_id"])
+        await bot.delete_msg(message_id=wait_msg["message_id"])
     except:
         pass
 
@@ -435,7 +454,7 @@ async def __newbing_change_mode__(
                     nickname=current_userdata.sender.user_name,
                     content=MessageSegment.image(image_links[i]),
                 )
-    
+
     except Exception as e:
         await matcher.finish(reply_out(event, f"发送图片出错: {e}"))
 
@@ -493,5 +512,7 @@ async def __newbing_help__(matcher: Matcher):
 | `/bingdraw / bd / bing绘图(bing画图) + 要画的东西(中文/英文)` | Dall-e画图功能，可以画出指定的中文或英文内容。 |"""
     # pic = await md_to_pic(msg)
     # await matcher.send(MessageSegment.image(pic))
-    await matcher.send(MessageSegment.image(Path(sourcepath / Path("demo(3).png")).absolute()))
+    await matcher.send(
+        MessageSegment.image(Path(sourcepath / Path("demo(3).png")).absolute())
+    )
     await matcher.finish()

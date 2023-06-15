@@ -31,7 +31,8 @@ class Newbing_bot:
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
-        return
+        if exc_type:
+            raise Exception(exc.__doc__)
 
     async def refresh(self):
         retry = 3
@@ -66,26 +67,17 @@ class Newbing_bot:
             style = ConversationStyle.precise
         # 使用EdgeGPT进行ask询问
         retry = 3
-        while retry > 0:
+        while retry >= 0:
             try:
-                if newbing_persistor.wss_link:
-                    raw_json = await chatbot.ask(
-                        prompt=question,
-                        conversation_style=style,
-                        wss_link=newbing_persistor.wss_link,
-                    )
-                    if raw_json["item"]:
-                        return raw_json
-                    else:
-                        raise Exception("返回值为None")
+                raw_json = await chatbot.ask(
+                    prompt=question,
+                    conversation_style=style,
+                    wss_link=newbing_persistor.wss_link,
+                )
+                if raw_json["item"]:
+                    return raw_json
                 else:
-                    raw_json = await chatbot.ask(
-                        prompt=question, conversation_style=style
-                    )
-                    if raw_json["item"]:
-                        return raw_json
-                    else:
-                        raise Exception("返回值为None")
+                    raise Exception("返回值为None")
             except Exception as e:
                 logger.warning(str(e))
                 if (
