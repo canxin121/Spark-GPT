@@ -14,11 +14,11 @@ from nonebot.adapters.onebot.v11 import (
     MessageEvent,
     MessageSegment,
 )
-from ImageGen import ImageGenAsync
+from EdgeGPT.ImageGen import ImageGen
 from .newbing_func import is_useable, sendmsg
 from .config import newbing_persistor, newbingtemper, set_userdata
 from .newbing_api import Newbing_bot
-from EdgeGPT import Chatbot, ConversationStyle
+from EdgeGPT.EdgeGPT import Chatbot, ConversationStyle
 from ..common.render.render import md_to_pic
 from ..common.common_func import delete_messages, reply_out
 
@@ -132,10 +132,17 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
     except Exception as e:
         logger.error(str(e))
         current_userdata.is_waiting = False
+        await bot.delete_msg(message_id = wait_msg["message_id"])
         await matcher.send(reply_out(event, f"出错喽:{str(e)}，多次失败请尝试刷新对话"))
         await matcher.finish()
-
-    value = raw_json["item"]["result"]["value"]
+    try:
+        value = raw_json["item"]["result"]["value"]
+    except Exception as e:
+        logger.error(str(e))
+        current_userdata.is_waiting = False
+        await bot.delete_msg(message_id = wait_msg["message_id"])
+        await matcher.send(reply_out(event, f"出错喽:{str(e)}，多次失败请尝试刷新对话"))
+        await matcher.finish()
     if value != "Success":
         if value == "Throttled":
             await matcher.finish(reply_out(event, "该账号cookie问答次数已达到今日上限"))
