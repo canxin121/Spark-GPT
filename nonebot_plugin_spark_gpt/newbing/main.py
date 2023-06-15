@@ -14,7 +14,7 @@ from nonebot.adapters.onebot.v11 import (
     MessageEvent,
     MessageSegment,
 )
-from EdgeGPT.ImageGen import ImageGen
+from EdgeGPT.ImageGen import ImageGenAsync
 from .newbing_func import is_useable, sendmsg
 from .config import newbing_persistor, newbingtemper, set_userdata
 from .newbing_api import Newbing_bot
@@ -403,9 +403,9 @@ async def __newbing_change_mode__(
                         if retry_count == max_retry:
                             # 如果达到最大重试次数还是保存失败，则抛出异常
                             await matcher.finish(reply_out(event, f"下载图片出错，多次出错请联系机器人主人"))
-    except:
+    except Exception as e:
         current_userdata.is_waiting = False
-        await matcher.finish(reply_out(event, f"生成图片出错，多次出错请联系机器人主人"))
+        await matcher.finish(reply_out(event, f"生成图片出错:{str(e)}，多次出错请联系机器人主人"))
     try:
         await bot.delete_msg(message_id = wait_msg["message_id"])
     except:
