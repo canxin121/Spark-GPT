@@ -128,6 +128,7 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         current_userdata.is_waiting = True
         async with Newbing_bot(event) as newbing_bot:
             raw_json = await newbing_bot.ask(raw_message)
+            # print(raw_json)
         current_userdata.is_waiting = False
     except Exception as e:
         logger.error(str(e))
@@ -152,10 +153,13 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
             await matcher.finish(reply_out(event, f"出错喽:{value}，多次失败请尝试刷新对话"))
 
     reply = ""
+    last_num = len(raw_json["item"]["messages"])-1
     try:
         max_num = raw_json["item"]["throttling"]["maxNumUserMessagesInConversation"]
         now_num = raw_json["item"]["throttling"]["numUserMessagesInConversation"]
-        reply = raw_json["item"]["messages"][1]["text"]
+        if "messageType" in raw_json["item"]["messages"][last_num]:
+            last_num -= 1
+        reply = raw_json["item"]["messages"][last_num]["text"]
         reply = (
             reply.replace("&#91;", "[")
             .replace("&#93;", "]")
@@ -170,7 +174,7 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
 
         if is_offense == "Offensive" and not reply:
             await matcher.finish(reply_out(event, "你的询问太冒犯了,newbing拒绝回答"))
-        if "hiddenText" in raw_json["item"]["messages"][1] and not reply:
+        if "hiddenText" in raw_json["item"]["messages"][last_num] and not reply:
             await matcher.finish(reply_out(event, "你的询问太敏感了,newbing拒绝回答"))
     except FinishedException:
         await bot.delete_msg(message_id=wait_msg["message_id"])
@@ -185,17 +189,17 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         html_resource = ""
         image_sources = [
             a["seeMoreUrl"]
-            for a in raw_json["item"]["messages"][1]["sourceAttributions"]
+            for a in raw_json["item"]["messages"][last_num]["sourceAttributions"]
             if "seeMoreUrl" in a
         ]
         image_names = [
             a["providerDisplayName"]
-            for a in raw_json["item"]["messages"][1]["sourceAttributions"]
+            for a in raw_json["item"]["messages"][last_num]["sourceAttributions"]
             if "providerDisplayName" in a
         ]
         image_links = [
             a["imageLink"]
-            for a in raw_json["item"]["messages"][1]["sourceAttributions"]
+            for a in raw_json["item"]["messages"][last_num]["sourceAttributions"]
             if "imageLink" in a
         ]
         for i in range(len(image_sources)):
@@ -221,15 +225,16 @@ async def __newbing_chat__(matcher: Matcher, event: Event, bot: Bot):
         suggest_str = "\n建议回复:\n"
         try:
             suggests = [
-                raw_json["item"]["messages"][1]["suggestedResponses"][i]["text"]
+                raw_json["item"]["messages"][last_num]["suggestedResponses"][i]["text"]
                 for i in range(
-                    len(raw_json["item"]["messages"][1]["suggestedResponses"])
+                    len(raw_json["item"]["messages"][last_num]["suggestedResponses"])
                 )
             ]
             suggest_str += "\n".join(
                 [f"{i+1}. {suggestion}  " for i, suggestion in enumerate(suggests)]
             )
         except:
+            suggests = []
             pass
     else:
         suggests = []
