@@ -2,7 +2,7 @@
   <a href="https://github.com/canxin121">
     <img src="https://socialify.git.ci/canxin121/Spark-GPT/image?font=Raleway&forks=1&issues=1&language=1&logo=https%3A%2F%2Fcanxin121.github.io%2Fdocs%2Flogo.png&name=1&owner=1&pattern=Charlie%20Brown&pulls=1&stargazers=1&theme=Auto" width="700" height="350">
   </a>
-  <h1>Spark-GPT</h1>
+  <h1>Spark-GPT重构仓库</h1>
   <p><em>Spark-GPT</em></p>
 </div>
 
@@ -38,38 +38,4 @@
 
 - 目前支持将Poe,NewBing,Dalle,ChatGPT (session token),Claude(slack),讯飞星火模型(Spark_desk)接入qq
 
-| Image 1 | Image 2 |
-|:-------:|:-------:|
-| ![1](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(1).png) | ![2](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(2).png) |
-| ![3](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(3).png) | ![4](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(4).png) |
-| ![5](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(5).png) | ![6](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(6).png) |
-| ![7](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(7).png) | ![8](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(8).png) |
-| ![9](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(9).png) |
 
-## 更新
-
-- 2023.5.19 0.2.2:
-    1.bing判断字数错误bug修复
-- 2023.5.18 0.2.1:  
-    1.帮助命令只加载配置好的
-- 2023.5.17 0.2.0:  
-    1.修复命令冲突和bard logger的bug
-    2.第一次使用自动创建bing的json
-- 2023.5.17 0.1.9:  
-    1.增加共享机器人
-    2.增加查看，修改机器人功能
-    3.修复路径问题
-    4.修复poe http创建时的模型索引错误问题
-- 2023.5.13 0.1.8:  
-    1.增加poe http版出错后自动重启poe客户端
-- 2023.5.13 0.1.7:  
-    1.增加一些配置项
-    2.poe增加http api版本
-- 2023.5.11 0.1.5:  
-    1.新增Bard的使用
-    2.修复以文字发送bug和newbing html图片显示bug 
-- 2023.5.11 0.1.4:  
-    1.增加讯飞星火模型(Spark_desk)  
-- 2023.5.11 0.1.3:  
-    1.增加claude_slack  
-    2.修复一些小bug  
