@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from pydantic import BaseModel
 from ...common.mytypes import UserInfo, CommonUserInfo
-# from mytypes import UserInfo,CommonUserInfo
+
 
 class Users(BaseModel):
     """储存平台用户和唯一用户的链接
@@ -32,7 +32,7 @@ class Users(BaseModel):
         with open(self.path, "w") as f:
             json.dump(data, f)
 
-    def load(self) -> "Users":
+    def load(self):
         """从JSON文件中读取Users对象"""
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.path.touch()
@@ -45,6 +45,7 @@ class Users(BaseModel):
             return finaldata
         except:
             pass
+
     def __init__(self, **data):
         """从JSON文件中读取数据并创建CommonUsers对象"""
         super().__init__(**data)
