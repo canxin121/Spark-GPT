@@ -1,6 +1,6 @@
 from nonebot.log import logger
 from EdgeGPT import Chatbot, ConversationStyle
-from ..source_data.newbing_config import newbing_persistor
+from .source_data import newbing_persistor
 
 class Newbing_api:
     def __init__(self,userdata):

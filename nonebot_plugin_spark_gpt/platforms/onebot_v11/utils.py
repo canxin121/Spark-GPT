@@ -46,6 +46,6 @@ def set_common_userinfo(event: Event) -> CommonUserInfo:
     try:
         common_userinfo = get_common_userinfo(userinfo)
     except:
-        common_userinfo = common_users.new_user()
+        common_userinfo = common_users.new_user(userinfo)
         users.link(userinfo, common_userinfo)
     return common_userinfo

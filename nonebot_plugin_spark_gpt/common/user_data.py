@@ -3,8 +3,9 @@ from bidict import bidict
 from pydantic import BaseModel
 from pathlib import Path
 import json
-from utils.utils import generate_uuid
-from mytypes import (
+from nonebot import logger
+from .utils.utils import generate_uuid
+from .mytypes import (
     BotInfo,
     BotData,
     CommonUserData,
@@ -27,11 +28,13 @@ class CommonUsers(BaseModel):
     user_dict: Dict[CommonUserInfo, CommonUserData] = {}
     user_links: Dict[CommonUserInfo, UsersInfo] = {}
 
-    def new_user(self):
+    def new_user(self,userinfo:UserInfo):
         """新建一个用户,返回新建的CommonUserInfo"""
-        common_userinfo = CommonUserInfo(user_id=generate_uuid())
+        user_id = generate_uuid()
+        common_userinfo = CommonUserInfo(user_id=user_id)
         key = generate_uuid()
-        self.user_dict[common_userinfo] = CommonUserData(bots={}, key=key)
+        self.user_dict[common_userinfo] = CommonUserData(bots={}, user_id=user_id,key=key)
+        self.user_links[common_userinfo] = UsersInfo(users=[userinfo])
         self.save()
         return common_userinfo
 
@@ -98,7 +101,8 @@ class CommonUsers(BaseModel):
                 ] = CommonUserData.load(data2)
 
             return user_dict, user_links
-        except:
+        except Exception as e:
+            logger.error(str(e))
             pass
 
     def __init__(self, **data):
@@ -110,9 +114,10 @@ class CommonUsers(BaseModel):
             self.user_links.update(user_links)
         except:
             pass
+common_users = CommonUsers()
 
 
-common_userinfo1 = CommonUserInfo(user_id="159753654")
+""" common_userinfo1 = CommonUserInfo(user_id="159753654")
 common_userinfo2 = CommonUserInfo(user_id="155656555")
 common_users = CommonUsers(
     user_dict={
@@ -147,3 +152,4 @@ common_users.user_dict[common_userinfo1].key = "123456789"
 common_users.save_userdata(common_userinfo=common_userinfo1)
 
 common_users.save()
+ """

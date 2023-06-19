@@ -3,8 +3,8 @@ from typing import List
 import nonebot
 from pathlib import Path
 from pydantic import BaseModel
-from ..common.config import spark_persistor
 
+from ...common.config import spark_persistor
 
 # 储存newbing的数据,不需要本地保存,每次启动从env读取覆盖即可
 class NewBing_Config(BaseModel):
