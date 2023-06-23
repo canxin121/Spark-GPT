@@ -4,7 +4,7 @@ import nonebot
 from nonebot.adapters.onebot.v11 import MessageEvent
 from pathlib import Path
 from pydantic import BaseModel, Extra
-from EdgeGPT.EdgeGPT import Chatbot, ConversationStyle
+from EdgeGPT import Chatbot, ConversationStyle
 from ..common.config import spark_persistor
 
 

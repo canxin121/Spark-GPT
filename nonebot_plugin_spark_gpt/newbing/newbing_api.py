@@ -1,7 +1,7 @@
 from nonebot.log import logger
 from .config import newbing_persistor, set_userdata
 from .config import newbingtemper
-from EdgeGPT.EdgeGPT import Chatbot, ConversationStyle
+from EdgeGPT import Chatbot, ConversationStyle
 
 
 class Newbing_bot:
@@ -14,12 +14,12 @@ class Newbing_bot:
         if not self.current_userdata.chatbot:
             try:
                 if len(newbing_persistor.proxy) > 0:
-                    self.current_userdata.chatbot = await Chatbot.create(
+                    self.current_userdata.chatbot =  Chatbot(
                         cookies=newbing_persistor.cookies,
                         proxy=newbing_persistor.proxy,
                     )
                 else:
-                    self.current_userdata.chatbot = await Chatbot.create(
+                    self.current_userdata.chatbot =  Chatbot(
                         cookies=newbing_persistor.cookies
                     )
             except FileNotFoundError:
@@ -39,12 +39,12 @@ class Newbing_bot:
         while retry > 0:
             try:
                 if len(newbing_persistor.proxy) > 0:
-                    self.current_userdata.chatbot = await Chatbot.create(
+                    self.current_userdata.chatbot = Chatbot(
                         cookies=newbing_persistor.cookies,
                         proxy=newbing_persistor.proxy,
                     )
                 else:
-                    self.current_userdata.chatbot = await Chatbot.create(
+                    self.current_userdata.chatbot = Chatbot(
                         cookies=newbing_persistor.cookies
                     )
                 return

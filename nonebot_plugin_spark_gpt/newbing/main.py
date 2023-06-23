@@ -14,11 +14,11 @@ from nonebot.adapters.onebot.v11 import (
     MessageEvent,
     MessageSegment,
 )
-from EdgeGPT.ImageGen import ImageGenAsync
+from ImageGen import ImageGenAsync
 from .newbing_func import is_useable, sendmsg
 from .config import newbing_persistor, newbingtemper, set_userdata
 from .newbing_api import Newbing_bot
-from EdgeGPT.EdgeGPT import Chatbot, ConversationStyle
+from EdgeGPT import Chatbot, ConversationStyle
 from ..common.render.render import md_to_pic
 from ..common.common_func import delete_messages, reply_out
 
