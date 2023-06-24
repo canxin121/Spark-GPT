@@ -47,7 +47,8 @@
 | ![9](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(9).png) |
 
 ## 更新
-
+- 2023.6.23 0.3.9:
+    1.回退EdgeGPT版本到0.2.1以解决部分用户因网络问题无法使用的bug
 - 2023.6.5 0.3.6:  
     1.更新EdgeGPT的api版本
 - 2023.6.9 0.3.5:  
