@@ -38,6 +38,11 @@ class PlaywrightFramework(metaclass=Singleton):
             else:
                 self.browser = await self.playwright.chromium.launch()
             self.context = await self.browser.new_context(device_scale_factor=2)
+            self.context.set_extra_http_headers(
+                {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36"
+                }
+            )
             logger.info("初次创建context")
             if poe_persistor.cookie_dict:
                 await self.context.add_cookies(cookies=cookies)

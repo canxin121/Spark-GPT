@@ -6,6 +6,7 @@ from playwright.sync_api import Page
 from .config import poe_persistor
 from nonebot import logger
 
+
 async def send_message_async(page: Page, botname: str, input_str: str):
     # 定义重试次数和重试间隔时间
     retry_count = 5
@@ -140,7 +141,7 @@ async def poe_chat(botname, question, page, nosuggest=False):
 # 清空聊天记录
 async def poe_clear(page, truename):
     retry = 0
-    while(retry - 3):
+    while retry - 3:
         try:
             await page.goto(f"https://poe.com/{truename}")
 
@@ -168,6 +169,7 @@ async def poe_clear(page, truename):
             retry += 1
     return False
 
+
 # 创建机器人
 async def poe_create(page, botname, base_bot_index, prompt, retries=2):
     try:
@@ -189,47 +191,43 @@ async def poe_create(page, botname, base_bot_index, prompt, retries=2):
                 value = "chinchilla"
             elif base_bot_index == 2:
                 value = "a2"
+            elif base_bot_index == 3:
+                value = "beaver"
+            elif base_bot_index == 4:
+                value = "a2_2"
             # 根据索引选择选项
             await page.select_option(".Select_select__I0JvU", value=value)
 
             # 添加预设
             prompt_textarea = await page.wait_for_selector('textarea[name="prompt"]')
             await prompt_textarea.fill(prompt)
-
-            chevron_button = await page.wait_for_selector(
-                '[class="BotInfoForm_chevronDown__LFWWC"]'
-            )
+            await asyncio.sleep(1)
+            chevron_button: ElementHandle = await page.wait_for_selector ('xpath=/html/body/div/div[1]/div/section/div[2]/div/form/div[9]')
             await chevron_button.click()
 
             # 点击"Suggest replies"复选框的<label>元素
             checkbox_label: ElementHandle = await page.wait_for_selector(
-                '//div[contains(text(), "Suggest replies")]/following-sibling::label'
-            )
-            await checkbox_label.click()
-
-            # 点击"Linkify bot responses"复选框的<label>元素
-            checkbox_label = await page.wait_for_selector(
-                '//div[contains(text(), "Linkify bot responses")]/following-sibling::label'
+                "html.auto body div#__next div.PageWithSidebarLayout_centeringDiv___L9br div.PageWithSidebarLayout_centeredPage__D42BU section.PageWithSidebarLayout_mainSectionWrapper__S1TJJ div.PageWithSidebarLayout_scrollSection__IRP9Y div.PageWithSidebarLayout_mainSection__i1yOg form.BotInfoForm_form__ssDjH div.BotInfoForm_section__evE42 div.BotInfoForm_toggleSection__DpGZB div.ToggleSwitch_toggleRow__0oPzQ label.ToggleSwitch_switch__zCK_g span.ToggleSwitch_slider__dcLHT"
             )
             await checkbox_label.click()
 
             # 点击"Create bot"按钮
-            create_bot_button = await page.wait_for_selector(
-                "button.Button_primary__pIDjn"
-            )
+            create_bot_button = await page.wait_for_selector('[type="submit"]')
+
             await create_bot_button.click()
 
             # 等待新页面加载完成
             try:
                 await page.wait_for_selector(
-                    "textarea.GrowingTextArea_textArea__eadlu", timeout=5000
+                    "textarea.GrowingTextArea_textArea__eadlu", timeout=10000
                 )
                 return True
             except:
                 pass
 
         return False
-    except:
+    except Exception as e:
+        logger.error(str(e))
         return False
 
 
@@ -238,17 +236,13 @@ async def poe_change(page, truename, prompt):
     try:
         await page.goto(f"https://poe.com/edit_bot?bot={truename}")
         # 使用 prompt 来查找文本框
-        prompt_input = await page.wait_for_selector(
-            'textarea[name="prompt"]'
-        )
+        prompt_input = await page.wait_for_selector('textarea[name="prompt"]')
         # 清空文本框并输入指定文本
         await prompt_input.fill("")
         await prompt_input.fill(prompt)
 
         # 使用 Save 来查找按钮
-        save_button = await page.wait_for_selector(
-            '[type="submit"]'
-        )
+        save_button = await page.wait_for_selector('[type="submit"]')
         # 点击保存按钮
         await save_button.click()
         # 等待新页面加载完成

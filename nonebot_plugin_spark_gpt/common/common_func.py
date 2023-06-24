@@ -68,7 +68,7 @@ async def delete_messages(bot, dict_list: list):
 
 
 async def get_url(text):
-    """将 Markdown 文本保存到 Mozilla Pastebin，并获得 URL"""
+    """将文本保存到 Mozilla Pastebin,并获得 URL"""
     async with aiohttp.ClientSession() as session:
         payload = {
             "expires": "86400",

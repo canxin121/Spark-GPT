@@ -75,8 +75,6 @@ class Newbing_bot:
                     wss_link=newbing_persistor.wss_link,
                 )
                 if raw_json["item"]:
-                    if raw_json["item"]["result"]["value"] == "InvalidSession":
-                        raise Exception("InvalidSession")
                     return raw_json
                 else:
                     raise Exception("返回值为None")
@@ -86,7 +84,6 @@ class Newbing_bot:
                     str(e) == "Update web page context failed"
                     or str(e) == "Conversation not found."
                     or str(e) == "InvalidRequest"
-                    or str(e) == "InvalidSession"
                 ):
                     await self.refresh()
                     while retry > 0:

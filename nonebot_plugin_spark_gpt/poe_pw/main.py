@@ -27,12 +27,19 @@ from .poe_func import (
     is_vip,
 )
 from .poe_api import poe_chat, poe_create, poe_clear
-from ..common.common_func import delete_messages, is_nickname, is_public_nickname, reply_out, set_public_info_data
+from ..common.common_func import (
+    delete_messages,
+    is_nickname,
+    is_public_nickname,
+    reply_out,
+    set_public_info_data,
+)
 from ..common.config import spark_persistor
 from ..common.render.render import md_to_pic
 from ..chatgpt_web.config import gptweb_persistor
 from .pwframework import pwfw
 from nonebot import logger
+
 sourcepath = Path(__file__).parent.parent / "source"
 
 # 初始化两个需要使用的实例
@@ -78,7 +85,9 @@ async def __poe_auto_change_prompt____(
         await poe_auto_change_prompt.finish("终止切换")
     infos = infos.split(" ")
     if len(infos) != 1 or infos[0] not in prompts_dict:
-        await poe_auto_change_prompt.reject("你输入的信息有误，请检查后重新输入\n输入取消 或 算了可以终止切换,终止后不会再发送此消息")
+        await poe_auto_change_prompt.reject(
+            "你输入的信息有误，请检查后重新输入\n输入取消 或 算了可以终止切换,终止后不会再发送此消息"
+        )
     # 将更新后的字典写回到JSON文件中
     poe_persistor.auto_prompt = infos[0]
     poe_persistor.save()
@@ -91,11 +100,13 @@ poe_create_ = on_command("poecreate", aliases={"pc"}, priority=4, block=False)
 
 
 @poe_create_.handle()
-async def __(matcher: Matcher, state: T_State, event: Event,args: Message = CommandArg()):
+async def __(
+    matcher: Matcher, state: T_State, event: Event, args: Message = CommandArg()
+):
     global poe_persistor
     if not is_useable(event):
         await matcher.finish()
-        
+
     is_public = False
     if str(args) == "public":
         if str(event.user_id) not in spark_persistor.superusers:
@@ -104,16 +115,16 @@ async def __(matcher: Matcher, state: T_State, event: Event,args: Message = Comm
     elif str(args):
         await matcher.finish("无意义后缀，请仅发送/加命令")
     state["public"] = is_public
-    
+
     create_msgs = []
     if len(spark_persistor.prompts_dict) > 0:
         str_prompts = str()
         for key, _ in spark_persistor.prompts_dict.items():
             str_prompts += f"{key}\n"
         # create_msgs.append(await matcher.send(reply_out(event, f"当前预设有：\n{str_prompts}")))
-        msg = f'当前预设有：\n{str_prompts}\n请输入\n1.机器人名称,\n2.基础模型选项，可选项为（gpt3_5输入1,claude输入2）,\n3.自定义预设（预设内容中间不要有空格） 或 "." + 可用本地预设名\n三个参数中间用空格隔开\n最终格式示例:\n示例一：chat 2 一个智能助理\n示例二： chat 1 .默认\n输入取消 或 算了可以终止创建'
+        msg = f'当前预设有：\n{str_prompts}\n请输入\n1.机器人名称,\n2.基础模型选项，可选项为（gpt3_5输入1,claude输入2,gpt4输入3,claude+输入4）,\n3.自定义预设（预设内容中间不要有空格） 或 "." + 可用本地预设名\n三个参数中间用空格隔开\n最终格式示例:\n示例一：chat 2 一个智能助理\n示例二： chat 1 .默认\n输入取消 或 算了可以终止创建'
     else:
-        msg = f'当前没有可用本地预设\n\n请输入\n1.机器人名称,\n2.基础模型选项，可选项为（gpt3_5输入1,claude输入2）,\n3.自定义预设（预设内容中间不要有空格） 或 "." + 可用本地预设名\n三个参数中间用空格隔开\n最终格式示例:\n示例一：chat 2 一个智能助理\n示例二： chat 1 .默认\n输入取消 或 算了可以终止创建'
+        msg = f'当前没有可用本地预设\n\n请输入\n1.机器人名称,\n2.基础模型选项，可选项为（gpt3_5输入1,claude输入2,gpt4输入3,claude+输入4）,\n3.自定义预设（预设内容中间不要有空格） 或 "." + 可用本地预设名\n三个参数中间用空格隔开\n最终格式示例:\n示例一：chat 2 一个智能助理\n示例二： chat 1 .默认\n输入取消 或 算了可以终止创建'
     create_msgs.append(await matcher.send(reply_out(event, msg)))
     state["create_msgs"] = create_msgs
 
@@ -135,8 +146,12 @@ async def __poe_create___(
         await poe_create_.finish()
 
     infos = infos.split(" ", 2)
-    if not (len(infos) == 3 and infos[1] in ["1", "2"]):
-        create_msgs.append(await matcher.send(reply_out(event, "输入信息有误，请检查后重新输入\n输入取消 或 算了可以终止创建,终止后不会再发送此消息")))
+    if not (len(infos) == 3 and infos[1] in ["1", "2", "3", "4"]):
+        create_msgs.append(
+            await matcher.send(
+                reply_out(event, "输入信息有误，请检查后重新输入\n输入取消 或 算了可以终止创建,终止后不会再发送此消息")
+            )
+        )
         await poe_create_.reject()
 
     # 获取创建所需信息
@@ -157,31 +172,39 @@ async def __poe_create___(
             prompt = spark_persistor.prompts_dict[prompt_name]
         else:
             create_msgs.append(
-                await matcher.send(reply_out(event, "输入的本地预设名不正确，请重新输入\n输入取消 或 算了可以终止创建,终止后不会再发送此消息"))
+                await matcher.send(
+                    reply_out(event, "输入的本地预设名不正确，请重新输入\n输入取消 或 算了可以终止创建,终止后不会再发送此消息")
+                )
             )
             await poe_create_.reject()
-            
+
     if state["public"]:
         current_userinfo, current_userdata = set_public_info_data(user_data_dict)
     else:
         current_userinfo, current_userdata = set_userdata(event, user_data_dict)
-        
+
     if current_userinfo not in list(poe_persistor.user_dict.keys()):
         poe_persistor.user_dict.setdefault(current_userinfo, {"all": {}, "now": {}})
 
     # 查看对应用户下是不是有重名的bot
     if state["public"]:
-        if is_public_nickname(nickname
-        ):
+        if is_public_nickname(nickname):
             create_msgs.append(
-                await matcher.send(reply_out(event, "已经有同名的bot了，换一个名字重新输入吧\n输入取消 或 算了可以终止创建,终止后不会再发送此消息"))
+                await matcher.send(
+                    reply_out(
+                        event, "已经有同名的bot了，换一个名字重新输入吧\n输入取消 或 算了可以终止创建,终止后不会再发送此消息"
+                    )
+                )
             )
             await matcher.reject()
     else:
-        if is_nickname(nickname,event
-        ):
+        if is_nickname(nickname, event):
             create_msgs.append(
-                await matcher.send(reply_out(event, "已经有同名的bot了，换一个名字重新输入吧\n输入取消 或 算了可以终止创建,终止后不会再发送此消息"))
+                await matcher.send(
+                    reply_out(
+                        event, "已经有同名的bot了，换一个名字重新输入吧\n输入取消 或 算了可以终止创建,终止后不会再发送此消息"
+                    )
+                )
             )
             await matcher.reject()
     if creat_lock.locked():
@@ -204,11 +227,11 @@ async def __poe_create___(
                 prompt=prompt,
                 owner=str(event.user_id),
             )
-            
+
             if state["public"]:
                 botinfo.share = True
                 botinfo.owner = "public"
-                
+
             poe_persistor.user_dict.setdefault(current_userinfo, {}).setdefault(
                 "all", {}
             )[nickname] = botinfo
@@ -298,7 +321,11 @@ async def __poe_remove____(
     nickname_delete = infos[0]
     nickname_now = str(list(poe_persistor.user_dict[userinfo]["now"].keys())[0])
     if not (nickname_delete in bots):
-        remove_msgs.append(await matcher.send(reply_out(event, "输入信息有误，请检查后重新输入\n输入取消 或 算了可以终止删除,终止后不会再发送此消息")))
+        remove_msgs.append(
+            await matcher.send(
+                reply_out(event, "输入信息有误，请检查后重新输入\n输入取消 或 算了可以终止删除,终止后不会再发送此消息")
+            )
+        )
         await poe_remove.reject()
     if nickname_delete == nickname_now:
         remove_msgs.append(await matcher.send(reply_out(event, "不能删除正在使用的bot哦")))
@@ -384,7 +411,11 @@ async def __poe_switch____(
 
     nickname = infos.split(" ")[0]
     if nickname not in list(poe_persistor.user_dict[userinfo]["all"].keys()):
-        switch_msgs.append(await matcher.send(reply_out(event, "没有这个机器人，请重新输入\n输入取消 或 算了可以终止切换,终止后不会再发送此消息")))
+        switch_msgs.append(
+            await matcher.send(
+                reply_out(event, "没有这个机器人，请重新输入\n输入取消 或 算了可以终止切换,终止后不会再发送此消息")
+            )
+        )
         await poe_switch.reject()
 
     poe_persistor.user_dict[userinfo]["now"] = {
@@ -572,7 +603,7 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
         except:
             pass
         try:
-            public_userinfo,public_userdata = set_public_info_data(user_data_dict)
+            public_userinfo, public_userdata = set_public_info_data(user_data_dict)
             bots_nicknames = list(
                 poe_persistor.user_dict[public_userinfo]["all"].keys()
             )
@@ -580,7 +611,8 @@ async def _is_chat_(event: MessageEvent, bot: Bot):
                 (
                     name
                     for name in bots_nicknames
-                    if str(event.message).startswith("/共享" + name) or str(event.message).startswith("/share" + name)
+                    if str(event.message).startswith("/共享" + name)
+                    or str(event.message).startswith("/share" + name)
                 ),
                 None,
             )
@@ -737,14 +769,16 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 result = await poe_chat(truename, text, page)
                 await page.close()
                 current_userdata.is_waiting = False
-                
+
                 await bot.delete_msg(message_id=wait_msg["message_id"])
                 reply_msgid, chat_suggest_temp = await send_msg(result, matcher, event)
-                current_userdata.last_reply_message_id[nickname] = reply_msgid["message_id"]
+                current_userdata.last_reply_message_id[nickname] = reply_msgid[
+                    "message_id"
+                ]
                 if len(chat_suggest_temp) - 0:
                     botinfo.last_suggests = chat_suggest_temp
                 msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
-                
+
                 await matcher.finish()
         else:
             if botinfo.nickname not in list(templocks.keys()):
@@ -752,7 +786,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
             if botinfo.nickname not in list(tempuser_num.keys()):
                 tempuser_num[botinfo.nickname] = 0
             lock = templocks[botinfo.nickname]
-            if lock.locked() and tempuser_num[botinfo.nickname] <4:
+            if lock.locked() and tempuser_num[botinfo.nickname] < 4:
                 tempuser_num[botinfo.nickname] += 1
                 wait_msg = await matcher.send(reply_out(event, "稍等，我还有一个问题没回发完，马上回复你"))
             elif lock.locked() and tempuser_num[botinfo.nickname] >= 4:
@@ -785,22 +819,23 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                 result = await poe_chat(truename, text, page)
                 await page.close()
                 tempuser_num[botinfo.nickname] -= 1
-                
+
                 await bot.delete_msg(message_id=wait_msg["message_id"])
                 reply_msgid, chat_suggest_temp = await send_msg(result, matcher, event)
-                current_userdata.last_reply_message_id[nickname] = reply_msgid["message_id"]
+                current_userdata.last_reply_message_id[nickname] = reply_msgid[
+                    "message_id"
+                ]
                 if len(chat_suggest_temp) - 0:
                     botinfo.last_suggests = chat_suggest_temp
                 msg_bot_bidict.inv[botinfo] = reply_msgid["message_id"]
-                
+
                 await matcher.finish()
-                
 
     elif mode == "public":
         if botinfo.nickname not in list(base_templocks.keys()):
             base_templocks[botinfo.nickname] = asyncio.Lock()
         lock = base_templocks[botinfo.nickname]
-        if lock.locked() and base_botinfo_dict[nickname].num_users <4:
+        if lock.locked() and base_botinfo_dict[nickname].num_users < 4:
             base_botinfo_dict[nickname].num_users += 1
             wait_msg = await matcher.send(reply_out(event, "稍等，我还有一个问题没回发完，马上回复你"))
         elif lock.locked() and base_botinfo_dict[nickname].num_users >= 4:
@@ -832,7 +867,7 @@ async def __chat_bot__(matcher: Matcher, event: MessageEvent, bot: Bot):
                     wait_msg = await matcher.send(reply_out(event, "正在思考，请稍等"))
                 except ActionFailed:
                     current_userdata.is_waiting = False
-                    await matcher.finish() 
+                    await matcher.finish()
             result = await poe_chat(truename, text, page)
             await close_page(page)
             msgid, temp_suggests = await send_msg(result, matcher, event)
@@ -916,6 +951,8 @@ async def __poe_help__(bot: Bot, matcher: Matcher, event: Event):
 """
     # pic = await md_to_pic(msg)
     # await matcher.send(MessageSegment.image(pic))
-    await matcher.send(MessageSegment.image(Path(sourcepath / Path("demo(2).png")).absolute()))
+    await matcher.send(
+        MessageSegment.image(Path(sourcepath / Path("demo(2).png")).absolute())
+    )
 
     await poe_help.finish()
