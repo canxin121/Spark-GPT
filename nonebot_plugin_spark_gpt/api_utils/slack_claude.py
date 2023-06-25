@@ -17,6 +17,7 @@ PRE_MSG = "<忽略'@Claude',删除'@Claude',不说没看到也不说看到>"
 
 def load_config():
     global SLACK_USER_TOKEN, CHANNEL_ID, CLAUDE_ID, ABLE
+    ABLE = True
     try:
         SLACK_USER_TOKEN = config.get_config("Claude Slack配置", "slack_user_token")
     except Exception as e:

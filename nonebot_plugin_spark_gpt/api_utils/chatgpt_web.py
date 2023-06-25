@@ -20,6 +20,7 @@ ABLE = True
 
 def load_config():
     global SESSION_TOKEN, SESSION_TOKEN_KEY, CF_CLEARANCE_KEY, MODEL, API_URL, PROXIES,ABLE
+    ABLE = True
     try:
         SESSION_TOKEN = config.get_config("Chat GPT web配置", "session token")
     except Exception as e:

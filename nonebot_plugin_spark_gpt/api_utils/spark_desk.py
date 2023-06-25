@@ -17,6 +17,7 @@ HEADER = None
 
 def load_config():
     global COOKIE, FD, GTTOKEN, SID, ABLE, HEADER,ABLE
+    ABLE = True
     try:
         COOKIE = config.get_config("Spark Desk配置", "cookie")
     except Exception as e:

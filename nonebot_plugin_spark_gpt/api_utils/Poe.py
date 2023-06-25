@@ -17,6 +17,7 @@ ABLE = True
 
 def load_config():
     global COOKIE, PROXY, ABLE
+    ABLE = True
     try:
         PROXY = config.get_config(source="Poe配置", config_name="proxy")
     except Exception as e:

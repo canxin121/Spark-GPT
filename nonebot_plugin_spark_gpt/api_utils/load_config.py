@@ -1,22 +1,23 @@
 from typing import Literal
 from .bard import load_config as load_bard_config
-from .bard import ABLE as BARD_ABLE
 from .chatgpt_web import load_config as load_chat_gpt_web_config
-from .chatgpt_web import ABLE as CHATGPTWEB_ABLE
 from .newbing import load_config as load_newbing_config
-from .newbing import ABLE as NEWBING_ABLE
 from .Poe import load_config as load_poe_config
-from .Poe import ABLE as POE_ABLE
 from .slack_claude import load_config as load_slack_claude_config
-from .slack_claude import ABLE as SLACKCLAUDE_ABLE
 from .bard import load_config as load_bard_config
-from .bard import ABLE as BARD_ABLE
 from .spark_desk import load_config as load_spark_desk_config
-from .spark_desk import ABLE as SPARKDESK_ABLE
 from ..common.config import CONFIG_SOURCE
 
 
 def get_able_source():
+    from .bard import ABLE as BARD_ABLE
+    from .chatgpt_web import ABLE as CHATGPTWEB_ABLE
+    from .newbing import ABLE as NEWBING_ABLE
+    from .Poe import ABLE as POE_ABLE
+    from .slack_claude import ABLE as SLACKCLAUDE_ABLE
+    from .bard import ABLE as BARD_ABLE
+    from .spark_desk import ABLE as SPARKDESK_ABLE
+
     able_dict = {
         "poe chatgpt": POE_ABLE,
         "poe claude": POE_ABLE,

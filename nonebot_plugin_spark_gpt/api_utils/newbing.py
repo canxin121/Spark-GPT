@@ -15,6 +15,7 @@ ABLE = True
 
 def load_config():
     global PROXY, COOKIES, WSS_LINK,ABLE
+    ABLE = True
     try:
         PROXY = config.get_config(source="Newbing配置", config_name="proxy")
     except Exception as e:
