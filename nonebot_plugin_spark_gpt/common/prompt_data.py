@@ -78,7 +78,7 @@ class Prompts(BaseModel):
     def load(self):
         """从JSON文件中读取prompts"""
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        if self.path.exists():
+        if not self.path.exists():
             self.path.touch()
         try:
             with open(self.path, "r", encoding="utf-8") as f:
@@ -100,7 +100,7 @@ class Prompts(BaseModel):
         try:
             self.load()
         except Exception as e:
-            logger.error(str(e))
+            # logger.error(str(e))
             pass
 
 

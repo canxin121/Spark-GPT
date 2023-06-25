@@ -158,7 +158,7 @@ class Config:
                     self.config[key].update(data[key])
 
         except Exception as e:
-            logger.error(str(e))
+            # logger.error(str(e))
             pass
 
     def save(self):
@@ -169,7 +169,7 @@ class Config:
             with open(self.path / "config.json", "w", encoding="utf-8") as f:
                 json.dump(self.config, f, ensure_ascii=False)
         except Exception as e:
-            logger.error(str(e))
+            # logger.error(str(e))
             pass
 
 

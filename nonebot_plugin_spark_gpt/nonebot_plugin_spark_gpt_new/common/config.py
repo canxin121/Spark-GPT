@@ -151,6 +151,7 @@ class Config:
     def load(self):
         """从本地读取配置项"""
         self.path.mkdir(parents=True, exist_ok=True)
+        (self.path / "config.json").touch()
         try:
             with open(self.path / "config.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -158,7 +159,7 @@ class Config:
                     self.config[key].update(data[key])
 
         except Exception as e:
-            logger.error(str(e))
+            # logger.error(str(e))
             pass
 
     def save(self):
@@ -169,7 +170,7 @@ class Config:
             with open(self.path / "config.json", "w", encoding="utf-8") as f:
                 json.dump(self.config, f, ensure_ascii=False)
         except Exception as e:
-            logger.error(str(e))
+            # logger.error(str(e))
             pass
 
 

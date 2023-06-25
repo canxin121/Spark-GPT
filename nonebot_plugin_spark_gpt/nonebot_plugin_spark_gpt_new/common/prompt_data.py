@@ -100,7 +100,7 @@ class Prompts(BaseModel):
         try:
             self.load()
         except Exception as e:
-            logger.error(str(e))
+            # logger.error(str(e))
             pass
 
 
