@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<style type="text/css">
+    h1, h2, h3, h4, h5, h6 {
+        color: rgb(125, 101, 89);
+    }
+    
+    .markdown-body {
+        background-image: url("./source/mi_background.png");
+        background-repeat: repeat-y;
+        background-position: center center;
+        background-size: auto;
+        box-sizing: content-box;
+        min-width: 10px;
+        max-width: 1080px;
+        margin: auto auto;
+        border: 2px solid rgb(220, 211, 196);
+        margin-top: 30px;
+        margin-bottom: 30px;
+        margin-right: 30px;
+        margin-left: 30px;
+        height: auto;
+        word-wrap: break-word;
+        white-space: normal;
+    }
+    
+    @media (max-width: 767px) {
+        .markdown-body {
+            padding: 15px;
+        }
+    }
+    
+    body {
+        background-image: url("./source/mi_background.png");
+        background-repeat: repeat-y;
+        background-position: center center;
+        background-size: auto;
+        height: 100%;
+      }
+</style>
+</head>
+<body>
+<article class="markdown-body">
+    {{ md }}
+</article>
+{{ extra }}
+</body>
+</html>
