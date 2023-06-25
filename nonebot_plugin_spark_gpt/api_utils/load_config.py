@@ -28,8 +28,10 @@ def get_able_source():
     }
     source_dict = {}
     source_dict_str = ""
-    for i, (source, ABLE) in enumerate(able_dict.items(), 1):
+    i = 0
+    for source, ABLE in able_dict.items():
         if ABLE:
+            i += 1
             key = str(i)
             source_dict[key] = source
             source_dict_str += f"{key}: {source}\n"

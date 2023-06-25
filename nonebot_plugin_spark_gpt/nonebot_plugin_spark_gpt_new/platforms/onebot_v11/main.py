@@ -23,7 +23,7 @@ from .utils import (
     if_super_user,
     if_close,
 )
-from ...common.web.app import start_web_ui, stop_web_ui
+from ...common.web.app import start_web_ui, stop_web_ui, HOST, PORT
 from ...common.user_data import common_users
 from ...common.prompt_data import prompts
 from .userlinks import users
@@ -65,7 +65,7 @@ start_web_ui_ = on_command("开启webui", priority=1, block=False)
 async def start_web_ui__(matcher: Matcher, event: Event, bot: Bot):
     await if_super_user(event, matcher)
     await start_web_ui()
-    await matcher.finish("成功开启webui,端口为8666,请在使用完成后关闭,以免他人修改内容")
+    await matcher.finish(f"成功开启webui,地址为http://{HOST}:{PORT},请在使用完成后关闭,以免他人修改内容")
 
 
 stop_web_ui___ = on_command("关闭webui", priority=1, block=False)
