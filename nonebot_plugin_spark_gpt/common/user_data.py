@@ -29,13 +29,21 @@ class CommonUsers:
 
     def get_bot_by_text(self, common_userinfo: CommonUserInfo, text: str) -> BotData:
         """根据text是否以某个bot的名字开头来获取对应的botdata"""
-        for bot in self.user_dict[common_userinfo].bots.keys():
+        bots = self.user_dict[common_userinfo].bots
+        for bot, bot_data in bots.items():
             if text.startswith((f"/{bot.nickname}", f".{bot.nickname}")):
-                return bot, self.user_dict[common_userinfo].bots[bot]
+                return bot, bot_data
 
     def delete_bot(self, common_userinfo: CommonUserInfo, botinfo: BotInfo):
         if botinfo in self.user_dict[common_userinfo].bots.keys():
             del self.user_dict[common_userinfo].bots[botinfo]
+            self.user_dict[common_userinfo].bots = dict(
+                sorted(
+                    self.user_dict[common_userinfo].bots.items(),
+                    key=lambda x: len(x[0].nickname),
+                    reverse=True,
+                )
+            )
             self.save_userdata(common_userinfo=common_userinfo)
         else:
             raise Exception("没有这个昵称的bot")
@@ -57,6 +65,13 @@ class CommonUsers:
     ):
         """向对应commonuser_info的bots中添加一个新的botdata"""
         self.user_dict[common_userinfo].bots[botinfo] = botdata
+        self.user_dict[common_userinfo].bots = dict(
+            sorted(
+                self.user_dict[common_userinfo].bots.items(),
+                key=lambda x: len(x[0].nickname),
+                reverse=True,
+            )
+        )
         self.save_userdata(common_userinfo=common_userinfo)
 
     def get_bot_data(

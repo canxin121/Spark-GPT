@@ -163,11 +163,11 @@
       <ul class="list-unstyled">
          {% for prompt_key in prompts.keys() %}
          <li>
-            <div style="position: relative;">
-               <span id="prompt-{{ prompt_key }}" onclick="window.location='/prompt/{{ prompt_key }}'">{{ prompt_key
-                  }}</span>
-               <button class="edit-btn" onclick="editPrompt('{{ prompt_key }}')">Edit</button>
-               <button class="delete-btn" onclick="deletePrompt('{{ prompt_key }}')">X</button>
+            <div style="position: relative;" onclick="window.location='/prompt/{{ prompt_key }}'">
+               <span id="prompt-{{ prompt_key }}">{{ prompt_key }}</span>
+               <button class="edit-btn"
+                  onclick="event.stopPropagation(); editPrompt('{{ prompt_key }}', this.parentNode)">Edit</button>
+               <button class="delete-btn" onclick="event.stopPropagation(); deletePrompt('{{ prompt_key }}')">X</button>
             </div>
          </li>
          {% endfor %}
@@ -198,11 +198,11 @@
    <!-- 使用JavaScript动态设置sidebar的高度 -->
    <script>
 
-      function editPrompt(key) {
-         var li = document.querySelector(`#prompt-${key}`).parentNode;
-         li.innerHTML = `<input id="edit-${key}" value="${key}">
-   <button class="edit-btn" onclick="savePrompt('${key}')">Save</button>
-   <button class="delete-btn" onclick="deletePrompt('${key}')">X</button>`;
+      function editPrompt(key, parentDiv) {
+         parentDiv.onclick = null; // remove the click event on parent div
+         parentDiv.innerHTML = `<input id="edit-${key}" value="${key}">
+            <button class="edit-btn" onclick="event.stopPropagation(); savePrompt('${key}')">Save</button>
+            <button class="delete-btn" onclick="event.stopPropagation(); deletePrompt('${key}')">X</button>`;
       }
 
       function deletePrompt(key) {

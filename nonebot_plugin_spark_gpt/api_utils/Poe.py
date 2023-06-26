@@ -13,6 +13,7 @@ import uuid
 COOKIE = ""
 PROXY = ""
 ABLE = True
+CLIENT = None
 
 
 def load_config():
@@ -41,7 +42,7 @@ class Poe_bot:
         self.nickname = bot_info.nickname
         self.common_userinfo = common_userinfo
         self.botdata = bot_data
-        self.client = None
+        CLIENT = None
 
         self.source = bot_data.source
         if self.source == "poe claude":
@@ -90,8 +91,8 @@ class Poe_bot:
     @run_sync
     def chat_break(self):
         detail_error = "未知错误"
-        retry = 5
-        if not self.client:
+        retry = 2
+        if not CLIENT:
             try:
                 self.new_client()
             except Exception as e:
@@ -99,12 +100,12 @@ class Poe_bot:
         while retry > 0:
             error = "未知错误"
             try:
-                self.client.send_chat_break(self.botdata.handle)
+                CLIENT.send_chat_break(self.botdata.handle)
                 return
             except Exception as e:
                 detail_error = str(e)
                 logger.error(f"Poe在清除会话记录时error:{detail_error}")
-                if retry % 3 == 0:
+                if retry % 1 == 0:
                     try:
                         self.new_client()
                     except Exception as e:
@@ -115,22 +116,22 @@ class Poe_bot:
 
     @run_sync
     def chat(self, question: str):
-        if not self.client:
+        if not CLIENT:
             try:
                 self.new_client()
             except Exception as e:
                 raise e
-        retry = 5
+        retry = 2
         while retry > 0:
             detail_error = "未知错误"
             try:
-                for chunk in self.client.send_message(self.botdata.handle, question):
+                for chunk in CLIENT.send_message(self.botdata.handle, question):
                     pass
                 return chunk["text"]
             except Exception as e:
                 detail_error = str(e)
                 logger.error(f"Poe在询问时error:{str(detail_error)}")
-                if retry % 3 == 0:
+                if retry % 1 == 0:
                     try:
                         self.new_client()
                     except Exception as e:
@@ -146,7 +147,7 @@ class Poe_bot:
             error = "Poe在创建新的bot时报错:预设过长,长度不得长于848字符,请修改预设或删除bot后新建"
             logger.error(error)
             raise Exception(error)
-        if not self.client:
+        if not CLIENT:
             try:
                 self.new_client()
             except Exception as e:
@@ -158,7 +159,7 @@ class Poe_bot:
         detail_error = "未知错误"
         while retry > 0:
             try:
-                self.client.create_bot(
+                CLIENT.create_bot(
                     self.botdata.handle, self.botdata.prompt, base_model=self.base_model
                 )
                 common_users.save_userdata(common_userinfo=self.common_userinfo)
@@ -178,15 +179,16 @@ class Poe_bot:
         raise Exception(error)
 
     def new_client(self):
-        retry = 3
+        global CLIENT
+        retry = 2
         detail_error = "未知错误"
         while retry > 0:
             try:
                 if PROXY:
-                    self.client = poe.Client(token=COOKIE, proxy=PROXY)
+                    CLIENT = poe.Client(token=COOKIE, proxy=PROXY)
                     return
                 else:
-                    self.client = poe.Client(token=COOKIE)
+                    CLIENT = poe.Client(token=COOKIE)
                     return
             except Exception as e:
                 detail_error = str(e)

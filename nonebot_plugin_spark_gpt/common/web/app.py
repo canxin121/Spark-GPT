@@ -170,7 +170,10 @@ class Fastapp:
             )
         elif "save" in form.keys() and form["save"] == "True":
             new_prompt = form["prompt_value"]
-            prompts.change(prompt_name=prompt_name, prompt=new_prompt)
+            try:
+                prompts.change(prompt_name=prompt_name, prompt=new_prompt)
+            except:
+                pass
             return TEMPLATES.TemplateResponse(
                 "prompt.html",
                 {

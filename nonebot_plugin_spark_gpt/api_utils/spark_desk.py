@@ -12,11 +12,12 @@ FD = ""
 GTTOKEN = ""
 SID = ""
 ABLE = True
-HEADER = ""
+ASK_HEADER = ""
+GENERATE_HEADER = ""
 
 
 def load_config():
-    global COOKIE, FD, GTTOKEN, SID, ABLE, HEADER, ABLE
+    global COOKIE, FD, GTTOKEN, SID, ABLE, ASK_HEADER, GENERATE_HEADER, ABLE
     ABLE = True
     try:
         COOKIE = config.get_config("Spark Desk配置", "cookie")
@@ -40,8 +41,8 @@ def load_config():
     except Exception as e:
         ABLE = False
         logger.warning(f"加载Spark Desk配置时warn: {str(e)}")
-    HEADER = {
-        "Accept": "application/json, text/plain, */*",
+    ASK_HEADER = {
+        "Accept": "text/event-stream",
         "Accept-Encoding": "gzip, deflate, br",
         "Accept-Language": "zh-CN,zh;q=0.9",
         "Connection": "keep-alive",
@@ -55,9 +56,11 @@ def load_config():
         "Sec-Fetch-Mode": "cors",
         "Sec-Fetch-Site": "same-origin",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "X-Requested-With": "XMLHttpRequest",
     }
+    GENERATE_HEADER = ASK_HEADER.copy()
+    GENERATE_HEADER['Accept'] = 'application/json, text/plain, */*'
+    GENERATE_HEADER['Content-Type'] = 'application/json'
+    GENERATE_HEADER['X-Requested-With'] = 'XMLHttpRequest'
 
 
 load_config()
@@ -76,10 +79,11 @@ class SparkBot:
         return hash((self.nickname, self.common_userinfo.user_id))
 
     async def generate_chat_id(self):
-        global HEADER
+        global GENERATE_HEADER
         url = "https://xinghuo.xfyun.cn/iflygpt/u/chat-list/v1/create-chat-list"
         payload = "{}"
-        async with aiohttp.ClientSession(headers=HEADER) as session:
+
+        async with aiohttp.ClientSession(headers=GENERATE_HEADER) as session:
             retry_count = 0
             while retry_count < 3:
                 try:
@@ -106,7 +110,7 @@ class SparkBot:
     #         "chatListId": chat_id,
     #         "chatListName": question,
     #     }
-    #     async with aiohttp.ClientSession(headers=HEADER) as session:
+    #     async with aiohttp.ClientSession(headers=ASK_HEADER) as session:
     #         retry_count = 0
     #         while retry_count < 3:
     #             try:
@@ -166,7 +170,7 @@ class SparkBot:
         return answer
 
     async def ask_question(self, question):
-        global HEADER,FD,GTTOKEN,SID
+        global ASK_HEADER, FD, GTTOKEN, SID
         url = "https://xinghuo.xfyun.cn/iflygpt-chat/u/chat_message/chat"
         payload = {
             "fd": FD,
@@ -177,8 +181,7 @@ class SparkBot:
             "clientType": "1",
             "isBot": "0",
         }
-
-        async with aiohttp.ClientSession(headers=HEADER) as session:
+        async with aiohttp.ClientSession(headers=ASK_HEADER) as session:
             retry_count = 3
             error = "未知错误"
             while retry_count > 0:

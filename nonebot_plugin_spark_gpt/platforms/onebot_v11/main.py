@@ -40,7 +40,7 @@ async def help_(matcher: Matcher, event: Event, bot: Bot):
 更改绑定:将当前平台账户绑定到指定通用账户
 所有预设:给出所有预设的名称
 查询预设:查询指定预设的内容
--以下进管理员可用-
+-以下仅管理员可用-
 开启webui:默认开启,打开webui,并返回webui开启的端口
 关闭webui:请在使用webui后关闭
 添加预设:添加新的预设
@@ -48,7 +48,7 @@ async def help_(matcher: Matcher, event: Event, bot: Bot):
 删除预设:删除指定预设
 
 -以下命令前加/为自己单独的,加.为公用的-
-
+-只有管理员才能创建或删除公用bot-
 所有bot:查询所有的可用的bot
 创建bot:创建新的bot
 删除bot:删除指定bot
@@ -326,5 +326,3 @@ async def all_bots_(matcher: Matcher, event: Event):
     await matcher.finish(
         MessageSegment.text(common_users.show_all_bots(common_userinfo))
     )
-
-
