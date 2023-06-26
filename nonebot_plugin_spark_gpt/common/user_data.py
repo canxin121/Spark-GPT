@@ -99,13 +99,23 @@ class CommonUsers:
         self.save()
 
     def if_delete_user(self, common_userinfo: CommonUserInfo, userinfo: UserInfo):
-        if len(self.user_links[common_userinfo].users) == 1:
-            del self.user_links[common_userinfo]
-            self.del_userdata(common_userinfo)
-            self.save()
-        elif len(self.user_links[common_userinfo].users) > 1:
-            self.user_links[common_userinfo].users.remove(userinfo)
-            self.save()
+        if common_userinfo in self.user_links.keys():
+            if len(self.user_links[common_userinfo].users) == 1:
+                self.del_userdata(common_userinfo)
+                try:
+                    del self.user_links[common_userinfo]
+                except Exception as e:
+                    pass
+                try:
+                    del self.user_dict[common_userinfo]
+                except Exception as e:
+                    pass
+                self.save()
+            elif len(self.user_links[common_userinfo].users) > 1:
+                self.user_links[common_userinfo].users.remove(userinfo)
+                self.save()
+        else:
+            return
 
     def new_user(self, userinfo: UserInfo):
         """新建一个用户,返回新建的CommonUserInfo"""
