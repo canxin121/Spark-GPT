@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 from pydantic import BaseModel
 from ...common.mytypes import UserInfo, CommonUserInfo
+from ...common.user_data import common_users
 
 
 class Users(BaseModel):
@@ -14,13 +15,14 @@ class Users(BaseModel):
     :type user_links: Dict[UserInfo, CommonUserInfo]
     """
 
-    path: Path = Path() / "data/spark_gpt/onebot_v11/user_links.json"
+    path: Path = Path() / "data/spark_gpt/platforms/nonebot.json"
 
     user_links: Dict[UserInfo, CommonUserInfo] = {}
 
     def link(self, userinfo: UserInfo, common_userinfo: CommonUserInfo):
         """将传入的Userinfo和CommonUserInfo相链接"""
         self.user_links[userinfo] = common_userinfo
+        common_users.link_user(common_userinfo, userinfo)
         self.save()
 
     def save(self):

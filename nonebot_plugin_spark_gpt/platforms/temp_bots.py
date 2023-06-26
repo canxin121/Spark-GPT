@@ -1,4 +1,4 @@
-from typing import Literal, Dict
+from typing import Literal, Dict, Union
 from nonebot import logger
 from pathlib import Path
 from pydantic import BaseModel
@@ -12,6 +12,11 @@ from ..api_utils.chatgpt_web import ChatGPT_web_Bot
 from ..api_utils.slack_claude import Slack_Claude_Bot
 from ..api_utils.Poe import Poe_bot
 from ..api_utils.bard import Bard_Bot
+from .nonebot.utils import OB11_BOT, Bot, MessageEvent, TGBot
+
+CHATBOT = Union[
+    SparkBot, Newbing_bot, ChatGPT_web_Bot, Slack_Claude_Bot, Poe_bot, Bard_Bot
+]
 
 
 class Bot_Links:
@@ -25,24 +30,55 @@ class Temp_Bots:
     def __init__(self):
         self.users: Dict[CommonUserInfo, Bot_Links] = {}
 
+    def get_message_id_by_send(
+        self,
+        event: MessageEvent,
+        reply: any,
+        bot: Bot,
+    ):
+        try:
+            if isinstance(bot, OB11_BOT):
+                return str(reply["message_id"])
+            elif isinstance(bot, TGBot):
+                return str(reply.message_id + event.from_.id)
+        except:
+            pass
+
+    def get_message_id_by_get(self, bot: Bot, event: MessageEvent):
+        if isinstance(bot, OB11_BOT):
+            return str(event.reply.message_id)
+        elif isinstance(bot, TGBot):
+            return str(event.reply_to_message.message_id + event.from_.id)
+
     def set_bot_msgid(
-        self, common_userinfo: CommonUserInfo, bot: any, new_message_id: str
+        self,
+        common_userinfo: CommonUserInfo,
+        chatbot: CHATBOT,
+        bot: Bot,
+        event: MessageEvent,
+        reply: any,
     ):
         botlinks: Bot_Links = self.get_bot_links(common_userinfo)
-        if bot:
-            botlinks.msg_bot_dict.inv[bot] = new_message_id
+        if chatbot:
+            botlinks.msg_bot_dict.inv[chatbot] = self.get_message_id_by_send(
+                event, reply, bot
+            )
         else:
             raise Exception("没有这个bot")
 
-    def del_bot_by_msgid(self, common_userinfo: CommonUserInfo, message_id: str):
-        botlinks: Bot_Links = self.get_bot_links(common_userinfo=common_userinfo)
-        if message_id in botlinks.msg_bot_dict.keys():
-            del botlinks.msg_bot_dict[message_id]
-        else:
-            raise Exception("没有这个messageid对应的bot")
+    # def del_bot_by_msgid(self, common_userinfo: CommonUserInfo, bot: Bot, reply: any):
+    #     botlinks: Bot_Links = self.get_bot_links(common_userinfo=common_userinfo)
+    #     message_id = self.get_message_id(bot, reply)
+    #     if message_id in botlinks.msg_bot_dict.keys():
+    #         del botlinks.msg_bot_dict[message_id]
+    #     else:
+    #         raise Exception("没有这个messageid对应的bot")
 
-    def get_bot_by_msgid(self, common_userinfo: CommonUserInfo, message_id: str):
+    def get_bot_by_msgid(
+        self, common_userinfo: CommonUserInfo, bot: Bot, event: MessageEvent
+    ):
         botlinks: Bot_Links = self.get_bot_links(common_userinfo)
+        message_id = self.get_message_id_by_get(bot, event)
         if str(message_id) in botlinks.msg_bot_dict.keys():
             return botlinks.msg_bot_dict[str(message_id)]
         else:

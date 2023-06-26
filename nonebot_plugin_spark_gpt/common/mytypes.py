@@ -1,10 +1,10 @@
 import json
 from pathlib import Path
-from typing import Dict, List, Literal, Optional
+from typing import Dict, List, Literal, Optional, Set, Tuple
 from pydantic import BaseModel
 from EdgeGPT import Chatbot
 
-PLATFORM = Literal["qq", "telegram"]
+PLATFORM = Literal["OneBot V11", "Telegram"]
 SOURCE = Literal[
     "poe chatgpt",
     "poe claude",
@@ -196,7 +196,7 @@ class CommonUserData(BaseModel):
 
 
 class UsersInfo(BaseModel):
-    users: List[UserInfo]
+    users: Set[UserInfo]
 
     def __hash__(self):
         # 将所有用户信息的哈希值相加得到 Usersinfo 的哈希值

@@ -1,1 +1,2 @@
-from . import onebot_v11
+from . import nonebot
+# from . import telegram

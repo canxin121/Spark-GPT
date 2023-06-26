@@ -95,8 +95,17 @@ class CommonUsers:
         if common_userinfo not in self.user_links.keys():
             self.user_links[common_userinfo] = UsersInfo(users=[userinfo])
         else:
-            self.user_links[common_userinfo].users.append(userinfo)
+            self.user_links[common_userinfo].users.add(userinfo)
         self.save()
+
+    def if_delete_user(self, common_userinfo: CommonUserInfo, userinfo: UserInfo):
+        if len(self.user_links[common_userinfo].users) == 1:
+            del self.user_links[common_userinfo]
+            self.del_userdata(common_userinfo)
+            self.save()
+        elif len(self.user_links[common_userinfo].users) > 1:
+            self.user_links[common_userinfo].users.remove(userinfo)
+            self.save()
 
     def new_user(self, userinfo: UserInfo):
         """新建一个用户,返回新建的CommonUserInfo"""
@@ -129,6 +138,14 @@ class CommonUsers:
             path.touch()
         with open(path, "w") as f:
             json.dump(data, f)
+
+    def del_userdata(self, common_userinfo: CommonUserInfo):
+        path = self.path / "common_users" / f"{common_userinfo.user_id}.json"
+        try:
+            if path.is_file():  # 判断是否为文件
+                path.unlink()
+        except:
+            pass
 
     def save(self):
         """将UsersInfo对象保存为JSON文件"""
