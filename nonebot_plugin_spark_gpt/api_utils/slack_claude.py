@@ -54,7 +54,7 @@ class Slack_Claude_Bot:
             )
 
     def __hash__(self):
-        return hash(self.nickname)
+        return hash((self.nickname,self.common_userinfo.user_id))
 
     async def refresh(self):
         self.bot_data.msg_ts = ""

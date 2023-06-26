@@ -12,11 +12,11 @@ FD = ""
 GTTOKEN = ""
 SID = ""
 ABLE = True
-HEADER = None
+HEADER = ""
 
 
 def load_config():
-    global COOKIE, FD, GTTOKEN, SID, ABLE, HEADER,ABLE
+    global COOKIE, FD, GTTOKEN, SID, ABLE, HEADER, ABLE
     ABLE = True
     try:
         COOKIE = config.get_config("Spark Desk配置", "cookie")
@@ -73,9 +73,10 @@ class SparkBot:
         self.botdata = bot_data
 
     def __hash__(self) -> int:
-        return hash(self.nickname)
+        return hash((self.nickname, self.common_userinfo.user_id))
 
     async def generate_chat_id(self):
+        global HEADER
         url = "https://xinghuo.xfyun.cn/iflygpt/u/chat-list/v1/create-chat-list"
         payload = "{}"
         async with aiohttp.ClientSession(headers=HEADER) as session:
@@ -165,6 +166,7 @@ class SparkBot:
         return answer
 
     async def ask_question(self, question):
+        global HEADER,FD,GTTOKEN,SID
         url = "https://xinghuo.xfyun.cn/iflygpt-chat/u/chat_message/chat"
         payload = {
             "fd": FD,

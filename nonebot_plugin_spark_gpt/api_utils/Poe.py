@@ -51,6 +51,9 @@ class Poe_bot:
         if not COOKIE:
             raise Exception("Poe的配置cookie没有填写,无法使用")
 
+    def __hash__(self) -> int:
+        return hash((self.common_userinfo.user_id, self.nickname))
+
     async def ask(self, question: str):
         self.is_waiting = True
         if not self.botdata.handle:

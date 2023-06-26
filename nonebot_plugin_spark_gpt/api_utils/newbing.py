@@ -3,7 +3,7 @@ from nonebot.log import logger
 from pydantic import BaseModel
 from ..common.config import config
 from EdgeGPT import Chatbot, ConversationStyle, ConversationStyle
-from ..common.mytypes import CommonUserInfo, BotData, BotInfo
+from ..common.mytypes import CommonUserData, CommonUserInfo, BotData, BotInfo
 from ..common.user_data import common_users
 import json
 
@@ -14,7 +14,7 @@ ABLE = True
 
 
 def load_config():
-    global PROXY, COOKIES, WSS_LINK,ABLE
+    global PROXY, COOKIES, WSS_LINK, ABLE
     ABLE = True
     try:
         PROXY = config.get_config(source="Newbing配置", config_name="proxy")
@@ -43,11 +43,12 @@ class Newbing_bot:
     ):
         self.is_waiting = False
         self.nickname = bot_info.nickname
+        self.common_userinfo = common_userinfo
         self.chatbot: Chatbot = None
         self.chatstyle: ConversationStyle = ConversationStyle.creative
 
     def __hash__(self) -> int:
-        return hash(self.nickname)
+        return hash((self.nickname, self.common_userinfo.user_id))
 
     async def refresh(self):
         retry = 3

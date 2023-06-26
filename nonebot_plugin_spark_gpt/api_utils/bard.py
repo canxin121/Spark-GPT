@@ -12,7 +12,7 @@ ABLE = True
 
 
 def load_config():
-    global COOKIE, PROXY,ABLE
+    global COOKIE, PROXY, ABLE
     ABLE = True
     try:
         PROXY = config.get_config(source="Bard配置", config_name="proxy")
@@ -54,7 +54,7 @@ class Bard_Bot:
         self.client = CLIENT
 
     def __hash__(self) -> int:
-        return hash(self.nickname)
+        return hash((self.common_userinfo.user_id, self.nickname))
 
     async def refresh(self):
         self.botdata.bard_r = ""

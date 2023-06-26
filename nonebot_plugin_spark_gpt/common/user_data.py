@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional
 from bidict import bidict
-from pydantic import BaseModel
 from pathlib import Path
 import json
 from nonebot import logger
@@ -15,7 +14,7 @@ from .mytypes import (
 )
 
 
-class CommonUsers(BaseModel):
+class CommonUsers:
     """所有用户的信息和数据
 
     :param path: 用户数据的存储路径

@@ -17,6 +17,7 @@ from nonebot.adapters.onebot.v11 import (
 )
 from nonebot.exception import MatcherException
 from .utils import (
+    if_super_user,
     set_common_userinfo,
     set_public_common_userinfo,
     set_userinfo,
@@ -84,6 +85,8 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
 
     if chatbot.is_waiting:
         await matcher.finish(reply_out(event, "这个bot已经有一个请求在执行中了,请等待结束后在询问它"))
+    if len(question) < 7:
+        question = question.replace(" ", "").replace("\n", "")
     if question in REFRESH_KEYWORDS:
         wait_msg = await matcher.send(reply_out(event, "正在刷新，请稍等"))
         try:
@@ -198,7 +201,7 @@ async def new_bot____(
             await matcher.finish("没有这个本地预设名")
     bot_nickname = state["bot_nickname"]
     common_userinfo = state["common_userinfo"]
-    botinfo = BotInfo(nickname=bot_nickname)
+    botinfo = BotInfo(nickname=bot_nickname, onwer=common_userinfo)
     try:
         temp_bots.add_new_bot(
             common_userinfo=common_userinfo,
@@ -212,6 +215,51 @@ async def new_bot____(
         pre_command = state["pre_command"]
         msg = f"成功添加了bot,使用命令{pre_command}{bot_nickname}加上你要询问的内容即可使用该bot"
         await matcher.finish(MessageSegment.text(msg))
+    except MatcherException:
+        await delete_messages(bot, state["replys"])
+        raise
+    except Exception as e:
+        await matcher.finish(str(e))
+
+
+delete_bot = on_message(priority=1, block=False)
+
+
+@delete_bot.handle()
+async def delete_bot_(matcher: Matcher, event: MessageEvent, state: T_State):
+    if not str(event.message).startswith(("/删除bot", ".删除bot")):
+        await matcher.finish()
+    if str(event.message).startswith("/"):
+        state["common_userinfo"] = set_common_userinfo(event=event)
+        plain_message = str(event.message).replace("/删除bot", "").replace(" ", "")
+    else:
+        await if_super_user(event, matcher)
+        state["common_userinfo"] = set_public_common_userinfo()
+        plain_message = str(event.message).replace(".删除bot", "").replace(" ", "")
+    state["replys"] = []
+    if not plain_message:
+        state["replys"].append(
+            await matcher.send(
+                MessageSegment.text("请输入bot的昵称,区分大小写\n输入'取消'或'算了'可以结束当前操作")
+            )
+        )
+    else:
+        matcher.set_arg("bot", plain_message)
+
+
+@delete_bot.got("bot")
+async def delete_bot__(
+    matcher: Matcher, state: T_State, bot: Bot, event: Event, args: str = ArgStr("bot")
+):
+    await if_close(event, matcher, bot, state["replys"])
+    bot_name = str(args).replace("\n", "")
+    common_userinfo = state["common_userinfo"]
+    try:
+        common_users.delete_bot(
+            common_userinfo=common_userinfo,
+            botinfo=BotInfo(nickname=bot_name, onwer=common_userinfo),
+        )
+        await matcher.finish(MessageSegment.text("成功删除了该bot"))
     except MatcherException:
         await delete_messages(bot, state["replys"])
         raise

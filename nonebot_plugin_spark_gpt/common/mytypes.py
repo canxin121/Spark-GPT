@@ -16,26 +16,6 @@ SOURCE = Literal[
 ]
 
 
-class BotInfo(BaseModel):
-    """Bot的信息
-
-    :param nickname: Bot的别名
-    :type nickname: str
-    """
-
-    nickname: str
-
-    def __hash__(self):
-        return hash(self.nickname)
-
-    def save(self) -> str:
-        return f"{self.nickname}"
-
-    @classmethod
-    def load(cls, nickname: str) -> "BotInfo":
-        return cls(nickname=nickname)
-
-
 class BotData(BaseModel):
     """Bot的数据类型
 
@@ -134,6 +114,48 @@ class UserInfo(BaseModel):
         return cls(platform=platform, username=str(username))
 
 
+class CommonUserInfo(BaseModel):
+    """用户通用身份
+
+    :param user_id: 用户的唯一特征id
+    :type user_id: str
+    """
+
+    user_id: str
+
+    def __hash__(self):
+        return hash(self.user_id)
+
+    def save(self) -> str:
+        return self.user_id
+
+    @classmethod
+    def load(cls, user_id: str) -> "CommonUserInfo":
+        return cls(user_id=user_id)
+
+
+class BotInfo(BaseModel):
+    """Bot的信息
+
+    :param nickname: Bot的别名
+    :type nickname: str
+    """
+
+    nickname: str
+    onwer: CommonUserInfo
+
+    def __hash__(self):
+        return hash(self.nickname)
+
+    def save(self) -> str:
+        return f"{self.nickname}-{self.onwer.user_id}"
+
+    @classmethod
+    def load(cls, arg: str) -> "BotInfo":
+        args = arg.split("-", 1)
+        return cls(nickname=args[0], onwer=CommonUserInfo(user_id=args[1]))
+
+
 class CommonUserData(BaseModel):
     """用户数据
 
@@ -173,33 +195,13 @@ class CommonUserData(BaseModel):
         return cls(**newdata)
 
 
-class CommonUserInfo(BaseModel):
-    """用户通用身份
-
-    :param user_id: 用户的唯一特征id
-    :type user_id: str
-    """
-
-    user_id: str
-
-    def __hash__(self):
-        return hash(self.user_id)
-
-    def save(self) -> str:
-        return self.user_id
-
-    @classmethod
-    def load(cls, user_id: str) -> "CommonUserInfo":
-        return cls(user_id=user_id)
-
-
 class UsersInfo(BaseModel):
     users: List[UserInfo]
 
     def __hash__(self):
         # 将所有用户信息的哈希值相加得到 Usersinfo 的哈希值
         return sum(hash(user) for user in self.users)
-    
+
     def save(self) -> list:
         data = [user.save() for user in self.users]
         return data

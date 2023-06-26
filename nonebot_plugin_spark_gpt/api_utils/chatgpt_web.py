@@ -19,7 +19,7 @@ ABLE = True
 
 
 def load_config():
-    global SESSION_TOKEN, SESSION_TOKEN_KEY, CF_CLEARANCE_KEY, MODEL, API_URL, PROXIES,ABLE
+    global SESSION_TOKEN, SESSION_TOKEN_KEY, CF_CLEARANCE_KEY, MODEL, API_URL, PROXIES, ABLE
     ABLE = True
     try:
         SESSION_TOKEN = config.get_config("Chat GPT web配置", "session token")
@@ -64,7 +64,7 @@ class ChatGPT_web_Bot:
             raise ValueError("无法使用官方API,请使用第三方api_url")
 
     def __hash__(self):
-        return hash(self.nickname)
+        return hash((self.nickname, self.common_userinfo.user_id))
 
     async def refresh(self):
         self.bot_data.conversation_id = None
@@ -196,6 +196,7 @@ class ChatGPT_web_Bot:
         raise Exception("ChatGPT在发送请求时错误次数超过上限")
 
     async def refresh_session(self) -> None:
+        global SESSION_TOKEN
         cookies = {
             SESSION_TOKEN_KEY: SESSION_TOKEN,
         }

@@ -72,22 +72,31 @@ class Temp_Bots:
     def load_user_bot(
         self, common_userinfo: CommonUserInfo, botinfo: BotInfo, botdata: BotData
     ):
-        bot_mapping = {
-            "spark desk": SparkBot,
-            "bing": Newbing_bot,
-            "chatgpt web": ChatGPT_web_Bot,
-            "slack claude": Slack_Claude_Bot,
-            "poe chatgpt": Poe_bot,
-            "poe claude": Poe_bot,
-            "bard": Bard_Bot,
-        }
-
-        bot_class = bot_mapping.get(botdata.source)
-        bot = bot_class(
-            common_userinfo=common_userinfo, bot_info=botinfo, bot_data=botdata
-        )
         bot_links: Bot_Links = self.get_bot_links(common_userinfo=common_userinfo)
-        bot_links.bot_dict[botinfo] = bot
+        if botdata.source == "spark desk":
+            bot_links.bot_dict[botinfo] = SparkBot(
+                common_userinfo=common_userinfo, bot_info=botinfo, bot_data=botdata
+            )
+        elif botdata.source == "bing":
+            bot_links.bot_dict[botinfo] = Newbing_bot(
+                common_userinfo=common_userinfo, bot_info=botinfo, bot_data=botdata
+            )
+        elif botdata.source == "chatgpt web":
+            bot_links.bot_dict[botinfo] = ChatGPT_web_Bot(
+                common_userinfo=common_userinfo, bot_info=botinfo, bot_data=botdata
+            )
+        elif botdata.source == "slack claude":
+            bot_links.bot_dict[botinfo] = Slack_Claude_Bot(
+                common_userinfo=common_userinfo, bot_info=botinfo, bot_data=botdata
+            )
+        elif botdata.source == "poe chatgpt" or botdata.source == "poe claude":
+            bot_links.bot_dict[botinfo] = Poe_bot(
+                common_userinfo=common_userinfo, bot_info=botinfo, bot_data=botdata
+            )
+        elif botdata.source == "bard":
+            bot_links.bot_dict[botinfo] = Bard_Bot(
+                common_userinfo=common_userinfo, bot_info=botinfo, bot_data=botdata
+            )
 
     def add_new_bot(
         self,
