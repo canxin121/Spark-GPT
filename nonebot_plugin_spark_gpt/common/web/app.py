@@ -79,7 +79,7 @@ COMMENTS = (
             "num_limit": NUM_LIMIT,
         },
         "Bard配置": {
-            "cookie": "获取方式:打开Bard网页,打开开发者工具中的网络,在网页版bard发送问题,在开发者工具的网络中找到请求log?format=json&hasfast=true对应的请求头,复制其中的cookie的值",
+            "__Secure-1PSID": "获取方式:打开Bard网页,打开开发者工具中的应用程序,选择其中的cookie,并且复制其中的__Secure-1PSID一项的值复制到这里",
             "proxy": "访问Bard官网时使用的代理链接,请按照协议://地址:端口的格式填写",
             "pic_able": PICABLE,
             "url_able": URLABLE,

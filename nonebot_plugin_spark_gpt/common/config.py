@@ -18,6 +18,7 @@ CONFIG_SOURCE = (
 )
 CONFIG_NAMES = (
     Literal[
+        "__Secure-1PSID",
         "superusers",
         "cookie",
         "proxy",
@@ -107,7 +108,7 @@ class Config(BaseModel):
                 "num_limit": "350",
             },
             "Bard配置": {
-                "cookie": "",
+                "__Secure-1PSID": "",
                 "proxy": "",
                 "pic_able": "Auto",
                 "url_able": "True",
