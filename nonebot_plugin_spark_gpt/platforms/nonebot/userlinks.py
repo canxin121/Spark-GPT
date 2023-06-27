@@ -1,7 +1,7 @@
 from typing import Dict
 import json
 from pathlib import Path
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from ...common.mytypes import UserInfo, CommonUserInfo
 from ...common.user_data import common_users
 
@@ -15,9 +15,19 @@ class Users(BaseModel):
     :type user_links: Dict[UserInfo, CommonUserInfo]
     """
 
-    path: Path = Path() / "data/spark_gpt/platforms/nonebot.json"
+    path: Path = Field(
+        Path() / "data/spark_gpt/platforms/nonebot.json", description="用户数据的存储路径"
+    )
 
-    user_links: Dict[UserInfo, CommonUserInfo] = {}
+    user_links: Dict[UserInfo, CommonUserInfo] = Field({}, description="用户链接的字典")
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        self.path: Path = (
+            data.get("path") or Path() / "data/spark_gpt/platforms/nonebot.json"
+        )
+
+        self.user_links: Dict[UserInfo, CommonUserInfo] = data.get("user_links") or {}
 
     def link(self, userinfo: UserInfo, common_userinfo: CommonUserInfo):
         """将传入的Userinfo和CommonUserInfo相链接"""

@@ -3,7 +3,8 @@ from bidict import bidict
 from pathlib import Path
 import json
 from nonebot import logger
-from .utils.utils import generate_uuid
+from pydantic import BaseModel, Field
+from ..utils.utils import generate_uuid
 from .mytypes import (
     BotInfo,
     BotData,
@@ -14,7 +15,7 @@ from .mytypes import (
 )
 
 
-class CommonUsers:
+class CommonUsers(BaseModel):
     """所有用户的信息和数据
 
     :param path: 用户数据的存储路径
@@ -23,9 +24,24 @@ class CommonUsers:
     :type user_dict: Dict[CommonUserInfo, CommonUserData]
     """
 
-    path: Path = Path() / "data/spark_gpt/common"
-    user_dict: Dict[CommonUserInfo, CommonUserData] = {}
-    user_links: Dict[CommonUserInfo, UsersInfo] = {}
+    path: Path = Field(Path() / "data/spark_gpt/common", description="用户数据的存储路径")
+    user_dict: dict = Field(None, description="用户数据的字典")
+    user_links: dict = Field(None, description="用户链接的字典")
+
+    def __init__(
+        self,
+        **data,
+    ):
+        super().__init__(**data)
+        self.path = Path() / "data/spark_gpt/common"
+        self.user_dict: Dict[CommonUserInfo, CommonUserData] = (
+            data.get("user_dict") or {}
+        )
+        self.user_links: Dict[CommonUserInfo, UsersInfo] = data.get("user_links") or {}
+        try:
+            self.load()
+        except:
+            pass
 
     def get_bot_by_text(self, common_userinfo: CommonUserInfo, text: str) -> BotData:
         """根据text是否以某个bot的名字开头来获取对应的botdata"""
@@ -199,59 +215,53 @@ class CommonUsers:
                 user_dict[
                     CommonUserInfo(user_id=common_userinfo)
                 ] = CommonUserData.load(data2)
-
-            return user_dict, user_links
+            self.user_dict = user_dict
+            self.user_links = user_links
         except Exception as e:
             logger.error(str(e))
             pass
 
-    def __init__(self, **data):
-        """从JSON文件中读取数据并创建CommonUsers对象"""
-        super().__init__(**data)
-        try:
-            user_dict, user_links = self.load()
-            self.user_dict.update(user_dict)
-            self.user_links.update(user_links)
-        except:
-            pass
-
 
 common_users = CommonUsers()
+# common_userinfo1 = CommonUserInfo(user_id="159753654")
+# common_userinfo2 = CommonUserInfo(user_id="155656555")
+# common_users = CommonUsers(
+#     user_dict={
+#         common_userinfo1: CommonUserData(
+#             bots={
+#                 BotInfo(nickname="sss", onwer=common_userinfo1): BotData(
+#                     id="ssss", source="bard"
+#                 )
+#             },
+#             key="123456789",
+#             user_id="159753654",
+#         ),
+#         common_userinfo2: CommonUserData(
+#             bots={
+#                 BotInfo(nickname="sss", onwer=common_userinfo1): BotData(
+#                     id="ssss", source="bard"
+#                 )
+#             },
+#             key="9555211",
+#             user_id="155656555",
+#         ),
+#     },
+#     user_links={
+#         common_userinfo1: UsersInfo(
+#             users=[
+#                 UserInfo(platform="OneBot V11", username="123456"),
+#                 UserInfo(platform="Telegram", username="456789"),
+#             ]
+#         ),
+#         common_userinfo2: UsersInfo(
+#             users=[
+#                 UserInfo(platform="OneBot V11", username="654321"),
+#                 UserInfo(platform="Telegram", username="6543211"),
+#             ]
+#         ),
+#     },
+# )
+# common_users.user_dict[common_userinfo1].key = "123456789"
+# common_users.save_userdata(common_userinfo=common_userinfo1)
 
-
-""" common_userinfo1 = CommonUserInfo(user_id="159753654")
-common_userinfo2 = CommonUserInfo(user_id="155656555")
-common_users = CommonUsers(
-    user_dict={
-        common_userinfo1: CommonUserData(
-            bots={BotInfo(nickname="sss"): BotData(id="ssss")},
-            key="123456789",
-            user_id="159753654",
-        ),
-        common_userinfo2: CommonUserData(
-            bots={BotInfo(nickname="aaa"): BotData(id="csacsac")},
-            key="9555211",
-            user_id="155656555",
-        )
-    },
-    user_links={
-        common_userinfo1: UsersInfo(
-            users=[
-                UserInfo(platform="qq", username="123456"),
-                UserInfo(platform="telegram", username="456789"),
-            ]
-        ),
-        common_userinfo2: UsersInfo(
-            users=[
-                UserInfo(platform="qq", username="654321"),
-                UserInfo(platform="telegram", username="6543211"),
-            ]
-        )
-    },
-)
-
-common_users.user_dict[common_userinfo1].key = "123456789"
-common_users.save_userdata(common_userinfo=common_userinfo1)
-
-common_users.save()
- """
+# common_users.save()

@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from ..config import config
 from ..prompt_data import prompts
-from ...api_utils.load_config import load_config
+from ...chatbot.load_config import load_config
 import uvicorn
 
 get_config = nonebot.get_driver().config
@@ -221,10 +221,6 @@ class Fastapp:
             )
 
 
-def run_unicorn():
-    uvicorn.run(app, host=HOST, port=PORT)
-
-
 async def run_server():
     web_ui_thread = threading.Thread(target=run_unicorn)
     web_ui_thread.start()
@@ -238,6 +234,10 @@ async def start_web_ui():
 async def stop_web_ui():
     global ABLE
     ABLE = False
+
+
+def run_unicorn():
+    uvicorn.run(app, host=HOST, port=PORT)
 
 
 asyncio.run(run_server())

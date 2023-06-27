@@ -81,7 +81,7 @@ class Newbing_bot:
             if value == "Throttled":
                 return "该账号cookie问答次数已达到今日上限"
             else:
-                return f"出错喽:{value}，多次失败请尝试刷新对话"
+                raise Exception(f"{value}")
         reply = ""
         last_num = len(raw_json["item"]["messages"]) - 1
         try:

@@ -41,11 +41,15 @@ CONFIG_NAMES = (
 )
 
 
-class Config:
-    path: Path = Path()
-    config: dict = {}
+from pydantic import BaseModel, Field
 
-    def __init__(self):
+
+class Config(BaseModel):
+    path: Path = Field(None, description="配置文件的存储路径")
+    config: dict = Field(None, description="配置文件的内容")
+
+    def __init__(self, **data):
+        super().__init__(**data)
         self.path = Path() / "data/spark_gpt/common"
         # 配置的优先级是 分级配置>总控配置，及当分级配置没有填写时从总控配置中读取
         self.config = {

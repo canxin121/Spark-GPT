@@ -26,7 +26,7 @@ from ...common.prompt_data import prompts
 from .userlinks import users
 from ...common.mytypes import UserInfo, CommonUserInfo, BotInfo, BotData
 from ..temp_bots import temp_bots
-from ...api_utils.load_config import get_able_source
+from ...chatbot.load_config import get_able_source
 
 REFRESH_KEYWORDS = [
     "清除对话",
@@ -64,12 +64,11 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
                 common_userinfo = set_common_userinfo(event, bot)
                 chatbot = temp_bots.get_bot_by_msgid(common_userinfo, bot, event)
             except:
-                pass
-            try:
-                common_userinfo = set_public_common_userinfo(bot)
-                chatbot = temp_bots.get_bot_by_msgid(common_userinfo, bot, event)
-            except:
-                await matcher.finish()
+                try:
+                    common_userinfo = set_public_common_userinfo(bot)
+                    chatbot = temp_bots.get_bot_by_msgid(common_userinfo, bot, event)
+                except:
+                    await matcher.finish()
         else:
             await matcher.finish()
     else:

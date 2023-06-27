@@ -1,17 +1,18 @@
-from typing import Literal, Dict, Union
+from typing import Any, Literal, Dict, Union
+import typing
 from nonebot import logger
 from pathlib import Path
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from bidict import bidict
 import json
 from ..common.mytypes import CommonUserInfo, BotInfo, BotData, PLATFORM, SOURCE
 from ..common.user_data import common_users
-from ..api_utils.spark_desk import SparkBot
-from ..api_utils.newbing import Newbing_bot
-from ..api_utils.chatgpt_web import ChatGPT_web_Bot
-from ..api_utils.slack_claude import Slack_Claude_Bot
-from ..api_utils.Poe import Poe_bot
-from ..api_utils.bard import Bard_Bot
+from ..chatbot.spark_desk import SparkBot
+from ..chatbot.newbing import Newbing_bot
+from ..chatbot.chatgpt_web import ChatGPT_web_Bot
+from ..chatbot.slack_claude import Slack_Claude_Bot
+from ..chatbot.Poe import Poe_bot
+from ..chatbot.bard import Bard_Bot
 from .nonebot.utils import OB11_BOT, Bot, MessageEvent, TGBot
 
 CHATBOT = Union[
@@ -19,16 +20,24 @@ CHATBOT = Union[
 ]
 
 
-class Bot_Links:
-    msg_bot_dict: bidict = bidict()
-    bot_dict: Dict[str, any] = {}
+class Bot_Links(BaseModel):
+    msg_bot_dict: bidict[str, Any] = Field(None, description="储存信息和chatbot的双向dict")
+    bot_dict: Dict[str, Any] = Field(None, description="储存用户和其chatbot的dict")
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        self.msg_bot_dict: bidict = data.get("msg_bot_dict") or bidict()
+        self.bot_dict: Dict[str, Any] = data.get("bot_dict") or bidict()
 
 
-class Temp_Bots:
-    users: Dict[CommonUserInfo, Bot_Links] = {}
+class Temp_Bots(BaseModel):
+    users: Dict[CommonUserInfo, Bot_Links] = Field(
+        None, description="储存运行中创建和使用的chatbot"
+    )
 
-    def __init__(self):
-        self.users: Dict[CommonUserInfo, Bot_Links] = {}
+    def __init__(self, **data):
+        super().__init__(**data)
+        self.users: Dict[CommonUserInfo, Bot_Links] = data.get("users") or {}
 
     def get_message_id_by_send(
         self,
