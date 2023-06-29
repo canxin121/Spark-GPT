@@ -1,3 +1,4 @@
+import asyncio
 from nonebot.log import logger
 import aiohttp
 import base64
@@ -58,9 +59,9 @@ def load_config():
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
     }
     GENERATE_HEADER = ASK_HEADER.copy()
-    GENERATE_HEADER['Accept'] = 'application/json, text/plain, */*'
-    GENERATE_HEADER['Content-Type'] = 'application/json'
-    GENERATE_HEADER['X-Requested-With'] = 'XMLHttpRequest'
+    GENERATE_HEADER["Accept"] = "application/json, text/plain, */*"
+    GENERATE_HEADER["Content-Type"] = "application/json"
+    GENERATE_HEADER["X-Requested-With"] = "XMLHttpRequest"
 
 
 load_config()
@@ -71,7 +72,7 @@ class SparkBot:
         self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
         self.nickname = bot_info.nickname
-        self.is_waiting = False
+        self.lock = asyncio.Lock()
         self.common_userinfo = common_userinfo
         self.botdata = bot_data
 
@@ -137,36 +138,33 @@ class SparkBot:
 
     async def refresh(self):
         retry = 3
-        self.is_waiting = True
+
         while retry > 0:
             try:
                 self.botdata.chatid = await self.generate_chat_id()
                 common_users.save_userdata(self.common_userinfo)
-                self.is_waiting = False
+
                 return
             except Exception as e:
                 logger.error(f"SparkDesk刷新出错了:{str(e)}")
                 retry -= 1
-        self.is_waiting = False
+
         raise Exception("SparkDesk刷新时出错次数超过上限")
 
     async def ask(self, question):
-        self.is_waiting = True
         if not self.botdata.chatid:
             try:
                 await self.refresh()
                 await self.ask_question(self.botdata.prompt)
             except Exception as e:
-                self.is_waiting = False
                 error = f"SparkDesk初始化时出错次数超过上限:{str(e)}"
                 logger.error(error)
                 raise Exception(error)
         try:
             answer = await self.ask_question(question=question)
         except Exception as e:
-            self.is_waiting = False
             raise e
-        self.is_waiting = False
+
         return answer
 
     async def ask_question(self, question):

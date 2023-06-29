@@ -85,6 +85,13 @@ COMMENTS = (
             "url_able": URLABLE,
             "num_limit": NUM_LIMIT,
         },
+        "通义千问配置": {
+            "cookie":"获取方法为打开通义千问聊天界面,F12打开开发者工具的网络界面,提取其中的heartbeat请求的cookie的值",
+            "XSRF_TOKEN": "获取方法为获取方法为打开通义千问聊天界面,F12打开开发者工具的应用程序界面,选择左侧cookie,提取其中的XSRF_TOKEN的值",
+            "pic_able": PICABLE,
+            "url_able": URLABLE,
+            "num_limit": NUM_LIMIT,
+        },
     },
 )
 DESCRIPTIONS = {
@@ -95,6 +102,7 @@ DESCRIPTIONS = {
     "Claude Slack配置": "Claude Slack聊天机器人的配置(留空则默认从总控配置读取)",
     "Poe配置": "Claude Slack聊天机器人的配置(留空则默认从总控配置读取)",
     "Bard配置": "Google Bard聊天机器人的配置(留空则默认从总控配置读取)",
+    "通义千问配置": "通义千问聊天机器人的配置(留空则默认从总控配置读取)",
 }
 ABLE = True
 

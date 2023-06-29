@@ -22,6 +22,7 @@ poe-api = "^0.4.6"
 pydantic = "^1.10.9"
 slack-sdk = "^3.21.3"
 uvicorn = "^0.22.0"
+bardapi = "^0.1.18"
 python-multipart = "^0.0.6"
 [tool.poetry.extras]
 onebot = ["nonebot-adapter-onebot"]

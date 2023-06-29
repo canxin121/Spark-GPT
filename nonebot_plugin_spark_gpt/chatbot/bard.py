@@ -1,3 +1,4 @@
+import asyncio
 import httpx
 from urllib.parse import quote
 from nonebot.log import logger
@@ -46,10 +47,9 @@ class Bard_Bot:
         self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
         global Secure1PSID
-        self.is_waiting = False
+        self.lock = asyncio.Lock()
         self.common_userinfo = common_userinfo
         self.nickname = bot_info.nickname
-        self.botdata = bot_data
         self.session = requests.Session()
         self.session.headers = HEADER
         self.bard_client = None
@@ -66,12 +66,9 @@ class Bard_Bot:
         self.session.headers = HEADER
         self.session.cookies.set("__Secure-1PSID", Secure1PSID)
         try:
-            self.is_waiting = True
             await self.new_bard_client()
-            self.is_waiting = False
             return
         except Exception as e:
-            self.is_waiting = False
             raise e
 
     async def ask(self, question: str):
@@ -82,12 +79,9 @@ class Bard_Bot:
             except Exception as e:
                 raise e
         try:
-            self.is_waiting = True
             answer = await self.bard_talk(question)
-            self.is_waiting = False
             return answer
         except Exception as e:
-            self.is_waiting = False
             raise e
 
     @run_sync

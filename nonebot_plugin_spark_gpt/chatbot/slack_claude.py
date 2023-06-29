@@ -44,8 +44,9 @@ class Slack_Claude_Bot:
     def __init__(
         self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
+        self.lock = asyncio.Lock()
         self.nickname = bot_info.nickname
-        self.is_waiting = False
+        
         self.bot_data = bot_data
         self.common_userinfo = common_userinfo
         if not (SLACK_USER_TOKEN and CHANNEL_ID and CLAUDE_ID):
@@ -54,38 +55,38 @@ class Slack_Claude_Bot:
             )
 
     def __hash__(self):
-        return hash((self.nickname,self.common_userinfo.user_id))
+        return hash((self.nickname, self.common_userinfo.user_id))
 
     async def refresh(self):
         self.bot_data.msg_ts = ""
         self.bot_data.thread_ts = ""
-        self.is_waiting = True
+        
         try:
             _ = await self.claude_chat(question=self.bot_data.prompt)
-            self.is_waiting = False
+            
             return
         except Exception as e:
-            self.is_waiting = False
+            
             error = f"Claude Slack刷新时error:{str(e)}"
             logger.error(error)
             raise Exception(error)
 
     async def ask(self, question: str):
-        self.is_waiting = True
+        
         if not self.bot_data.thread_ts:
             try:
                 _ = await self.claude_chat(question=self.bot_data.prompt)
             except Exception as e:
-                self.is_waiting = False
+                
                 error = f"Claude Slack加载预设时error:{str(e)}"
                 logger.error(error)
                 raise Exception(error)
         try:
             answer = await self.claude_chat(question=question)
-            self.is_waiting = False
+            
             return answer
         except Exception as e:
-            self.is_waiting = False
+            
             error = f"Claude Slack询问时error:{str(e)}"
             logger.error(error)
             raise Exception(error)
@@ -113,7 +114,7 @@ class Slack_Claude_Bot:
                 text=f"<@{CLAUDE_ID}>{text}",
             )
             return result
-        except SlackApiError as e:
+        except Exception as e:
             error = f"Claude Slack在获取claude发送的消息时error: {e}"
             logger.error(error)
             raise Exception(error)
@@ -133,7 +134,7 @@ class Slack_Claude_Bot:
     async def get_msg(self, question: str):
         response = "_Typing…_"
         start_time = time.time()
-        max_retries = 5
+        max_retries = 3
         reties = 0
         while response.strip().endswith("_Typing…_"):
             time.sleep(RECEIVE_INTERVAL)
@@ -152,10 +153,13 @@ class Slack_Claude_Bot:
                 # 否则更新消息从而触发@Claude的响应
                 if reties >= max_retries:
                     # 解锁会话
-                    raise f"以重试{max_retries}次,未收到Claude响应,请重试."
+                    raise f"以重试{max_retries}次,未收到Claude响应,将重试."
                 else:
                     # 如果重试次数未超过{max_retries}次,则更新消息从而触发@Claude的响应
-                    await self.update_message(CHANNEL_ID, self.bot_data, question)
+                    try:
+                        await self.update_message(CHANNEL_ID, question)
+                    except Exception as e:
+                        pass
                     start_time = time.time()
                     reties += 1
                     continue

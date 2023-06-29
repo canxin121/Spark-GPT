@@ -1,3 +1,4 @@
+import asyncio
 from typing import Dict, Literal
 from nonebot.log import logger
 from pydantic import BaseModel
@@ -41,18 +42,18 @@ class Newbing_bot:
     def __init__(
         self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
-        self.is_waiting = False
+        
         self.nickname = bot_info.nickname
         self.common_userinfo = common_userinfo
         self.chatbot: Chatbot = None
         self.chatstyle: ConversationStyle = ConversationStyle.creative
-
+        self.lock = asyncio.Lock()
     def __hash__(self) -> int:
         return hash((self.nickname, self.common_userinfo.user_id))
 
     async def refresh(self):
         retry = 3
-        self.is_waiting = True
+        
         while retry > 0:
             try:
                 if len(PROXY) > 0:
@@ -62,14 +63,14 @@ class Newbing_bot:
                     )
                 else:
                     self.chatbot = Chatbot(cookies=COOKIES)
-                self.is_waiting = False
+                
                 return
             except Exception as e:
                 logger.error(f"Newbing刷新时error:{str(e)}")
                 if retry > 0:
                     retry += 1
                 else:
-                    self.is_waiting = False
+                    
                     raise e
         error = "Newbing刷新时报错次数超过上限"
         logger.error(error)
@@ -130,7 +131,7 @@ class Newbing_bot:
                 logger.error("Newbing自动刷新出错:" + str(e))
                 pass
         final_answer = str(reply + "\n" + suggest_str + limit_str)
-        self.is_waiting = False
+        
         return final_answer
 
     async def ask(self, question):
@@ -138,7 +139,7 @@ class Newbing_bot:
             await self.refresh()
         # 使用EdgeGPT进行ask询问
         retry = 3
-        self.is_waiting = True
+        
         while retry >= 0:
             try:
                 raw_json = await self.chatbot.ask(
@@ -152,7 +153,7 @@ class Newbing_bot:
                         raise Exception("InvalidSession")
                     elif raw_json["item"]["result"]["value"] == "UnauthorizedRequest":
                         raise Exception("UnauthorizedRequest")
-                    self.is_waiting = False
+                    
                     return await self.generate_answer(raw_json)
                 else:
                     raise Exception("返回值为None")
@@ -166,7 +167,7 @@ class Newbing_bot:
                     or str(e) == "UnauthorizedRequest"
                 ):
                     await self.refresh()
-                    self.is_waiting = True
+                    
                     while retry > 0:
                         try:
                             if WSS_LINK:
@@ -176,7 +177,7 @@ class Newbing_bot:
                                     wss_link=WSS_LINK,
                                 )
                                 if raw_json["item"]:
-                                    self.is_waiting = False
+                                    
                                     return await self.generate_answer(raw_json)
                                 else:
                                     raise Exception("返回值为None")
@@ -185,12 +186,12 @@ class Newbing_bot:
                                     prompt=question, conversation_style=self.chatstyle
                                 )
                                 if raw_json["item"]:
-                                    self.is_waiting = False
+                                    
                                     return await self.generate_answer(raw_json)
                                 else:
                                     raise Exception("返回值为None")
                         except:
-                            self.is_waiting = False
+                            
                             if retry > 0:
                                 retry -= 1
                             else:

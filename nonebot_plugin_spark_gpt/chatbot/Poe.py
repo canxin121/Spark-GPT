@@ -1,3 +1,4 @@
+import asyncio
 from typing import Dict, Literal
 from nonebot.log import logger
 from nonebot.utils import run_sync
@@ -6,7 +7,7 @@ from ..common.config import config
 from EdgeGPT import Chatbot, ConversationStyle, ConversationStyle
 from ..common.mytypes import CommonUserInfo, BotData, BotInfo
 from ..common.user_data import common_users
-import poe
+from .poe_api.src import poe
 import uuid
 
 
@@ -38,7 +39,7 @@ class Poe_bot:
     def __init__(
         self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
-        self.is_waiting = False
+        self.lock = asyncio.Lock()
         self.nickname = bot_info.nickname
         self.common_userinfo = common_userinfo
         self.botdata = bot_data
@@ -56,42 +57,42 @@ class Poe_bot:
         return hash((self.common_userinfo.user_id, self.nickname))
 
     async def ask(self, question: str):
-        self.is_waiting = True
+        
         if not self.botdata.handle:
             try:
                 await self.new_bot()
             except Exception as e:
-                self.is_waiting = False
+                
                 raise e
         try:
             answer = await self.chat(question)
-            self.is_waiting = False
+            
             return answer
         except Exception as e:
-            self.is_waiting = False
+            
             raise e
 
     async def refresh(self):
-        self.is_waiting = True
+        
         if not self.botdata.handle:
             try:
                 await self.new_bot()
             except Exception as e:
-                self.is_waiting = False
+                
                 raise e
         else:
             try:
                 await self.chat_break()
             except Exception as e:
-                self.is_waiting = False
+                
                 raise e
-        self.is_waiting = False
+        
         return
 
     @run_sync
     def chat_break(self):
         detail_error = "未知错误"
-        retry = 2
+        retry = 3
         if not CLIENT:
             try:
                 self.new_client()
@@ -121,7 +122,7 @@ class Poe_bot:
                 self.new_client()
             except Exception as e:
                 raise e
-        retry = 2
+        retry = 3
         while retry > 0:
             detail_error = "未知错误"
             try:
@@ -155,7 +156,7 @@ class Poe_bot:
         generated_uuid = uuid.uuid4()
         random_handle = generated_uuid.hex.replace("-", "")[0:15]
         self.botdata.handle = random_handle
-        retry = 2
+        retry = 3
         detail_error = "未知错误"
         while retry > 0:
             try:
@@ -180,7 +181,7 @@ class Poe_bot:
 
     def new_client(self):
         global CLIENT
-        retry = 2
+        retry = 3
         detail_error = "未知错误"
         while retry > 0:
             try:

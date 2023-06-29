@@ -1,3 +1,4 @@
+import asyncio
 import httpx
 from urllib.parse import urljoin
 
@@ -51,13 +52,12 @@ class ChatGPT_web_Bot:
     def __init__(
         self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
-        self.is_waiting = False
         self.nickname = bot_info.nickname
         self.common_userinfo = common_userinfo
         self.bot_data: BotData = bot_data
         self.timeout = 30
         self.authorization = ""
-
+        self.lock = asyncio.Lock()
         if not (SESSION_TOKEN and MODEL and API_URL):
             raise Exception("ChatGPT web的必填配置session_token,model,api_url没有填写全,无法使用")
         if API_URL.startswith("https://chat.openai.com"):
@@ -69,7 +69,7 @@ class ChatGPT_web_Bot:
     async def refresh(self):
         self.bot_data.conversation_id = None
         self.bot_data.parent_id = str(uuid.uuid4())
-        self.is_waiting = True
+
         try:
             (
                 _,
@@ -77,15 +77,14 @@ class ChatGPT_web_Bot:
                 self.bot_data.conversation_id,
             ) = await self.send_query(self.bot_data.prompt)
         except Exception as e:
-            self.is_waiting = False
             raise e
-        self.is_waiting = False
+
         common_users.save_userdata(common_userinfo=self.common_userinfo)
 
     async def ask(self, question: str):
         if not self.bot_data.conversation_id:
             await self.refresh()
-        self.is_waiting = True
+
         try:
             (
                 answer,
@@ -93,10 +92,9 @@ class ChatGPT_web_Bot:
                 self.bot_data.conversation_id,
             ) = await self.send_query(question=question)
             common_users.save_userdata(common_userinfo=self.common_userinfo)
-            self.is_waiting = False
+
             return answer
         except Exception as e:
-            self.is_waiting = False
             raise e
 
     async def send_query(self, question: str):

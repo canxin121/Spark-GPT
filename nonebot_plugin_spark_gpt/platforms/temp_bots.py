@@ -13,10 +13,17 @@ from ..chatbot.chatgpt_web import ChatGPT_web_Bot
 from ..chatbot.slack_claude import Slack_Claude_Bot
 from ..chatbot.Poe import Poe_bot
 from ..chatbot.bard import Bard_Bot
+from ..chatbot.tongyiqianwen import TongYiQianWen
 from .nonebot.utils import OB11_BOT, Bot, MessageEvent, TGBot
 
 CHATBOT = Union[
-    SparkBot, Newbing_bot, ChatGPT_web_Bot, Slack_Claude_Bot, Poe_bot, Bard_Bot
+    SparkBot,
+    Newbing_bot,
+    ChatGPT_web_Bot,
+    Slack_Claude_Bot,
+    Poe_bot,
+    Bard_Bot,
+    TongYiQianWen,
 ]
 
 
@@ -140,6 +147,10 @@ class Temp_Bots(BaseModel):
             )
         elif botdata.source == "bard":
             bot_links.bot_dict[botinfo] = Bard_Bot(
+                common_userinfo=common_userinfo, bot_info=botinfo, bot_data=botdata
+            )
+        elif botdata.source == "通义千问":
+            bot_links.bot_dict[botinfo] = TongYiQianWen(
                 common_userinfo=common_userinfo, bot_info=botinfo, bot_data=botdata
             )
 

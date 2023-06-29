@@ -8,6 +8,7 @@ from .userlinks import users
 from ...common.user_data import common_users
 from ...common.config import config
 from nonebot.matcher import Matcher
+from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageEvent as OB11_MessageEvent
 from nonebot.adapters.onebot.v11 import Bot as OB11_BOT
 from nonebot.adapters.onebot.v11 import MessageSegment as OB11_MessageSegment
@@ -61,7 +62,7 @@ async def reply_message(
 ):
     """跨平台回复消息"""
     if isinstance(event, TGMessageEvent):
-        retry = 3
+        retry = 5
         while retry > 0:
             try:
                 any = await bot.send(
@@ -80,12 +81,13 @@ async def send_message(matcher: Matcher, bot: Bot, message: Message):
     if isinstance(bot, OB11_BOT):
         return await matcher.send(message)
     if isinstance(bot, TGBot):
-        retry = 3
+        retry = 5
         while retry > 0:
             try:
                 any = await matcher.send(message)
                 return any
-            except:
+            except Exception as e:
+                logger.error(f"Tg发送消息时出错:{str(e)}")
                 retry -= 1
         raise Exception("Telegram发送消息多次超时,请检查网络连接状况")
 
@@ -98,7 +100,7 @@ async def delete_messages(bot: Bot, event: MessageEvent, dict_list: list):
             await bot.delete_msg(message_id=eachmsg["message_id"])
     elif isinstance(bot, TGBot):
         for eachmsg in dict_list:
-            retry = 3
+            retry = 5
             while retry > 0:
                 try:
                     await bot.delete_message(

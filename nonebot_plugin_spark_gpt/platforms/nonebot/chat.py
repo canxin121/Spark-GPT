@@ -42,8 +42,7 @@ REFRESH_KEYWORDS = [
 chat = on_message(priority=1, block=False)
 
 
-@chat.handle()
-async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
+async def get_question_chatbot(event: MessageEvent, bot: Bot, matcher: Matcher):
     raw_text = str(event.message)
     if not (
         raw_text.startswith(("/", "."))
@@ -63,10 +62,12 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
             try:
                 common_userinfo = set_common_userinfo(event, bot)
                 chatbot = temp_bots.get_bot_by_msgid(common_userinfo, bot, event)
+                return question, chatbot, common_userinfo
             except:
                 try:
                     common_userinfo = set_public_common_userinfo(bot)
                     chatbot = temp_bots.get_bot_by_msgid(common_userinfo, bot, event)
+                    return question, chatbot, common_userinfo
                 except:
                     await matcher.finish()
         else:
@@ -80,33 +81,39 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
             question, chatbot = temp_bots.get_bot_by_text(
                 common_userinfo=common_userinfo, text=raw_text
             )
+            return question, chatbot, common_userinfo
         except Exception as e:
             # logger.error(str(e))
             await matcher.finish()
 
-    if chatbot.is_waiting:
+
+@chat.handle()
+async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
+    question, chatbot, common_userinfo = await get_question_chatbot(event, bot, matcher)
+
+    if chatbot.lock.locked():
         await send_message(matcher, bot, "这个bot已经有一个请求在执行中了,请等待结束后在询问它")
         await matcher.finish()
-        # 1await send_message(matcher,bot,reply_out(event, "这个bot已经有一个请求在执行中了,请等待结束后在询问它"))
 
     if len(question) < 7:
         question = question.replace(" ", "").replace("\n", "")
     if question in REFRESH_KEYWORDS:
         wait_msg = await reply_message(bot, matcher, event, "正在刷新，请稍等")
-        # wait_msg = await send_message(matcher, bot, "正在刷新，请稍等")
-
-        try:
-            await chatbot.refresh()
-            msg = "刷新对话成功"
-        except Exception as e:
-            msg = str(e)
-    else:
-        wait_msg = await reply_message(bot, matcher, event, "正在思考，请稍等")
-        if len(question) >= 1:
+        async with chatbot.lock:
             try:
-                msg = await chatbot.ask(question=question)
+                await chatbot.refresh()
+                msg = "刷新对话成功"
             except Exception as e:
                 msg = str(e)
+    else:
+        if len(question) >= 1:
+            async with chatbot.lock:
+                wait_msg = await reply_message(bot, matcher, event, "正在思考，请稍等")
+                
+                try:
+                    msg = await chatbot.ask(question=question)
+                except Exception as e:
+                    msg = str(e)
         else:
             msg = "你没有输入任何问题,请重新询问并在命令后加上问题"
 
@@ -116,7 +123,6 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
         # logger.error("撤回消息失败")
         pass
     reply = await reply_message(bot, matcher, event, msg)
-    # reply = await send_message(matcher,bot,reply_out(event, msg))
     temp_bots.set_bot_msgid(common_userinfo, chatbot, bot, event, reply)
     await matcher.finish()
 
@@ -181,6 +187,7 @@ async def new_bot___(
     if not (
         state["able_source_dict"][state["source_index"]] == "bing"
         or state["able_source_dict"][state["source_index"]] == "bard"
+        or state["able_source_dict"][state["source_index"]] == "通义千问"
     ):
         prompts_str = prompts.show_list()
         state["replys"].append(

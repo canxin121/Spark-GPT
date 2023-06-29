@@ -13,54 +13,36 @@ SOURCE = Literal[
     "spark desk",
     "bing",
     "bard",
+    "通义千问",
 ]
 
 
 class BotData(BaseModel):
-    """Bot的数据类型
+    """Bot的数据类型"""
 
-    :param nickname: bot的别名
-    :type nickname: str
-    :param id: bot的id
-    :type id: str
-    :param owner: bot的拥有者
-    :type owner: str
-    :param is_waiting: bot是否正在等待
-    :type is_waiting: bool
-    :param last_suggests: bot的最后的建议回复
-    :type last_suggests: List[str]
-    :param source: bot的来源
-    :type source: str
-    :param model: bot的ai模型
-    :type model: str
-    :param num_users: bot的正在使用人数
-    :type num_users: int
-    :param prompt_nickname: bot的预设名
-    :type prompt_nickname: str
-    :param prompt: bot的预设内容
-    :type prompt: str
-    """
-
-    nickname: Optional[str]
+    """poe"""
     handle: Optional[str]
+    """chatgpt web"""
     conversation_id: Optional[str]
     parent_id: Optional[str]
+    """通义千问"""
+    sessionId: Optional[str]
+    parentMsgId: Optional[str]
+    userId: Optional[str]
+    """slack Claude"""
     msg_ts: Optional[str]
     thread_ts: Optional[str]
     session_id: Optional[str]
-    bard_r: Optional[str]
-    bard_rc: Optional[str]
-    bard_at: Optional[str]
-    id: Optional[str]
+    """spark desk"""
+    chatid: Optional[str]
+    """通用"""
+    nickname: Optional[str]
     owner: Optional[str]
     is_waiting: Optional[bool]
     last_suggests: Optional[List[str]] = []
     source: SOURCE
-    model: Optional[str]
-    num_users: Optional[int]
     prompt_nickname: Optional[str]
     prompt: Optional[str]
-    chatid: Optional[str]
 
     def __hash__(self):
         return hash((self.nickname, self.owner))
