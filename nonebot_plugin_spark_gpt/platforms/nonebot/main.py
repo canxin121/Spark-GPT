@@ -30,6 +30,35 @@ from ...common.user_data import common_users
 from ...common.prompt_data import prompts
 from .userlinks import users
 from ...common.mytypes import UserInfo, CommonUserInfo, BotInfo
+from ...utils.text_render import text_to_html
+
+debug = on_command("debug", priority=1, block=False)
+path = Path()
+
+
+@debug.handle()
+async def debug_(matcher: Matcher, event: MessageEvent, bot: Bot):
+    example = """好的，以下是一篇500字的科幻小说：
+
+《时空穿越的秘密》
+
+我是一名实验室的研究员，我正在进行一项关于时空穿越的实验。这项实验试图探究时空的奥秘，让我们能够穿越时空，探索未来和过去。但是，我很快就发现这项实验的危险性。
+
+我和我的团队进行了数次实验，我们试图穿越时空，进入不同的时代。我们发现，时空穿越并不是一件简单的事情，它能够改变历史和未来。我们试图寻找一种稳定的方法，让时空穿越成为一种安全和可控的技术。
+
+但是，在一次实验中，我们发现了一个神秘的时空裂缝。这个裂缝非常强大，它能够将我们带到一个未知的时空。我们决定探索这个时空，试图了解它的历史和文明。
+
+我们发现这个时空非常奇怪，它的文明非常先进，但却非常残酷。我们看到了许多奇怪的科技和文化，但也看到了许多破坏和死亡。我们试图了解这个时空的历史和原因，但我们很快就发现这个时空的秘密。
+
+这个时空被一种神秘的生命体控制着，这个生命体非常强大，它能够控制时空和文明的命运。我们意识到这个生命体可能是一个时空的守护者，它试图保护时空不受外来干扰。但是，我们也意识到这个生命体可能是一个威胁，它试图控制时空和文明的发展。
+
+我们决定采取行动，试图打破这个时空的秘密。我们试图与这个生命体交流，了解它的真正目的。我们最终成功了，我们发现这个生命体试图保护时空的平衡和稳定，但它也意识到了自己的局限性。它希望我们能够帮助它，探索更多的时空和文明，让时空和文明得到更好的发展。
+
+这个旅程让我明白了，时空穿越是一种双刃剑。它能够带给我们更多的知识和文明，但也能够带来更多的风险和危险。我们应该尊重和保护时空的平衡和稳定，而不是试图改变和控制它们。只有这样，我们才能够真正地探索时空的奥秘，发现更多的可能性和未知。"""
+    a = await text_to_html(example)
+    with open(path / "temp.html", "w") as f:
+        f.write(a)
+    await matcher.finish()
 
 
 help = on_command("help", priority=1, block=False)

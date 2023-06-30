@@ -7,7 +7,7 @@ from ...common.mytypes import UserInfo, CommonUserInfo
 from .userlinks import users
 from ...common.user_data import common_users
 from ...common.config import config
-from ...utils.old import txt2img
+from ...utils.text_render import txt_to_pic
 from ...utils.utils import get_url
 from nonebot.matcher import Matcher
 from nonebot import logger
@@ -99,7 +99,7 @@ async def reply_message(
         if PICABLE == "Auto":
             if len(str(content)) > NUMLIMIT:
                 url = await get_url(str(content))
-                content = await txt2img.draw_img("", str(content))
+                content = await txt_to_pic(str(content))
                 return await matcher.send(
                     OB11_MessageSegment.reply(event.message_id)
                     + OB11_MessageSegment.image(content)
@@ -111,7 +111,7 @@ async def reply_message(
                 )
         elif PICABLE == "True" and len(str(content)) > 100:
             url = await get_url(str(content))
-            content = await txt2img.draw_img("", str(content))
+            content = await txt_to_pic(str(content))
             return await matcher.send(
                 OB11_MessageSegment.reply(event.message_id)
                 + OB11_MessageSegment.image(content)
