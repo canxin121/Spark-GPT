@@ -6,7 +6,8 @@ from .Poe import load_config as load_poe_config
 from .slack_claude import load_config as load_slack_claude_config
 from .bard import load_config as load_bard_config
 from .spark_desk import load_config as load_spark_desk_config
-from .tongyiqianwen import load_config as laod_tongyiqianwen_config
+from .tongyiqianwen import load_config as load_tongyiqianwen_config
+from ..platforms.nonebot.utils import load_config as load_common_config
 from ..common.config import CONFIG_SOURCE
 
 
@@ -19,6 +20,7 @@ def get_able_source():
     from .bard import ABLE as BARD_ABLE
     from .spark_desk import ABLE as SPARKDESK_ABLE
     from .tongyiqianwen import ABLE as TongYiQianWen_ABLE
+
     able_dict = {
         "poe chatgpt": POE_ABLE,
         "poe claude": POE_ABLE,
@@ -27,7 +29,7 @@ def get_able_source():
         "spark desk": SPARKDESK_ABLE,
         "bing": NEWBING_ABLE,
         "bard": BARD_ABLE,
-        "通义千问":TongYiQianWen_ABLE
+        "通义千问": TongYiQianWen_ABLE,
     }
     source_dict = {}
     source_dict_str = ""
@@ -43,12 +45,14 @@ def get_able_source():
 
 
 def load_all_config():
+    load_common_config()
     load_bard_config()
     load_newbing_config()
     load_poe_config()
     load_slack_claude_config()
     load_chat_gpt_web_config()
     load_spark_desk_config()
+    load_tongyiqianwen_config()
 
 
 def load_config(source: CONFIG_SOURCE):
@@ -67,4 +71,4 @@ def load_config(source: CONFIG_SOURCE):
     elif source == "Bard配置":
         load_bard_config()
     elif source == "通义千问配置":
-        laod_tongyiqianwen_config()
+        load_tongyiqianwen_config()

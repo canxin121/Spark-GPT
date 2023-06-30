@@ -117,13 +117,18 @@ class TongYiQianWen:
                                 stripped_line = line.decode().replace("data:", "")
                                 try:
                                     data = json.loads(stripped_line)
+                                    if "errorMsg" in data.keys():
+                                        raise Exception(data["errorMsg"])
                                     content = data["content"][0]
                                 except json.decoder.JSONDecodeError as e:
                                     pass
+                                except Exception as e:
+                                    raise e
                         return content
             except Exception as e:
                 detail_error = str(e)
                 logger.error(f"通义千问在询问时error:{detail_error}")
+                retry -= 1
         error = f"通义千问在询问时出错次数超过上限:{detail_error}"
         logger.error(error)
         raise Exception(error)
@@ -150,7 +155,7 @@ class TongYiQianWen:
                             self.botdata.sessionId = data["data"].get("sessionId")
                             self.botdata.userId = data["data"].get("userId")
                             self.botdata.parentMsgId = "0"
-                            return
+                        return
             except Exception as e:
                 detail_error = str(e)
                 logger.error(f"通义千问在刷新时error:{detail_error}")

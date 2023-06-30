@@ -7,6 +7,8 @@ from ...common.mytypes import UserInfo, CommonUserInfo
 from .userlinks import users
 from ...common.user_data import common_users
 from ...common.config import config
+from ...utils.old import txt2img
+from ...utils.utils import get_url
 from nonebot.matcher import Matcher
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import MessageEvent as OB11_MessageEvent
@@ -24,6 +26,26 @@ Message_Segment = Union[OB11_MessageSegment, TGMessageSegment]
 Message = Union[Message_Segment, str, TGMessage, OB11_Message]
 MessageEvent = Union[OB11_MessageEvent, TGMessageEvent]
 Bot = Union[OB11_BOT, TGBot]
+
+PICABLE = "Auto"
+NUMLIMIT = 850
+
+
+def load_config():
+    global PICABLE, NUMLIMIT
+    try:
+        PICABLE = config.get_config("总控配置", "pic_able")
+    except:
+        PICABLE = "Auto"
+
+    if PICABLE == "Auto":
+        try:
+            NUMLIMIT = int(config.get_config("总控配置", "num_limit"))
+        except:
+            NUMLIMIT = 800
+
+
+load_config()
 
 
 async def if_close(
@@ -74,7 +96,31 @@ async def reply_message(
                 pass
 
     elif isinstance(event, OB11_MessageEvent):
-        return await matcher.send(OB11_MessageSegment.reply(event.message_id) + content)
+        if PICABLE == "Auto":
+            if len(str(content)) > NUMLIMIT:
+                url = await get_url(str(content))
+                content = await txt2img.draw_img("", str(content))
+                return await matcher.send(
+                    OB11_MessageSegment.reply(event.message_id)
+                    + OB11_MessageSegment.image(content)
+                    + OB11_MessageSegment.text(url)
+                )
+            else:
+                return await matcher.send(
+                    OB11_MessageSegment.reply(event.message_id) + content
+                )
+        elif PICABLE == "True" and len(str(content)) > 100:
+            url = await get_url(str(content))
+            content = await txt2img.draw_img("", str(content))
+            return await matcher.send(
+                OB11_MessageSegment.reply(event.message_id)
+                + OB11_MessageSegment.image(content)
+                + OB11_MessageSegment.text(url)
+            )
+        else:
+            return await matcher.send(
+                OB11_MessageSegment.reply(event.message_id) + content
+            )
 
 
 async def send_message(matcher: Matcher, bot: Bot, message: Message):

@@ -18,12 +18,13 @@ fastapi = "^0.98.0"
 httpx = "^0.24.1"
 jinja2 = "^3.1.2"
 markdown = "^3.4.3"
-poe-api = "^0.4.6"
+poe-api = "^0.4.7"
 pydantic = "^1.10.9"
 slack-sdk = "^3.21.3"
 uvicorn = "^0.22.0"
 bardapi = "^0.1.18"
 python-multipart = "^0.0.6"
+pillow = "^9.5.0"
 [tool.poetry.extras]
 onebot = ["nonebot-adapter-onebot"]
 

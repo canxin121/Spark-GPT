@@ -61,7 +61,7 @@ class Config(BaseModel):
                 "pic_able": "Auto",
                 "url_able": "True",
                 "suggest_able": "True",
-                "num_limit": "350",
+                "num_limit": "800",
                 "poe_api_mode": "1",
                 "mode": "black",
             },

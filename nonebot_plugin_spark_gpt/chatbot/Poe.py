@@ -7,7 +7,7 @@ from ..common.config import config
 from EdgeGPT import Chatbot, ConversationStyle, ConversationStyle
 from ..common.mytypes import CommonUserInfo, BotData, BotInfo
 from ..common.user_data import common_users
-from .poe_api.src import poe
+import poe
 import uuid
 
 
