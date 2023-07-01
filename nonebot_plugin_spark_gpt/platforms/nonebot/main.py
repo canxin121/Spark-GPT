@@ -24,6 +24,8 @@ from .utils import (
     MessageEvent,
     Message,
     Bot,
+    SPECIALPIC_WIDTH,
+    PIC_WIDTH,
 )
 
 from ...common.web.app import start_web_ui, stop_web_ui, HOST, PORT
@@ -89,7 +91,7 @@ async def help_(
 | 关闭webui | 请在使用webui后关闭(管理员可用) | SparkGPT管理员可用 |
 """
     if not Generated_Help_Msg_Pic:
-        await txt_to_pic(help_msg, Help_Msg_Path, quality=100)
+        await txt_to_pic(help_msg, Help_Msg_Path, width=PIC_WIDTH, quality=100)
         Generated_Help_Msg_Pic = True
     await send_img(Help_Msg_Path, matcher, bot, event)
     await matcher.finish()
@@ -204,7 +206,7 @@ all_prompts = on_command("所有预设", priority=1, block=False)
 
 @all_prompts.handle()
 async def all_prompts_(bot: Bot, matcher: Matcher, event: MessageEvent):
-    path = await txt_to_pic(prompts.show_list(), width=600)
+    path = await txt_to_pic(prompts.show_list(), width=SPECIALPIC_WIDTH)
     await send_img(path, matcher, bot, event)
     await matcher.finish()
 
@@ -416,7 +418,7 @@ async def all_bots_(matcher: Matcher, bot: Bot, event: MessageEvent):
         pre_command = "."
         common_userinfo = set_public_common_userinfo(bot)
     path = await txt_to_pic(
-        common_users.show_all_bots(common_userinfo, pre_command), width=900
+        common_users.show_all_bots(common_userinfo, pre_command), width=SPECIALPIC_WIDTH
     )
     await send_img(path, matcher, bot, event)
     await matcher.finish()

@@ -250,33 +250,6 @@ async def new_bot____(
 delete_bot = on_message(priority=1, block=False)
 
 
-
-
-
-@delete_bot.got("bot")
-async def delete_bot__(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("bot"),
-):
-    await if_close(event, matcher, bot, state["replys"])
-    bot_name = str(args).replace("\n", "")
-    common_userinfo = state["common_userinfo"]
-    try:
-        common_users.delete_bot(
-            common_userinfo=common_userinfo,
-            botinfo=BotInfo(nickname=bot_name, onwer=common_userinfo),
-        )
-        await send_message(matcher, bot, "成功删除了该bot")
-        await matcher.finish()
-    except MatcherException:
-        await delete_messages(bot, event, state["replys"])
-        raise
-    except Exception as e:
-        await send_message(matcher, bot, str(e))
-        await matcher.finish()
 @delete_bot.handle()
 async def delete_bot_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_State):
     if not str(event.message).startswith(("/删除bot", ".删除bot")):
@@ -296,3 +269,29 @@ async def delete_bot_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_
 
     else:
         matcher.set_arg("bot", plain_message)
+
+
+@delete_bot.got("bot")
+async def delete_bot__(
+    matcher: Matcher,
+    state: T_State,
+    bot: Bot,
+    event: MessageEvent,
+    args: str = ArgStr("bot"),
+):
+    await if_close(event, matcher, bot, ["replys"])
+    bot_name = str(args).replace("\n", "")
+    common_userinfo = state["common_userinfo"]
+    try:
+        common_users.delete_bot(
+            common_userinfo=common_userinfo,
+            botinfo=BotInfo(nickname=bot_name, onwer=common_userinfo),
+        )
+        await send_message(matcher, bot, "成功删除了该bot")
+        await matcher.finish()
+    except MatcherException:
+        await delete_messages(bot, event, state["replys"])
+        raise
+    except Exception as e:
+        await send_message(matcher, bot, str(e))
+        await matcher.finish()

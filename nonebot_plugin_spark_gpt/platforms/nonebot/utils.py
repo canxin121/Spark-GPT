@@ -32,14 +32,25 @@ Bot = Union[OB11_BOT, TGBot]
 PICABLE = "Auto"
 NUMLIMIT = 850
 URLABLE = "True"
+PIC_WIDTH = 1800
+SPECIALPIC_WIDTH = 600
 
 
 def load_config():
-    global PICABLE, NUMLIMIT, URLABLE
+    global PICABLE, NUMLIMIT, URLABLE, PIC_WIDTH, SPECIALPIC_WIDTH
+
     try:
         PICABLE = config.get_config("总控配置", "pic_able")
     except:
         PICABLE = "Auto"
+    try:
+        PIC_WIDTH = int(config.get_config("总控配置", "pic_width"))
+    except:
+        PIC_WIDTH = 1800
+    try:
+        SPECIALPIC_WIDTH = int(config.get_config("总控配置", "specialpic_width"))
+    except:
+        SPECIALPIC_WIDTH = 600
 
     if PICABLE == "Auto":
         try:
@@ -142,7 +153,7 @@ async def reply_message(
                         url = await get_url(str(content))
                     else:
                         url = ""
-                    path = await txt_to_pic(str(content))
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
                     any = await send_TGMessagePhoto_with_retry(
                         path, url, bot, event, reply_to_message_id=event.message_id
                     )
@@ -157,7 +168,7 @@ async def reply_message(
                     url = await get_url(str(content))
                 else:
                     url = ""
-                path = await txt_to_pic(str(content))
+                path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
                 any = await send_TGMessagePhoto_with_retry(
                     path, url, bot, event, reply_to_message_id=event.message_id
                 )
@@ -178,14 +189,18 @@ async def reply_message(
                 if len(str(content)) > NUMLIMIT:
                     if URLABLE == "True":
                         url = await get_url(str(content))
+                        path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                        return await matcher.send(
+                            OB11_MessageSegment.reply(event.message_id)
+                            + OB11_MessageSegment.image(path)
+                            + OB11_MessageSegment.text(url)
+                        )
                     else:
-                        url = ""
-                    path = await txt_to_pic(str(content))
-                    return await matcher.send(
-                        OB11_MessageSegment.reply(event.message_id)
-                        + OB11_MessageSegment.image(path)
-                        + OB11_MessageSegment.text(url)
-                    )
+                        path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                        return await matcher.send(
+                            OB11_MessageSegment.reply(event.message_id)
+                            + OB11_MessageSegment.image(path)
+                        )
                 else:
                     return await matcher.send(
                         OB11_MessageSegment.reply(event.message_id) + content
@@ -193,14 +208,18 @@ async def reply_message(
             elif PICABLE == "True":
                 if URLABLE == "True":
                     url = await get_url(str(content))
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                    return await matcher.send(
+                        OB11_MessageSegment.reply(event.message_id)
+                        + OB11_MessageSegment.image(path)
+                        + OB11_MessageSegment.text(url)
+                    )
                 else:
-                    url = ""
-                path = await txt_to_pic(str(content))
-                return await matcher.send(
-                    OB11_MessageSegment.reply(event.message_id)
-                    + OB11_MessageSegment.image(path)
-                    + OB11_MessageSegment.text(url)
-                )
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                    return await matcher.send(
+                        OB11_MessageSegment.reply(event.message_id)
+                        + OB11_MessageSegment.image(path)
+                    )
             else:
                 return await matcher.send(
                     OB11_MessageSegment.reply(event.message_id) + content
@@ -217,7 +236,7 @@ async def send_img(
         any = await send_TGMessagePhoto_with_retry(path, "", bot, event)
         return any
     elif isinstance(event, OB11_MessageEvent):
-        return await matcher.send(+OB11_MessageSegment.image(path))
+        return await matcher.send(OB11_MessageSegment.image(path))
 
 
 async def send_message(
@@ -231,7 +250,7 @@ async def send_message(
     """跨平台回复消息"""
     if isinstance(event, TGMessageEvent):
         if force_pic:
-            path = await txt_to_pic(str(content))
+            path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
             any = await send_TGMessagePhoto_with_retry(path, "", bot, event)
             return any
         if plain:
@@ -244,7 +263,7 @@ async def send_message(
                         url = await get_url(str(content))
                     else:
                         url = ""
-                    path = await txt_to_pic(str(content))
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
                     any = await send_TGMessagePhoto_with_retry(path, url, bot, event)
                     return any
                 else:
@@ -255,7 +274,7 @@ async def send_message(
                     url = await get_url(str(content))
                 else:
                     url = ""
-                path = await txt_to_pic(str(content))
+                path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
                 any = await send_TGMessagePhoto_with_retry(path, url, bot, event)
                 return any
             else:
@@ -263,8 +282,8 @@ async def send_message(
                 return any
     elif isinstance(event, OB11_MessageEvent):
         if force_pic:
-            path = await txt_to_pic(str(content))
-            return await matcher.send(+OB11_MessageSegment.image(path))
+            path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+            return await matcher.send(OB11_MessageSegment.image(path))
         if plain:
             return await matcher.send(content)
         else:
@@ -272,23 +291,35 @@ async def send_message(
                 if len(str(content)) > NUMLIMIT:
                     if URLABLE == "True":
                         url = await get_url(str(content))
+                        path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                        return await matcher.send(
+                            OB11_MessageSegment.reply(event.message_id)
+                            + OB11_MessageSegment.image(path)
+                            + OB11_MessageSegment.text(url)
+                        )
                     else:
-                        url = ""
-                    path = await txt_to_pic(str(content))
-                    return await matcher.send(
-                        +OB11_MessageSegment.image(path) + OB11_MessageSegment.text(url)
-                    )
+                        path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                        return await matcher.send(
+                            OB11_MessageSegment.reply(event.message_id)
+                            + OB11_MessageSegment.image(path)
+                        )
                 else:
                     return await matcher.send(Message)
             elif PICABLE == "True":
                 if URLABLE == "True":
                     url = await get_url(str(content))
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                    return await matcher.send(
+                        OB11_MessageSegment.reply(event.message_id)
+                        + OB11_MessageSegment.image(path)
+                        + OB11_MessageSegment.text(url)
+                    )
                 else:
-                    url = ""
-                path = await txt_to_pic(str(content))
-                return await matcher.send(
-                    +OB11_MessageSegment.image(path) + OB11_MessageSegment.text(url)
-                )
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                    return await matcher.send(
+                        OB11_MessageSegment.reply(event.message_id)
+                        + OB11_MessageSegment.image(path)
+                    )
             else:
                 return await matcher.send(Message)
 

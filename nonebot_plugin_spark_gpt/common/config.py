@@ -40,6 +40,8 @@ CONFIG_NAMES = (
         "claude_id",
         "slack_user_token",
         "XSRF_TOKEN",
+        "specialpic_width",
+        "pic_width",
     ],
 )
 
@@ -61,6 +63,8 @@ class Config(BaseModel):
                 "pic_able": "Auto",
                 "url_able": "True",
                 "num_limit": "800",
+                "pic_width": "1800",
+                "specialpic_width": "",
             },
             "Newbing配置": {
                 "cookie": "",
@@ -112,7 +116,7 @@ class Config(BaseModel):
                 "num_limit": "",
             },
             "通义千问配置": {
-                "cookie":"",
+                "cookie": "",
                 "XSRF_TOKEN": "",
                 "pic_able": "",
                 "url_able": "",
@@ -163,9 +167,10 @@ class Config(BaseModel):
         try:
             with open(self.path / "config.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
-                for key in data.keys():
-                    self.config[key].update(data[key])
-
+                for eachdict in data.keys():
+                    for key in eachdict:
+                        if key in self.config[eachdict].keys():
+                            self.config[eachdict][key] = data[eachdict][key]
         except Exception as e:
             # logger.error(str(e))
             pass
