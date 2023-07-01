@@ -2,7 +2,7 @@
   <a href="https://github.com/canxin121">
     <img src="https://socialify.git.ci/canxin121/Spark-GPT/image?font=Raleway&forks=1&issues=1&language=1&logo=https%3A%2F%2Fcanxin121.github.io%2Fdocs%2Flogo.png&name=1&owner=1&pattern=Charlie%20Brown&pulls=1&stargazers=1&theme=Auto" width="700" height="350">
   </a>
-  <h1>Spark-GPT</h1>
+  <h1>Spark-GPT重构仓库</h1>
   <p><em>Spark-GPT</em></p>
 </div>
 
@@ -38,72 +38,4 @@
 
 - 目前支持将Poe,NewBing,Dalle,ChatGPT (session token),Claude(slack),讯飞星火模型(Spark_desk)接入qq
 
-| Image 1 | Image 2 |
-|:-------:|:-------:|
-| ![1](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(1).png) | ![2](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(2).png) |
-| ![3](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(3).png) | ![4](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(4).png) |
-| ![5](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(5).png) | ![6](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(6).png) |
-| ![7](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(7).png) | ![8](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(8).png) |
-| ![9](https://github.com/canxin121/Spark-GPT/blob/main/source/spark/demo(9).png) |
 
-## 更新
-- 2023.6.23 0.3.9:
-    1.回退EdgeGPT版本到0.2.1以解决部分用户因网络问题无法使用的bug
-- 2023.6.5 0.3.6:  
-    1.更新EdgeGPT的api版本
-- 2023.6.9 0.3.5:  
-    1.修复一个gpt_web的日志错误
-    2.将EdgeGPT升到最新版并包装成上下文管理器
-- 2023.6.5 0.3.3:  
-    1.修复一个gpt_web的日志错误
-    2.将EdgeGPT升到最新版并包装成上下文管理器
-- 2023.5.30 0.3.1:  
-    1.修复风控造成对用户是否在等待的错误
-- 2023.5.29 0.3.0:  
-    1.修复讯飞星火停止一段时间后不可用的bug
-- 2023.5.25 0.2.8:
-    1.修复一些bug
-    2.同步poe更新
-    3.将poe的默认api改成了playwright的api
-- 2023.5.23 0.2.7:
-    1.修复gpt web出现 会话不存在的问题，如果出现请更新后 刷新对话，即可恢复
-- 2023.5.23 0.2.6:
-    1.增加更多关于预设的命令
-    2.修复一些bug
-- 2023.5.23 0.2.6:
-    1.增加更多关于预设的命令
-    2.修复一些bug
-- 2023.5.23 0.2.5:
-    1.更新poe playwright api来同步新版的poe
-- 2023.5.22 0.2.4:
-    1.为claude的api设置2分钟超时
-    2.修复bot更改修改prompt出错的bug
-- 2023.5.22 0.2.3:
-    1.输错信息时提示终止
-    2.sbl和bl过长自动转图片
-    3./bs修复不能直接/bs 1这种的bug
-- 2023.5.19 0.2.2:
-    1.bing判断字数错误bug修复
-- 2023.5.18 0.2.1:  
-    1.帮助命令只加载配置好的
-- 2023.5.17 0.2.0:  
-    1.修复命令冲突和bard logger的bug
-    2.第一次使用自动创建bing的json
-- 2023.5.17 0.1.9:  
-    1.增加共享机器人
-    2.增加查看，修改机器人功能
-    3.修复路径问题
-    4.修复poe http创建时的模型索引错误问题
-- 2023.5.13 0.1.8:  
-    1.增加poe http版出错后自动重启poe客户端
-- 2023.5.13 0.1.7:  
-    1.增加一些配置项
-    2.poe增加http api版本
-- 2023.5.11 0.1.5:  
-    1.新增Bard的使用
-    2.修复以文字发送bug和newbing html图片显示bug
-- 2023.5.11 0.1.4:  
-    1.增加讯飞星火模型(Spark_desk)  
-- 2023.5.11 0.1.3:  
-    1.增加claude_slack  
-    2.修复一些小bug  

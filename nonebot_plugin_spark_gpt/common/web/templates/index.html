@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+   <style>
+      /* 设置.sidebar的样式 */
+      .sidebar {
+         position: absolute;
+         left: 0;
+         height: calc(100%);
+         width: 20vw;
+         background-color: #b3eff1;
+         border-radius: 10px;
+         padding: 20px;
+         overflow: auto;
+         min-width: 88px;
+      }
+
+      /* 修改.main的样式 */
+      .main {
+         padding: 50px;
+         border: 1px solid rgb(93, 90, 90);
+         border-radius: 10px;
+         margin-top: 22px;
+         margin-bottom: 20px;
+         margin-right: 20px;
+         margin-left: max(21vw, 90px);
+      }
+
+      /* 将body的高度设置为100vh */
+      body {
+         height: 100vh;
+         margin: 0;
+      }
+
+      /* 修改按钮样式 */
+      .my-btn {
+         display: block;
+         margin-bottom: 10px;
+      }
+   </style>
+</head>
+
+<body>
+   <!-- 侧边栏 -->
+   <div class="sidebar">
+      <div>
+         <a href="/config" class="btn btn-primary my-btn">配置</a>
+         <a href="/prompt" class="btn btn-primary my-btn">预设</a>
+      </div>
+      <a href="https://canxin121.github.io/docs/docs/Spark_GPT.html" style="position: relative; display: inline-block;">
+         <div
+            style="position: absolute; top: 0; left: 0; width: 50px; height: 50px; border-radius: 50%; overflow: hidden;">
+            <img src="https://avatars.githubusercontent.com/u/69547456?s=96&v=4" alt="logo"
+               style="width: 100%; height: 100%; object-fit: cover;">
+         </div>
+      </a>
+   </div>
+
+   <!-- 主内容 -->
+   <div class="main">
+      <h1>SparkGPT</h1>
+   </div>
+
+   <!-- 引入所需的JavaScript库 -->
+   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+
+</html>

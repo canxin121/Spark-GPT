@@ -1,31 +1,30 @@
 [tool.poetry]
 name = "nonebot_plugin_spark_gpt"
-version = "0.4.1"
-description = "Spark-GPT,将多来源的gpt接入qq及更多平台,使用便捷,管理完善,功能强大"
+version = "1.0.1"
+description = "Spark-GPT,将多种来源的gpt接入qq,TG及更多平台,提供webui进行实时配置热更新,效率高超,使用便捷,管理完善,功能强大"
 authors = ["canxin121 <1969730106@qq.com>"]
 readme = "README.md"
-packages = [{include = "nonebot_plugin_spark_gpt"}]
+packages = [{ include = "nonebot_plugin_spark_gpt" }]
 
 [tool.poetry.dependencies]
+nonebot-adapter-onebot = { version = "^2.0.0-beta.1", optional = true }
 python = "^3.9"
-nonebot2 = "^2.0.0-beta.1"
-aiofiles = "^23.1.0"
 aiohttp = "^3.8.4"
 bidict = "^0.22.1"
 edgegpt = "0.2.1"
-httpx = "^0.24.0"
-imagegen = "^0.2"
-jinja2 = "^3.1.2"
+fastapi = "^0.98.0"
+httpx = "^0.24.1"
 markdown = "^3.4.3"
-nonebot-plugin-guild-patch = "*"
-playwright = "^1.33.0"
-pydantic = "^1.10.7"
-nonebot-adapter-onebot = { version = "^2.0.0-beta.1", optional = true }
-pymdown-extensions = "^9.11"
-python-markdown-math = "^0.8"
+poe-api = "^0.4.7"
+pydantic = "^1.10.9"
 slack-sdk = "^3.21.3"
-poe-api = "^0.3.1"
-
+uvicorn = "^0.22.0"
+bardapi = "^0.1.18"
+python-multipart = "^0.0.6"
+python_markdown_math = "^0.8"
+charset_normalizer = "^3.1.0"
+imgkit = "^1.2.3"
+Pygments = "^2.15.1"
 [tool.poetry.extras]
 onebot = ["nonebot-adapter-onebot"]
 
