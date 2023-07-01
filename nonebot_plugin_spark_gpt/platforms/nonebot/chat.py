@@ -92,7 +92,7 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
     question, chatbot, common_userinfo = await get_question_chatbot(event, bot, matcher)
 
     if chatbot.lock.locked():
-        await send_message(matcher, bot, "这个bot已经有一个请求在执行中了,请等待结束后在询问它")
+        await send_message("这个bot已经有一个请求在执行中了,请等待结束后在询问它", matcher, bot, event)
         await matcher.finish()
 
     if len(question) < 7:
@@ -146,9 +146,10 @@ async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_Sta
     state["replys"] = []
     state["replys"].append(
         await send_message(
+            f"请输入要创建的bot的来源的序号\n可选项有:\n{able_source_str}输入'算了'或'取消'可以结束当前操作",
             matcher,
             bot,
-            f"请输入要创建的bot的来源的序号\n可选项有:\n{able_source_str}输入'算了'或'取消'可以结束当前操作",
+            event,
         )
     )
 
@@ -166,11 +167,16 @@ async def new_bot__(
     if state["source_index"] not in [
         str(i) for i in range(1, len(state["able_source_dict"]) + 1)
     ]:
-        await send_message(matcher, bot, "没有这个索引数字,请从头开始")
+        await send_message("没有这个索引数字,请从头开始", matcher, bot, event)
         await delete_messages(bot, event, state["replys"])
         await matcher.finish()
     state["replys"].append(
-        await send_message(matcher, bot, "请为这个新bot设置一个独一无二的昵称\n输入'算了'或'取消'可以结束当前操作")
+        await send_message(
+            "请为这个新bot设置一个独一无二的昵称\n输入'算了'或'取消'可以结束当前操作",
+            matcher,
+            bot,
+            event,
+        )
     )
 
 
@@ -192,9 +198,10 @@ async def new_bot___(
         prompts_str = prompts.show_list()
         state["replys"].append(
             await send_message(
+                f'请设置这个bot的预设\n如果使用本地预设,请在预设名前加".",如使用自己的预设直接发送即可\n当前可用的本地预设有\n{prompts_str}\n输入"算了"或"取消"可以结束当前操作',
                 matcher,
                 bot,
-                f'请设置这个bot的预设\n如果使用本地预设,请在预设名前加".",如使用自己的预设直接发送即可\n当前可用的本地预设有\n{prompts_str}\n输入"算了"或"取消"可以结束当前操作',
+                event,
             )
         )
 
@@ -218,7 +225,7 @@ async def new_bot____(
             prompt = prompts.show_prompt(prompt_nickname)
             state["prompt_nickname"] = prompt_nickname
         except:
-            await send_message(matcher, bot, "没有这个本地预设名")
+            await send_message("没有这个本地预设名", matcher, bot, event)
             await matcher.finish()
     bot_nickname = state["bot_nickname"]
     common_userinfo = state["common_userinfo"]
@@ -237,13 +244,13 @@ async def new_bot____(
         )
         pre_command = state["pre_command"]
         msg = f"成功添加了bot,使用命令{pre_command}{bot_nickname}加上你要询问的内容即可使用该bot"
-        await send_message(matcher, bot, msg)
+        await send_message(msg, matcher, bot, event)
         await matcher.finish()
     except MatcherException:
         await delete_messages(bot, event, state["replys"])
         raise
     except Exception as e:
-        await send_message(matcher, bot, str(e))
+        await send_message(str(e), matcher, bot, event)
         await matcher.finish()
 
 
@@ -264,7 +271,9 @@ async def delete_bot_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_
     state["replys"] = []
     if not plain_message:
         state["replys"].append(
-            await send_message(matcher, bot, "请输入bot的昵称,区分大小写\n输入'取消'或'算了'可以结束当前操作")
+            await send_message(
+                "请输入bot的昵称,区分大小写\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event
+            )
         )
 
     else:
@@ -287,11 +296,11 @@ async def delete_bot__(
             common_userinfo=common_userinfo,
             botinfo=BotInfo(nickname=bot_name, onwer=common_userinfo),
         )
-        await send_message(matcher, bot, "成功删除了该bot")
+        await send_message("成功删除了该bot", matcher, bot, event)
         await matcher.finish()
     except MatcherException:
         await delete_messages(bot, event, state["replys"])
         raise
     except Exception as e:
-        await send_message(matcher, bot, str(e))
+        await send_message(str(e), matcher, bot, event)
         await matcher.finish()

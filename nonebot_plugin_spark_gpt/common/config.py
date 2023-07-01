@@ -168,7 +168,7 @@ class Config(BaseModel):
             with open(self.path / "config.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
                 for eachdict in data.keys():
-                    for key in eachdict:
+                    for key in data[eachdict].keys():
                         if key in self.config[eachdict].keys():
                             self.config[eachdict][key] = data[eachdict][key]
         except Exception as e:
