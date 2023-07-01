@@ -1,4 +1,5 @@
 import asyncio
+from pathlib import Path
 from nonebot import require
 
 import ast
@@ -21,6 +22,7 @@ from nonebot.adapters.telegram.bot import Bot as TGBot
 from nonebot.adapters.telegram.event import MessageEvent as TGMessageEvent
 from nonebot.adapters.telegram.exception import NetworkError as TGNetworkError
 from nonebot.adapters.telegram.exception import ActionFailed as TGActionFailed
+from nonebot.adapters.telegram.message import File as TGFile
 
 Message_Segment = Union[OB11_MessageSegment, TGMessageSegment]
 Message = Union[Message_Segment, str, TGMessage, OB11_Message]
@@ -29,10 +31,11 @@ Bot = Union[OB11_BOT, TGBot]
 
 PICABLE = "Auto"
 NUMLIMIT = 850
+URLABLE = "True"
 
 
 def load_config():
-    global PICABLE, NUMLIMIT
+    global PICABLE, NUMLIMIT, URLABLE
     try:
         PICABLE = config.get_config("总控配置", "pic_able")
     except:
@@ -43,6 +46,15 @@ def load_config():
             NUMLIMIT = int(config.get_config("总控配置", "num_limit"))
         except:
             NUMLIMIT = 800
+        try:
+            URLABLE = config.get_config("总控配置", "url_able")
+        except:
+            URLABLE = False
+    if PICABLE == "True":
+        try:
+            URLABLE = config.get_config("总控配置", "url_able")
+        except:
+            URLABLE = False
 
 
 load_config()
@@ -76,66 +88,209 @@ async def if_super_user(event: MessageEvent, bot: Bot, mathcer: Matcher):
         return
 
 
+async def send_TGMessageText_with_retry(
+    content: str, bot: Bot, event: MessageEvent, **kwargs
+):
+    retry = 10
+    while retry > 0:
+        try:
+            any = await bot.send(event, content, **kwargs)
+            return any
+        except Exception as e:
+            logger.error(f"Telegram适配器在发送消息时出错:{str(e)}")
+            retry -= 1
+            pass
+    raise Exception("Telegram适配器在发送消息时出错次数超过上限")
+
+
+async def send_TGMessagePhoto_with_retry(
+    path: Union[str, Path], text: str, bot: Bot, event: MessageEvent, **kwargs
+):
+    retry = 10
+    while retry > 0:
+        try:
+            if text:
+                any = await bot.send(event, TGFile.photo(str(path)) + text, **kwargs)
+            else:
+                any = await bot.send(event, TGFile.photo(str(path)), **kwargs)
+            return any
+        except Exception as e:
+            logger.error(f"Telegram适配器在发送图片消息时出错:{str(e)}")
+            retry -= 1
+            pass
+    raise Exception("Telegram适配器在发送图片消息时出错次数超过上限")
+
+
 async def reply_message(
     bot: Bot,
     matcher: Matcher,
     event: MessageEvent,
     content: str,
+    plain: bool = True,
 ):
     """跨平台回复消息"""
     if isinstance(event, TGMessageEvent):
-        retry = 5
-        while retry > 0:
-            try:
-                any = await bot.send(
-                    event, content, reply_to_message_id=event.message_id
+        if plain:
+            any = await send_TGMessageText_with_retry(
+                content, bot, event, reply_to_message_id=event.message_id
+            )
+            return any
+        else:
+            if PICABLE == "Auto":
+                if len(str(content)) > NUMLIMIT:
+                    if URLABLE == "True":
+                        url = await get_url(str(content))
+                    else:
+                        url = ""
+                    path = await txt_to_pic(str(content))
+                    any = await send_TGMessagePhoto_with_retry(
+                        path, url, bot, event, reply_to_message_id=event.message_id
+                    )
+                    return any
+                else:
+                    any = await send_TGMessageText_with_retry(
+                        content, bot, event, reply_to_message_id=event.message_id
+                    )
+                    return any
+            elif PICABLE == "True":
+                if URLABLE == "True":
+                    url = await get_url(str(content))
+                else:
+                    url = ""
+                path = await txt_to_pic(str(content))
+                any = await send_TGMessagePhoto_with_retry(
+                    path, url, bot, event, reply_to_message_id=event.message_id
                 )
                 return any
-            except:
-                retry -= 1
-                pass
+            else:
+                any = await send_TGMessageText_with_retry(
+                    content, bot, event, reply_to_message_id=event.message_id
+                )
+                return any
 
     elif isinstance(event, OB11_MessageEvent):
-        if PICABLE == "Auto":
-            if len(str(content)) > NUMLIMIT:
-                url = await get_url(str(content))
-                content = await txt_to_pic(str(content))
+        if plain:
+            return await matcher.send(
+                OB11_MessageSegment.reply(event.message_id) + content
+            )
+        else:
+            if PICABLE == "Auto":
+                if len(str(content)) > NUMLIMIT:
+                    if URLABLE == "True":
+                        url = await get_url(str(content))
+                    else:
+                        url = ""
+                    path = await txt_to_pic(str(content))
+                    return await matcher.send(
+                        OB11_MessageSegment.reply(event.message_id)
+                        + OB11_MessageSegment.image(path)
+                        + OB11_MessageSegment.text(url)
+                    )
+                else:
+                    return await matcher.send(
+                        OB11_MessageSegment.reply(event.message_id) + content
+                    )
+            elif PICABLE == "True":
+                if URLABLE == "True":
+                    url = await get_url(str(content))
+                else:
+                    url = ""
+                path = await txt_to_pic(str(content))
                 return await matcher.send(
                     OB11_MessageSegment.reply(event.message_id)
-                    + OB11_MessageSegment.image(content)
+                    + OB11_MessageSegment.image(path)
                     + OB11_MessageSegment.text(url)
                 )
             else:
                 return await matcher.send(
                     OB11_MessageSegment.reply(event.message_id) + content
                 )
-        elif PICABLE == "True" and len(str(content)) > 100:
-            url = await get_url(str(content))
-            content = await txt_to_pic(str(content))
-            return await matcher.send(
-                OB11_MessageSegment.reply(event.message_id)
-                + OB11_MessageSegment.image(content)
-                + OB11_MessageSegment.text(url)
-            )
+
+
+async def send_img(
+    path: Union[str, Path],
+    matcher: Matcher,
+    bot: Bot,
+    event: MessageEvent,
+):
+    if isinstance(event, TGMessageEvent):
+        any = await send_TGMessagePhoto_with_retry(path, "", bot, event)
+        return any
+    elif isinstance(event, OB11_MessageEvent):
+        return await matcher.send(+OB11_MessageSegment.image(path))
+
+
+async def send_message(
+    content: str,
+    matcher: Matcher,
+    bot: Bot,
+    event: MessageEvent,
+    plain: bool = True,
+    force_pic=False,
+):
+    """跨平台回复消息"""
+    if isinstance(event, TGMessageEvent):
+        if force_pic:
+            path = await txt_to_pic(str(content))
+            any = await send_TGMessagePhoto_with_retry(path, "", bot, event)
+            return any
+        if plain:
+            any = await send_TGMessageText_with_retry(content, bot, event)
+            return any
         else:
-            return await matcher.send(
-                OB11_MessageSegment.reply(event.message_id) + content
-            )
-
-
-async def send_message(matcher: Matcher, bot: Bot, message: Message):
-    if isinstance(bot, OB11_BOT):
-        return await matcher.send(message)
-    if isinstance(bot, TGBot):
-        retry = 5
-        while retry > 0:
-            try:
-                any = await matcher.send(message)
+            if PICABLE == "Auto":
+                if len(str(content)) > NUMLIMIT:
+                    if URLABLE == "True":
+                        url = await get_url(str(content))
+                    else:
+                        url = ""
+                    path = await txt_to_pic(str(content))
+                    any = await send_TGMessagePhoto_with_retry(path, url, bot, event)
+                    return any
+                else:
+                    any = await send_TGMessageText_with_retry(content, bot, event)
+                    return any
+            elif PICABLE == "True":
+                if URLABLE == "True":
+                    url = await get_url(str(content))
+                else:
+                    url = ""
+                path = await txt_to_pic(str(content))
+                any = await send_TGMessagePhoto_with_retry(path, url, bot, event)
                 return any
-            except Exception as e:
-                logger.error(f"Tg发送消息时出错:{str(e)}")
-                retry -= 1
-        raise Exception("Telegram发送消息多次超时,请检查网络连接状况")
+            else:
+                any = await send_TGMessageText_with_retry(content, bot, event)
+                return any
+    elif isinstance(event, OB11_MessageEvent):
+        if force_pic:
+            path = await txt_to_pic(str(content))
+            return await matcher.send(+OB11_MessageSegment.image(path))
+        if plain:
+            return await matcher.send(content)
+        else:
+            if PICABLE == "Auto":
+                if len(str(content)) > NUMLIMIT:
+                    if URLABLE == "True":
+                        url = await get_url(str(content))
+                    else:
+                        url = ""
+                    path = await txt_to_pic(str(content))
+                    return await matcher.send(
+                        +OB11_MessageSegment.image(path) + OB11_MessageSegment.text(url)
+                    )
+                else:
+                    return await matcher.send(Message)
+            elif PICABLE == "True":
+                if URLABLE == "True":
+                    url = await get_url(str(content))
+                else:
+                    url = ""
+                path = await txt_to_pic(str(content))
+                return await matcher.send(
+                    +OB11_MessageSegment.image(path) + OB11_MessageSegment.text(url)
+                )
+            else:
+                return await matcher.send(Message)
 
 
 async def delete_messages(bot: Bot, event: MessageEvent, dict_list: list):
@@ -146,7 +301,7 @@ async def delete_messages(bot: Bot, event: MessageEvent, dict_list: list):
             await bot.delete_msg(message_id=eachmsg["message_id"])
     elif isinstance(bot, TGBot):
         for eachmsg in dict_list:
-            retry = 5
+            retry = 10
             while retry > 0:
                 try:
                     await bot.delete_message(

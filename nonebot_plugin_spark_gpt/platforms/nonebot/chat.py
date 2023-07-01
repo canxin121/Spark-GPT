@@ -109,7 +109,7 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
         if len(question) >= 1:
             async with chatbot.lock:
                 wait_msg = await reply_message(bot, matcher, event, "正在思考，请稍等")
-                
+
                 try:
                     msg = await chatbot.ask(question=question)
                 except Exception as e:
@@ -122,7 +122,7 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
     except:
         # logger.error("撤回消息失败")
         pass
-    reply = await reply_message(bot, matcher, event, msg)
+    reply = await reply_message(bot, matcher, event, msg, plain=False)
     temp_bots.set_bot_msgid(common_userinfo, chatbot, bot, event, reply)
     await matcher.finish()
 
@@ -214,12 +214,15 @@ async def new_bot____(
     prompt = str(args).replace("\n", "")
     if prompt.startswith("."):
         try:
-            prompt = prompts.show_prompt(prompt_name=prompt.replace(".", ""))
+            prompt_nickname = prompt.replace(".", "")
+            prompt = prompts.show_prompt(prompt_nickname)
+            state["prompt_nickname"] = prompt_nickname
         except:
             await send_message(matcher, bot, "没有这个本地预设名")
             await matcher.finish()
     bot_nickname = state["bot_nickname"]
     common_userinfo = state["common_userinfo"]
+    prompt_nickname = state["prompt_nickname"] if state["prompt_nickname"] else "自定义预设"
     botinfo = BotInfo(nickname=bot_nickname, onwer=common_userinfo)
     try:
         temp_bots.add_new_bot(
@@ -227,6 +230,7 @@ async def new_bot____(
             botinfo=botinfo,
             botdata=BotData(
                 nickname=bot_nickname,
+                prompt_nickname=prompt_nickname,
                 prompt=prompt,
                 source=state["able_source_dict"][state["source_index"]],
             ),
@@ -246,25 +250,7 @@ async def new_bot____(
 delete_bot = on_message(priority=1, block=False)
 
 
-@delete_bot.handle()
-async def delete_bot_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_State):
-    if not str(event.message).startswith(("/删除bot", ".删除bot")):
-        await matcher.finish()
-    if str(event.message).startswith("/"):
-        state["common_userinfo"] = set_common_userinfo(event, bot)
-        plain_message = str(event.message).replace("/删除bot", "").replace(" ", "")
-    else:
-        await if_super_user(event, bot, matcher)
-        state["common_userinfo"] = set_public_common_userinfo(bot)
-        plain_message = str(event.message).replace(".删除bot", "").replace(" ", "")
-    state["replys"] = []
-    if not plain_message:
-        state["replys"].append(
-            await send_message(matcher, bot, "请输入bot的昵称,区分大小写\n输入'取消'或'算了'可以结束当前操作")
-        )
 
-    else:
-        matcher.set_arg("bot", plain_message)
 
 
 @delete_bot.got("bot")
@@ -291,3 +277,22 @@ async def delete_bot__(
     except Exception as e:
         await send_message(matcher, bot, str(e))
         await matcher.finish()
+@delete_bot.handle()
+async def delete_bot_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_State):
+    if not str(event.message).startswith(("/删除bot", ".删除bot")):
+        await matcher.finish()
+    if str(event.message).startswith("/"):
+        state["common_userinfo"] = set_common_userinfo(event, bot)
+        plain_message = str(event.message).replace("/删除bot", "").replace(" ", "")
+    else:
+        await if_super_user(event, bot, matcher)
+        state["common_userinfo"] = set_public_common_userinfo(bot)
+        plain_message = str(event.message).replace(".删除bot", "").replace(" ", "")
+    state["replys"] = []
+    if not plain_message:
+        state["replys"].append(
+            await send_message(matcher, bot, "请输入bot的昵称,区分大小写\n输入'取消'或'算了'可以结束当前操作")
+        )
+
+    else:
+        matcher.set_arg("bot", plain_message)

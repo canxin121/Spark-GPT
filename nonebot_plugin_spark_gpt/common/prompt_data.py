@@ -40,14 +40,12 @@ class Prompts(BaseModel):
 
     def show_list(self):
         """获取所有的prompts的名称"""
-        num_per_line = 2
-        prompt_list_str = ""
-        for i, key in enumerate(self.prompts.keys()):
-            prompt_list_str += "{:02d}. {}\t".format(i + 1, key)
-            if (i + 1) % num_per_line == 0:
-                prompt_list_str += "\n"
-        if len(self.prompts) % num_per_line != 0:
-            prompt_list_str += "\n"
+        prompt_list_str = "所有预设如下:\n\n| 序号 | 预设名称 |\n| --- | --- |\n"
+        i = 1
+        for key in self.prompts.keys():
+            prompt_list_str += f"| {str(i)} | {key} |\n"
+            i += 1
+        prompt_list_str += "\n"
         return prompt_list_str
 
     def change(self, prompt_name: str, prompt: str):

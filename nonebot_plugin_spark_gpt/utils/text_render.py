@@ -16,7 +16,7 @@ from nonebot.utils import run_sync
 import imgkit
 
 ASSETS_PATH = Path(__file__).parent / "assets"
-TEMP_PATH = Path(__file__).parent / "temp.png"
+TEMP_PATH = Path(__file__).parent / "temp.jpeg"
 TEMP_PATH.touch()
 template_html = ""
 
@@ -43,16 +43,20 @@ def run_sync(call: Callable[P, R]) -> Callable[P, Coroutine[None, None, R]]:
 
 
 @run_sync
-def string_to_pic(string: str, output_path: str):
+def string_to_pic(
+    string: str, output_path: str, width: int = 2200, zoom: int = 2, quality: int = 94
+):
     return imgkit.from_string(
         string,
         output_path,
         {
             "enable-local-file-access": "",
             "allow": ASSETS_PATH,
-            "width": 1600,
+            "width": width,
             "enable-javascript": "",
-            "zoom": 2,
+            "zoom": zoom,
+            "quality": quality,
+            "quiet": "",
         },
         None,
         None,
@@ -62,7 +66,13 @@ def string_to_pic(string: str, output_path: str):
 
 
 @run_sync
-def file_to_pic(file_path: str, output_path: str):
+def file_to_pic(
+    file_path: str,
+    output_path: str,
+    width: int = 2200,
+    zoom: int = 2,
+    quality: int = 94,
+):
     return imgkit.from_file(
         file_path,
         output_path,
@@ -70,9 +80,11 @@ def file_to_pic(file_path: str, output_path: str):
         {
             "enable-local-file-access": "",
             "allow": ASSETS_PATH,
-            "width": 1600,
+            "width": width,
             "enable-javascript": "",
-            "zoom": 2,
+            "zoom": zoom,
+            "quality": quality,
+            "quiet": "",
         },
         None,
         None,
@@ -82,7 +94,9 @@ def file_to_pic(file_path: str, output_path: str):
 
 
 @run_sync
-def url_to_pic(url: str, output_path: str):
+def url_to_pic(
+    url: str, output_path: str, width: int = 2200, zoom: int = 2, quality: int = 94
+):
     return imgkit.from_url(
         url,
         output_path,
@@ -90,9 +104,11 @@ def url_to_pic(url: str, output_path: str):
         {
             "enable-local-file-access": "",
             "allow": ASSETS_PATH,
-            "width": 1600,
+            "width": width,
             "enable-javascript": "",
-            "zoom": 2,
+            "zoom": zoom,
+            "quality": quality,
+            "quiet": "",
         },
         None,
         None,
@@ -131,6 +147,7 @@ md = markdown.Markdown(extensions=extensions)
 
 @run_sync
 def text_to_html(text: str) -> str:
+    text = text.replace("\n", "  \n")
     content = md.convert(text)
     css_style = HtmlFormatter(style=XcodeStyle).get_style_defs(".highlight")
 
@@ -142,7 +159,16 @@ def text_to_html(text: str) -> str:
     )
     return html
 
-async def txt_to_pic(text: str):
+
+async def txt_to_pic(
+    text: str,
+    output_path: Path = TEMP_PATH,
+    width: int = 2200,
+    zoom: int = 2,
+    quality: int = 100,
+):
     html = await text_to_html(text)
-    await string_to_pic(html, str(TEMP_PATH.absolute()))
-    return TEMP_PATH
+    if not output_path.exists():
+        output_path.touch()
+    await string_to_pic(html, str(output_path.absolute()), width, zoom, quality)
+    return output_path

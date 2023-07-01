@@ -43,6 +43,17 @@ class CommonUsers(BaseModel):
         except:
             pass
 
+    def rename_bot(self, common_userinfo: CommonUserInfo, oldname: str, newname: str):
+        """更改某个bot的名称"""
+        bots = self.user_dict[common_userinfo].bots
+        for bot, bot_data in bots.items():
+            if bot.nickname == oldname:
+                bot.nickname = newname
+                bot_data.nickname = newname
+                self.save_userdata(common_userinfo)
+                return
+        raise Exception("没有这个名称的bot")
+
     def get_bot_by_text(self, common_userinfo: CommonUserInfo, text: str) -> BotData:
         """根据text是否以某个bot的名字开头来获取对应的botdata"""
         bots = self.user_dict[common_userinfo].bots
@@ -64,30 +75,21 @@ class CommonUsers(BaseModel):
         else:
             raise Exception("没有这个昵称的bot")
 
-    def show_all_bots(self, common_userinfo: CommonUserInfo):
+    def show_all_bots(self, common_userinfo: CommonUserInfo, pre_command: str):
         if len(self.user_dict[common_userinfo].bots.keys()) == 0:
             return "当前没有可用的bot,请使用/help命令获取更多帮助"
-        return "所有可用的bot如下\n使用命令'.'+bot名+问题即可进行对话\n" + "\n".join(
-            [
-                f"{i}:{botinfo.nickname}:{botdata.source}"
-                for i, (botinfo, botdata) in enumerate(
-                    self.user_dict[common_userinfo].bots.items(), 1
-                )
-            ]
-        )
+        msg = f"所有可用的bot如下\n使用命令'{pre_command}'+bot名称+问题即可进行对话\n\n| bot名称 | bot来源 | bot预设名 |\n| --- | --- | --- |\n"
+        for botinfo, botdata in self.user_dict[common_userinfo].bots.items():
+            prompt_name = botdata.prompt_nickname if botdata.prompt_nickname else "未知"
+            msg += f"| {botinfo.nickname} | {botdata.source} | {prompt_name} |\n"
+        msg += "\n"
+        return msg
 
     def add_new_bot(
         self, common_userinfo: CommonUserInfo, botinfo: BotInfo, botdata: BotData
     ):
         """向对应commonuser_info的bots中添加一个新的botdata"""
         self.user_dict[common_userinfo].bots[botinfo] = botdata
-        self.user_dict[common_userinfo].bots = dict(
-            sorted(
-                self.user_dict[common_userinfo].bots.items(),
-                key=lambda x: len(x[0].nickname),
-                reverse=True,
-            )
-        )
         self.save_userdata(common_userinfo=common_userinfo)
 
     def get_bot_data(
@@ -157,6 +159,13 @@ class CommonUsers(BaseModel):
 
     def save_userdata(self, common_userinfo: CommonUserInfo):
         """保存指定用户的信息CommonUserData为JSON文件"""
+        self.user_dict[common_userinfo].bots = dict(
+            sorted(
+                self.user_dict[common_userinfo].bots.items(),
+                key=lambda x: len(x[0].nickname),
+                reverse=True,
+            )
+        )
         data = self.user_dict[common_userinfo].save()
         path = self.path / "common_users" / f"{common_userinfo.user_id}.json"
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -218,50 +227,8 @@ class CommonUsers(BaseModel):
             self.user_dict = user_dict
             self.user_links = user_links
         except Exception as e:
-            logger.error(str(e))
+            # logger.error(str(e))
             pass
 
 
 common_users = CommonUsers()
-# common_userinfo1 = CommonUserInfo(user_id="159753654")
-# common_userinfo2 = CommonUserInfo(user_id="155656555")
-# common_users = CommonUsers(
-#     user_dict={
-#         common_userinfo1: CommonUserData(
-#             bots={
-#                 BotInfo(nickname="sss", onwer=common_userinfo1): BotData(
-#                     id="ssss", source="bard"
-#                 )
-#             },
-#             key="123456789",
-#             user_id="159753654",
-#         ),
-#         common_userinfo2: CommonUserData(
-#             bots={
-#                 BotInfo(nickname="sss", onwer=common_userinfo1): BotData(
-#                     id="ssss", source="bard"
-#                 )
-#             },
-#             key="9555211",
-#             user_id="155656555",
-#         ),
-#     },
-#     user_links={
-#         common_userinfo1: UsersInfo(
-#             users=[
-#                 UserInfo(platform="OneBot V11", username="123456"),
-#                 UserInfo(platform="Telegram", username="456789"),
-#             ]
-#         ),
-#         common_userinfo2: UsersInfo(
-#             users=[
-#                 UserInfo(platform="OneBot V11", username="654321"),
-#                 UserInfo(platform="Telegram", username="6543211"),
-#             ]
-#         ),
-#     },
-# )
-# common_users.user_dict[common_userinfo1].key = "123456789"
-# common_users.save_userdata(common_userinfo=common_userinfo1)
-
-# common_users.save()
