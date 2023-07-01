@@ -202,11 +202,12 @@ async def new_bot___(
         prompts_str = prompts.show_list()
         path = await txt_to_pic(
             f'请设置这个bot的预设\n如果使用本地预设,请在预设名前加".",如使用自己的预设直接发送即可\n当前可用的本地预设有\n{prompts_str}\n输入"算了"或"取消"可以结束当前操作',
-            width=SPECIALPIC_WIDTH,
+            width=SPECIALPIC_WIDTH + 300,
             quality=100,
         )
         state["replys"].append(await send_img(path, matcher, bot, event))
     else:
+        state["prompt_nickname"] = "无预设"
         matcher.set_arg("prompt", "no prompt")
 
 
@@ -221,6 +222,10 @@ async def new_bot____(
     await if_close(event, matcher, bot, state["replys"])
     prompt = str(args).replace("\n", "")
     prompt_nickname = "自定义预设"
+    try:
+        prompt_nickname = state["prompt_nickname"]
+    except:
+        pass
     if prompt.startswith("."):
         try:
             prompt_nickname = prompt.replace(".", "")

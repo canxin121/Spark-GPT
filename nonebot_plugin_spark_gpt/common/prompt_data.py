@@ -40,11 +40,9 @@ class Prompts(BaseModel):
 
     def show_list(self):
         """获取所有的prompts的名称"""
-        prompt_list_str = "所有预设如下:\n\n| 序号 | 预设名称 |\n| --- | --- |\n"
-        i = 1
+        prompt_list_str = "所有预设如下:\n\n| 预设名称 |\n| --- |\n"
         for key in self.prompts.keys():
-            prompt_list_str += f"| {str(i)} | {key} |\n"
-            i += 1
+            prompt_list_str += f"| {key} |\n"
         prompt_list_str += "\n"
         return prompt_list_str
 

@@ -62,9 +62,9 @@ class Config(BaseModel):
                 "superusers": "[]",
                 "pic_able": "Auto",
                 "url_able": "True",
-                "num_limit": "800",
+                "num_limit": "500",
                 "pic_width": "1800",
-                "specialpic_width": "",
+                "specialpic_width": "400",
             },
             "Newbing配置": {
                 "cookie": "",

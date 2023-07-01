@@ -48,15 +48,21 @@ async def help_(
 ):
     global Generated_Help_Msg_Pic
     command_start = str(foo)
-    help_msg = f"""# 使用bot方式
-## 1.使用命令:使用“/bot名称+你所询问的内容”
-> 查询bot名称请看下面表格内的 所有bot 命令
-## 2.无需命令:直接回复某个bot的最后一条消息来继续对话
+    help_msg = f"""# 1.使用bot方式
+## (1).使用命令:先查询可用的bot或创建新的bot,然后使用“前缀+bot名称+你所询问的内容 或 刷新指令”,这里前缀 "/" 使用自己的bot,前缀 "." 使用公用的bot.
+> 当询问内容为 刷新指令 也就是 "清除对话" 或 "清空对话" 或"刷新对话" 时,将清除和bot的聊天记录,即重新开始对话
+## 一个可能的私有的bot使用示例为 “/chat 在吗?” 这里的chat就是我自己的bot,是我创建的,并且可以通过 “/所有bot” 查询
+
+## 一个可能的公用的bot使用示例为 “.chat 在吗?” 这里的chat是公用的bot,可以通过 “.所有bot” 查询,但只有本插件管理员可以创建
+
+## 一个可能的清除某个bot的聊天记录的示例为 “/chat 刷新对话”
+## (2).无需命令:直接回复某个bot的最后一条消息来继续对话
 > 注意公用的bot可能也在和别人对话,所以最后一条消息不一定是发给你的最后一条
 
-# 以下是bot管理命令列表,这里有两种不同前缀代表不用含义
-## 使用**/**前缀表示管理自己的用户信息
-## 使用**.** 前缀表示管理公用用户的bot信息
+# 2.以下是bot管理命令列表,这里有两种不同前缀代表不用含义
+## 使用**/**前缀表示管理自己的bot
+
+## 使用**.** 前缀表示管理公用用户的bot
 
 | 命令 | 命令含义 | 命令可用用户 |
 | --- | --- | --- |
@@ -65,7 +71,7 @@ async def help_(
 | 改名bot | 更改bot的名称 | .开头仅SparkGPT管理员可用,/开头所有用户可用 |
 | 删除bot | 删除指定bot | .开头仅SparkGPT管理员可用,/开头所有用户可用 |
 
-# 以下是用户信息命令列表,所有命令前需要加上前缀{command_start}才能触发。
+# 3.以下是用户信息命令列表,所有命令前需要加上前缀{command_start}才能触发。
 
 | 命令 | 命令含义 | 命令可用用户 |
 | --- | --- | --- |
@@ -73,7 +79,7 @@ async def help_(
 | 更改绑定 | 将当前平台账户绑定到指定通用账户,实现跨平台数据互通 | 所有用户可用 |
 
 
-# 以下是预设管理命令列表,所有命令前需要加上前缀{command_start}才能触发。
+# 4.以下是预设管理命令列表,所有命令前需要加上前缀{command_start}才能触发。
 
 | 命令 | 命令含义 | 命令可用用户 |
 | --- | --- | --- |
@@ -83,7 +89,7 @@ async def help_(
 | 改名预设 | 修改预设的名字 | SparkGPT管理员可用 |
 | 删除预设 | 删除指定预设 | SparkGPT管理员可用 |
 
-# 以下是webui管理命令列表,所有命令前需要加上前缀{command_start}才能触发
+# 5.以下是webui管理命令列表,所有命令前需要加上前缀{command_start}才能触发
 
 | 命令 | 命令含义 | 命令可用用户 |
 | --- | --- | --- |
@@ -206,6 +212,8 @@ all_prompts = on_command("所有预设", priority=1, block=False)
 
 @all_prompts.handle()
 async def all_prompts_(bot: Bot, matcher: Matcher, event: MessageEvent):
+    from .utils import SPECIALPIC_WIDTH
+
     path = await txt_to_pic(prompts.show_list(), width=SPECIALPIC_WIDTH)
     await send_img(path, matcher, bot, event)
     await matcher.finish()
@@ -408,6 +416,8 @@ all_bots = on_message(priority=1, block=False)
 
 @all_bots.handle()
 async def all_bots_(matcher: Matcher, bot: Bot, event: MessageEvent):
+    from .utils import SPECIALPIC_WIDTH
+
     if not str(event.message).startswith(("/所有bot", ".所有bot")):
         await matcher.finish()
 
@@ -418,7 +428,8 @@ async def all_bots_(matcher: Matcher, bot: Bot, event: MessageEvent):
         pre_command = "."
         common_userinfo = set_public_common_userinfo(bot)
     path = await txt_to_pic(
-        common_users.show_all_bots(common_userinfo, pre_command), width=SPECIALPIC_WIDTH
+        common_users.show_all_bots(common_userinfo, pre_command),
+        width=SPECIALPIC_WIDTH + 150,
     )
     await send_img(path, matcher, bot, event)
     await matcher.finish()
