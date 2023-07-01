@@ -20,6 +20,8 @@ from .utils import (
     Message,
     Bot,
     Message_Segment,
+    txt_to_pic,
+    send_img,
 )
 from ...common.user_data import common_users
 from ...common.prompt_data import prompts
@@ -188,6 +190,8 @@ async def new_bot___(
     bot: Bot,
     args: str = ArgStr("bot_nickname"),
 ):
+    from .utils import SPECIALPIC_WIDTH
+
     await if_close(event, matcher, bot, state["replys"])
     state["bot_nickname"] = str(args).replace("\n", "")
     if not (
@@ -196,15 +200,12 @@ async def new_bot___(
         or state["able_source_dict"][state["source_index"]] == "通义千问"
     ):
         prompts_str = prompts.show_list()
-        state["replys"].append(
-            await send_message(
-                f'请设置这个bot的预设\n如果使用本地预设,请在预设名前加".",如使用自己的预设直接发送即可\n当前可用的本地预设有\n{prompts_str}\n输入"算了"或"取消"可以结束当前操作',
-                matcher,
-                bot,
-                event,
-            )
+        path = await txt_to_pic(
+            f'请设置这个bot的预设\n如果使用本地预设,请在预设名前加".",如使用自己的预设直接发送即可\n当前可用的本地预设有\n{prompts_str}\n输入"算了"或"取消"可以结束当前操作',
+            width=SPECIALPIC_WIDTH,
+            quality=100,
         )
-
+        state["replys"].append(await send_img(path, matcher, bot, event))
     else:
         matcher.set_arg("prompt", "no prompt")
 
@@ -219,17 +220,16 @@ async def new_bot____(
 ):
     await if_close(event, matcher, bot, state["replys"])
     prompt = str(args).replace("\n", "")
+    prompt_nickname = "自定义预设"
     if prompt.startswith("."):
         try:
             prompt_nickname = prompt.replace(".", "")
             prompt = prompts.show_prompt(prompt_nickname)
-            state["prompt_nickname"] = prompt_nickname
         except:
             await send_message("没有这个本地预设名", matcher, bot, event)
             await matcher.finish()
     bot_nickname = state["bot_nickname"]
     common_userinfo = state["common_userinfo"]
-    prompt_nickname = state["prompt_nickname"] if state["prompt_nickname"] else "自定义预设"
     botinfo = BotInfo(nickname=bot_nickname, onwer=common_userinfo)
     try:
         temp_bots.add_new_bot(
