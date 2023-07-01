@@ -34,7 +34,22 @@
 )
 
 ---
+# 项目需要依赖一个第三方的库wkhtmltopdf,需要手动安装才可正常使用文转图功能
+1.  安装 wkhtmltopdf:
 
+    - Debian/Ubuntu:
+
+      ```bash
+      sudo apt-get install wkhtmltopdf
+      ```
+    - MacOSX:
+
+      ```bash
+      brew install --cask wkhtmltopdf
+      ```
+    - Windows 和其他系统:
+
+      在[下载页面](https://wkhtmltopdf.org/downloads.html)下载对应版本安装，并将安装的目录下的bin目录添加到系统环境变量  
 # .env.*配置项：  
 | 项 | 默认值 | 含义 |
 | --- | --- | --- |
