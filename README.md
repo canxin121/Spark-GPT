@@ -2,7 +2,7 @@
   <a href="https://github.com/canxin121">
     <img src="https://socialify.git.ci/canxin121/Spark-GPT/image?font=Raleway&forks=1&issues=1&language=1&logo=https%3A%2F%2Fcanxin121.github.io%2Fdocs%2Flogo.png&name=1&owner=1&pattern=Charlie%20Brown&pulls=1&stargazers=1&theme=Auto" width="700" height="350">
   </a>
-  <h1>Spark-GPT重构仓库</h1>
+  <h1>Spark-GPT仓库</h1>
   <p><em>Spark-GPT</em></p>
 </div>
 
@@ -23,19 +23,27 @@
 
 ---
 
-[![残心小站-文档库](https://github.com/canxin121/Spark-GPT/blob/main/source/display.png )](https://canxin121.github.io/docs/docs/Spark_GPT.html )
+# ！！！项目重构已完成，新版本将无法兼容旧版本配置文件和预设文件，请手动保存原来的配置并手动转移至新版本
+# 新版本数据位置为data/sparp_gpt，其中的common文件夹中的prompt和config是可以由旧版本手动打开替换其中的部分内容的,其余数据如创建的bot均无法转移
 
-> 详细教程（必看，否则不会使用） 点击链接跳转👇 点击图片跳转☝️
-  
-> 详细教程（必看，否则不会使用） 点击链接跳转👇 点击图片跳转☝️
 
 >
-## [必看教程-残心小站-文档库](https://canxin121.github.io/docs/docs/Spark_GPT.html )
+## [教程-残心小站-文档库(暂未更新)](https://canxin121.github.io/docs/docs/Spark_GPT.html )
 
 > 用户交流群:[610948446](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=KHGqjjbiz6fpRr-W2X9SugTXThKFiprJ&authKey=LhpClaGtc4%2Ff3EL7f4IIIt7F94vLHJj4HSS8c2YCE55nRBRBtftzla%2Bgj7pa0fWX&noverify=0&group_code=610948446
 )
+
 ---
 
-- 目前支持将Poe,NewBing,Dalle,ChatGPT (session token),Claude(slack),讯飞星火模型(Spark_desk)接入qq
+# .env.*配置项：  
+| 项 | 默认值 | 含义 |
+| --- | --- | --- |
+| spark_host | 127.0.0.1 | webui的host地址 |
+| spark_port | 8666 | webui的端口地址 |
 
+# 其余所有配置项均通过webui实时配置，热更新，
+## 各来源gpt验证信息获取方式均通过注释显示在对应位置
 
+更新日志:  
+2023.7.1:  
+    重构版本上线  
