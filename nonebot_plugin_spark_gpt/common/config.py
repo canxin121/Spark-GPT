@@ -5,6 +5,8 @@ from pathlib import Path
 from pydantic import BaseModel
 import json
 
+from pydantic import BaseModel, Field
+
 CONFIG_SOURCE = (
     Literal[
         "总控配置",
@@ -43,12 +45,9 @@ CONFIG_NAMES = (
         "specialpic_width",
         "pic_width",
         "public_command",
-        "private_command"
+        "private_command",
     ],
 )
-
-
-from pydantic import BaseModel, Field
 
 
 class Config(BaseModel):
@@ -67,8 +66,8 @@ class Config(BaseModel):
                 "num_limit": "500",
                 "pic_width": "1800",
                 "specialpic_width": "400",
-                "private_command":"/",
-                "public_command":"."
+                "private_command": "/",
+                "public_command": ".",
             },
             "Newbing配置": {
                 "cookie": "",
@@ -192,3 +191,5 @@ class Config(BaseModel):
 
 
 config = Config()
+
+

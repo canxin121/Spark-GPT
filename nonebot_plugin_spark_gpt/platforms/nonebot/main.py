@@ -35,23 +35,7 @@ from ...utils.text_render import txt_to_pic
 from nonebot.params import CommandStart
 from ...common.config import config
 
-PRIVATE_COMMAND = "/"
-PUBLIC_COMMAND = "."
 
-
-def load_config():
-    global PRIVATE_COMMAND, PUBLIC_COMMAND
-    try:
-        PRIVATE_COMMAND = config.get_config("总控配置", "private_command")
-    except:
-        pass
-    try:
-        PUBLIC_COMMAND = config.get_config("总控配置", "public_command")
-    except:
-        pass
-
-
-load_config()
 
 Generated_Help_Msg_Pic = False
 Help_Msg_Path = Path(__file__).parent / "HelpMsg.jpeg"
@@ -63,6 +47,7 @@ help = on_command("shelp", aliases={"s帮助", "sparkhelp"}, priority=1, block=F
 async def help_(
     matcher: Matcher, event: MessageEvent, bot: Bot, foo: Annotated[str, CommandStart()]
 ):
+    from ...common.load_config import PRIVATE_COMMAND,PUBLIC_COMMAND
     global Generated_Help_Msg_Pic
     command_start = str(foo)
     help_msg = f"""# 1.使用bot方式
@@ -432,6 +417,7 @@ all_bots = on_message(priority=1, block=False)
 @all_bots.handle()
 async def all_bots_(matcher: Matcher, bot: Bot, event: MessageEvent):
     from .utils import SPECIALPIC_WIDTH
+    from ...common.load_config import PRIVATE_COMMAND,PUBLIC_COMMAND
 
     if not str(event.message).startswith(
         (f"{PRIVATE_COMMAND}所有bot", f"{PUBLIC_COMMAND}所有bot")
@@ -457,6 +443,8 @@ rename_bot = on_message(priority=1, block=False)
 
 @rename_bot.handle()
 async def rename_bot_(matcher: Matcher, bot: Bot, event: MessageEvent, state: T_State):
+    from ...common.load_config import PRIVATE_COMMAND,PUBLIC_COMMAND
+    
     if not str(event.message).startswith(
         (f"{PUBLIC_COMMAND}改名bot", f"{PRIVATE_COMMAND}改名bot")
     ):

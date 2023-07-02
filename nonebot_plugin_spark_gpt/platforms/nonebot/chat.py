@@ -40,7 +40,7 @@ chat = on_message(priority=1, block=False)
 
 
 async def get_question_chatbot(event: MessageEvent, bot: Bot, matcher: Matcher):
-    from .main import PRIVATE_COMMAND, PUBLIC_COMMAND
+    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
 
     raw_text = str(event.message)
     """因为kook不支持直接在event里获取reply的msgid或者判断是不是reply，只能出此下策"""
@@ -146,7 +146,7 @@ new_bot = on_message(priority=1, block=False)
 
 @new_bot.handle()
 async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_State):
-    from .main import PRIVATE_COMMAND, PUBLIC_COMMAND
+    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
 
     raw_message = str(event.message)
     if not raw_message.startswith(
@@ -286,7 +286,7 @@ delete_bot = on_message(priority=1, block=False)
 
 @delete_bot.handle()
 async def delete_bot_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_State):
-    from .main import PRIVATE_COMMAND, PUBLIC_COMMAND
+    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
 
     if not str(event.message).startswith(
         (f"{PRIVATE_COMMAND}删除bot", f"{PUBLIC_COMMAND}删除bot")
