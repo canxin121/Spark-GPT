@@ -203,7 +203,12 @@ async def new_bot___(
     from .utils import SPECIALPIC_WIDTH
 
     await if_close(event, matcher, bot, state["replys"])
-    state["bot_nickname"] = str(args).replace("\n", "")
+    bot_nickname = str(args).replace("\n", "").replace(" ", "").replace("\r", "")
+    if not bot_nickname:
+        await send_message("bot的名称不能仅为换行符或空格或空白", matcher, bot, event)
+        await matcher.finish()
+    else:
+        state["bot_nickname"] = bot_nickname
     if not (
         state["able_source_dict"][state["source_index"]] == "bing"
         or state["able_source_dict"][state["source_index"]] == "bard"

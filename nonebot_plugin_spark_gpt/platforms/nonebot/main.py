@@ -39,7 +39,7 @@ from nonebot.params import CommandStart
 Generated_Help_Msg_Pic = False
 Help_Msg_Path = Path(__file__).parent / "HelpMsg.jpeg"
 
-help = on_command("shelp", aliases={"s帮助","sparkhelp"}, priority=1, block=False)
+help = on_command("shelp", aliases={"s帮助", "sparkhelp"}, priority=1, block=False)
 
 
 @help.handle()

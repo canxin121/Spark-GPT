@@ -31,6 +31,8 @@ COMMENTS = (
             "pic_able": PICABLE,
             "url_able": URLABLE,
             "num_limit": NUM_LIMIT,
+            "pic_width": "一般文字转图片的宽度",
+            "specialpic_width": "命令 所有预设 所有bot 使用的文转图的宽度大致范围",
         },
         "Newbing配置": {
             "cookie": "Newbing的cookie json,获取方法为登录微软账号并打开到bing聊天界面,使用浏览器扩展 cookie editor将cookie导出为json格式并粘贴到此处",

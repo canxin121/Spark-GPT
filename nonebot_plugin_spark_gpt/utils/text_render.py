@@ -1,50 +1,24 @@
-import asyncio
 from pathlib import Path
-from charset_normalizer import from_bytes
+
+import imgkit
 import markdown
-from mdx_math import MathExtension
+from charset_normalizer import from_bytes
 from markdown.extensions.codehilite import CodeHiliteExtension
 from markdown.extensions.tables import TableExtension
+from mdx_math import MathExtension
+from nonebot.utils import run_sync
 from pygments.formatters import HtmlFormatter
 from pygments.styles.xcode import XcodeStyle
-import asyncio
-from contextvars import copy_context
-from functools import wraps, partial
-from pathlib import Path
-from typing import Callable, Coroutine, ParamSpec, TypeVar
-from nonebot.utils import run_sync
-import imgkit
 
 ASSETS_PATH = Path(__file__).parent / "assets"
 TEMP_PATH = Path(__file__).parent / "temp.jpeg"
 TEMP_PATH.touch()
 template_html = ""
 
-P = ParamSpec("P")
-R = TypeVar("R")
-
-
-def run_sync(call: Callable[P, R]) -> Callable[P, Coroutine[None, None, R]]:
-    """一个用于包装 sync function 为 async function 的装饰器
-
-    参数:
-        call: 被装饰的同步函数
-    """
-
-    @wraps(call)
-    async def _wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
-        loop = asyncio.get_running_loop()
-        pfunc = partial(call, *args, **kwargs)
-        context = copy_context()
-        result = await loop.run_in_executor(None, partial(context.run, pfunc))
-        return result
-
-    return _wrapper
-
 
 @run_sync
 def string_to_pic(
-    string: str, output_path: str, width: int = 2200, zoom: int = 2, quality: int = 94
+        string: str, output_path: str, width: int = 2200, zoom: int = 2, quality: int = 94
 ):
     return imgkit.from_string(
         string,
@@ -67,11 +41,11 @@ def string_to_pic(
 
 @run_sync
 def file_to_pic(
-    file_path: str,
-    output_path: str,
-    width: int = 2200,
-    zoom: int = 2,
-    quality: int = 94,
+        file_path: str,
+        output_path: str,
+        width: int = 2200,
+        zoom: int = 2,
+        quality: int = 94,
 ):
     return imgkit.from_file(
         file_path,
@@ -95,7 +69,7 @@ def file_to_pic(
 
 @run_sync
 def url_to_pic(
-    url: str, output_path: str, width: int = 2200, zoom: int = 2, quality: int = 94
+        url: str, output_path: str, width: int = 2200, zoom: int = 2, quality: int = 94
 ):
     return imgkit.from_url(
         url,
@@ -161,11 +135,11 @@ def text_to_html(text: str) -> str:
 
 
 async def txt_to_pic(
-    text: str,
-    output_path: Path = TEMP_PATH,
-    width: int = 2200,
-    zoom: int = 2,
-    quality: int = 100,
+        text: str,
+        output_path: Path = TEMP_PATH,
+        width: int = 2200,
+        zoom: int = 2,
+        quality: int = 100,
 ):
     html = await text_to_html(text)
     if not output_path.exists():
