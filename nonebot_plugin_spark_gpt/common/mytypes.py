@@ -4,7 +4,7 @@ from typing import Dict, List, Literal, Optional, Set, Tuple
 from pydantic import BaseModel
 from EdgeGPT import Chatbot
 
-PLATFORM = Literal["OneBot V11", "Telegram"]
+PLATFORM = Literal["OneBot V11", "Telegram", "Kaiheila"]
 SOURCE = Literal[
     "poe chatgpt",
     "poe claude",

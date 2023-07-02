@@ -135,9 +135,9 @@ async def userinfo_(matcher: Matcher, event: MessageEvent, bot: Bot):
     common_userinfo = set_common_userinfo(event, bot)
     common_user_id = common_userinfo.user_id
     common_user_key = common_users.get_key(common_userinfo)
-    msg = f"通用用户名为:{common_user_id}\n用户密钥为:{common_user_key}\n该消息将在5秒后被撤回,请及时保存"
+    msg = f"通用用户名为:{common_user_id}\n用户密钥为:{common_user_key}\n该消息将在5秒后尝试被撤回,请及时保存"
     reply = await send_message(msg, matcher, bot, event)
-    asyncio.sleep(5)
+    await asyncio.sleep(5)
     await delete_messages(bot, event, [reply])
     await matcher.finish()
 

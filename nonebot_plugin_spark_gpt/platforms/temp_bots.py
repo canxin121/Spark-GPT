@@ -1,20 +1,18 @@
-from typing import Any, Literal, Dict, Union
-import typing
-from nonebot import logger
-from pathlib import Path
-from pydantic import BaseModel, Field
+from typing import Any, Dict, Union
+
 from bidict import bidict
-import json
-from ..common.mytypes import CommonUserInfo, BotInfo, BotData, PLATFORM, SOURCE
-from ..common.user_data import common_users
-from ..chatbot.spark_desk import SparkBot
-from ..chatbot.newbing import Newbing_bot
-from ..chatbot.chatgpt_web import ChatGPT_web_Bot
-from ..chatbot.slack_claude import Slack_Claude_Bot
+from pydantic import BaseModel, Field
+
+from .nonebot.utils import OB11_BOT, Bot, MessageEvent, TGBot, KOOKBot
 from ..chatbot.Poe import Poe_bot
 from ..chatbot.bard import Bard_Bot
+from ..chatbot.chatgpt_web import ChatGPT_web_Bot
+from ..chatbot.newbing import Newbing_bot
+from ..chatbot.slack_claude import Slack_Claude_Bot
+from ..chatbot.spark_desk import SparkBot
 from ..chatbot.tongyiqianwen import TongYiQianWen
-from .nonebot.utils import OB11_BOT, Bot, MessageEvent, TGBot
+from ..common.mytypes import CommonUserInfo, BotInfo, BotData
+from ..common.user_data import common_users
 
 CHATBOT = Union[
     SparkBot,
@@ -57,6 +55,8 @@ class Temp_Bots(BaseModel):
                 return str(reply["message_id"])
             elif isinstance(bot, TGBot):
                 return str(reply.message_id + event.from_.id)
+            elif isinstance(bot, KOOKBot):
+                return str(reply.msg_id)
         except:
             pass
 
@@ -65,6 +65,8 @@ class Temp_Bots(BaseModel):
             return str(event.reply.message_id)
         elif isinstance(bot, TGBot):
             return str(event.reply_to_message.message_id + event.from_.id)
+        elif isinstance(bot, KOOKBot):
+            return str(event.msg_id)
 
     def set_bot_msgid(
         self,
@@ -91,10 +93,17 @@ class Temp_Bots(BaseModel):
     #         raise Exception("没有这个messageid对应的bot")
 
     def get_bot_by_msgid(
-        self, common_userinfo: CommonUserInfo, bot: Bot, event: MessageEvent
+        self,
+        common_userinfo: CommonUserInfo,
+        bot: Bot,
+        event: MessageEvent,
+        kook_msgid: str = "",
     ):
         botlinks: Bot_Links = self.get_bot_links(common_userinfo)
-        message_id = self.get_message_id_by_get(bot, event)
+        if kook_msgid:
+            message_id = kook_msgid
+        else:
+            message_id = self.get_message_id_by_get(bot, event)
         if str(message_id) in botlinks.msg_bot_dict.keys():
             return botlinks.msg_bot_dict[str(message_id)]
         else:

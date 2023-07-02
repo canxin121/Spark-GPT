@@ -1,33 +1,50 @@
+import ast
 import asyncio
 from pathlib import Path
-from nonebot import require
-
-import ast
 from typing import Union
-from ...common.mytypes import UserInfo, CommonUserInfo
-from .userlinks import users
-from ...common.user_data import common_users
-from ...common.config import config
-from ...utils.text_render import txt_to_pic
-from ...utils.utils import get_url
-from nonebot.matcher import Matcher
+
 from nonebot import logger
-from nonebot.adapters.onebot.v11 import MessageEvent as OB11_MessageEvent
+from nonebot.adapters.kaiheila import Message as KOOKMessage
+from nonebot.adapters.kaiheila import MessageSegment as KOOKMessageSegment
+from nonebot.adapters.kaiheila.bot import Bot as KOOKBot
+from nonebot.adapters.kaiheila.event import MessageEvent as KOOKMessageEvent
+from nonebot.adapters.kaiheila.event import (
+    ChannelMessageEvent as KOOKChannelMessageEvent,
+)
 from nonebot.adapters.onebot.v11 import Bot as OB11_BOT
-from nonebot.adapters.onebot.v11 import MessageSegment as OB11_MessageSegment
 from nonebot.adapters.onebot.v11 import Message as OB11_Message
-from nonebot.adapters.telegram import MessageSegment as TGMessageSegment
+from nonebot.adapters.onebot.v11 import MessageEvent as OB11_MessageEvent
+from nonebot.adapters.onebot.v11 import MessageSegment as OB11_MessageSegment
+from nonebot.adapters.qqguild import Message as QQGUILDMessage
+from nonebot.adapters.qqguild import MessageSegment as QQGUILDMessageSegment
+from nonebot.adapters.qqguild.bot import Bot as QQGUILDBot
+from nonebot.adapters.qqguild.event import MessageEvent as QQGUILDMassageEvent
 from nonebot.adapters.telegram import Message as TGMessage
+from nonebot.adapters.telegram import MessageSegment as TGMessageSegment
 from nonebot.adapters.telegram.bot import Bot as TGBot
 from nonebot.adapters.telegram.event import MessageEvent as TGMessageEvent
-from nonebot.adapters.telegram.exception import NetworkError as TGNetworkError
 from nonebot.adapters.telegram.exception import ActionFailed as TGActionFailed
+from nonebot.adapters.telegram.exception import NetworkError as TGNetworkError
 from nonebot.adapters.telegram.message import File as TGFile
+from nonebot.matcher import Matcher
 
-Message_Segment = Union[OB11_MessageSegment, TGMessageSegment]
-Message = Union[Message_Segment, str, TGMessage, OB11_Message]
-MessageEvent = Union[OB11_MessageEvent, TGMessageEvent]
-Bot = Union[OB11_BOT, TGBot]
+from .userlinks import users
+from ...common.config import config
+from ...common.mytypes import UserInfo, CommonUserInfo
+from ...common.user_data import common_users
+from ...utils.text_render import txt_to_pic
+from ...utils.utils import get_url
+
+Message_Segment = Union[
+    OB11_MessageSegment, TGMessageSegment, QQGUILDMessageSegment, KOOKMessageSegment
+]
+Message = Union[
+    Message_Segment, str, TGMessage, OB11_Message, QQGUILDMessage, KOOKMessage
+]
+MessageEvent = Union[
+    OB11_MessageEvent, TGMessageEvent, QQGUILDMassageEvent, KOOKMessageEvent
+]
+Bot = Union[OB11_BOT, TGBot, QQGUILDBot, KOOKBot]
 
 PICABLE = "Auto"
 NUMLIMIT = 850
@@ -189,14 +206,18 @@ async def reply_message(
                 if len(str(content)) > NUMLIMIT:
                     if URLABLE == "True":
                         url = await get_url(str(content))
-                        path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                        path = await txt_to_pic(
+                            str(content), width=PIC_WIDTH, quality=100
+                        )
                         return await matcher.send(
                             OB11_MessageSegment.reply(event.message_id)
                             + OB11_MessageSegment.image(path)
                             + OB11_MessageSegment.text(url)
                         )
                     else:
-                        path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                        path = await txt_to_pic(
+                            str(content), width=PIC_WIDTH, quality=100
+                        )
                         return await matcher.send(
                             OB11_MessageSegment.reply(event.message_id)
                             + OB11_MessageSegment.image(path)
@@ -224,6 +245,69 @@ async def reply_message(
                 return await matcher.send(
                     OB11_MessageSegment.reply(event.message_id) + content
                 )
+    elif isinstance(event, KOOKMessageEvent):
+        if plain:
+            return await bot.send(
+                event, KOOKMessageSegment.text(content), reply_sender=True
+            )
+        else:
+            if PICABLE == "Auto":
+                if len(str(content)) > NUMLIMIT:
+                    if URLABLE == "True":
+                        url = await get_url(content)
+                        path = await txt_to_pic(
+                            str(content), width=PIC_WIDTH, quality=100
+                        )
+                        return await bot.send(
+                            event,
+                            KOOKMessage(
+                                KOOKMessage(
+                                    KOOKMessageSegment.image(
+                                        await bot.upload_file(path)
+                                    )
+                                )
+                                + KOOKMessage(KOOKMessageSegment.text(url))
+                            ),
+                            reply_sender=True,
+                        )
+                    else:
+                        path = await txt_to_pic(
+                            str(content), width=PIC_WIDTH, quality=100
+                        )
+                        return await bot.send(
+                            event,
+                            KOOKMessageSegment.image(await bot.upload_file(path)),
+                            reply_sender=True,
+                        )
+                else:
+                    return await bot.send(
+                        event, KOOKMessageSegment.text(content), reply_sender=True
+                    )
+            elif PICABLE == "True":
+                if URLABLE == "True":
+                    url = await get_url(content)
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                    return await bot.send(
+                        event,
+                        KOOKMessage(
+                            KOOKMessage(
+                                KOOKMessageSegment.image(await bot.upload_file(path))
+                            )
+                            + KOOKMessage(KOOKMessageSegment.text(url))
+                        ),
+                        reply_sender=True,
+                    )
+                else:
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                    return await bot.send(
+                        event,
+                        KOOKMessageSegment.image(await bot.upload_file(path)),
+                        reply_sender=True,
+                    )
+            else:
+                return await bot.send(
+                    event, KOOKMessageSegment.text(content), reply_sender=True
+                )
 
 
 async def send_img(
@@ -237,6 +321,11 @@ async def send_img(
         return any
     elif isinstance(event, OB11_MessageEvent):
         return await matcher.send(OB11_MessageSegment.image(path))
+    elif isinstance(event, KOOKMessageEvent):
+        any = await bot.send(
+            event, KOOKMessageSegment.image(await bot.upload_file(path))
+        )
+        return any
 
 
 async def send_message(
@@ -291,37 +380,93 @@ async def send_message(
                 if len(str(content)) > NUMLIMIT:
                     if URLABLE == "True":
                         url = await get_url(str(content))
-                        path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                        path = await txt_to_pic(
+                            str(content), width=PIC_WIDTH, quality=100
+                        )
                         return await matcher.send(
-                            OB11_MessageSegment.reply(event.message_id)
-                            + OB11_MessageSegment.image(path)
+                            OB11_MessageSegment.image(path)
                             + OB11_MessageSegment.text(url)
                         )
                     else:
-                        path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
-                        return await matcher.send(
-                            OB11_MessageSegment.reply(event.message_id)
-                            + OB11_MessageSegment.image(path)
+                        path = await txt_to_pic(
+                            str(content), width=PIC_WIDTH, quality=100
                         )
+                        return await matcher.send(OB11_MessageSegment.image(path))
                 else:
-                    return await matcher.send(Message)
+                    return await matcher.send(content)
             elif PICABLE == "True":
                 if URLABLE == "True":
                     url = await get_url(str(content))
                     path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
                     return await matcher.send(
-                        OB11_MessageSegment.reply(event.message_id)
-                        + OB11_MessageSegment.image(path)
-                        + OB11_MessageSegment.text(url)
+                        OB11_MessageSegment.image(path) + OB11_MessageSegment.text(url)
                     )
                 else:
                     path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
-                    return await matcher.send(
-                        OB11_MessageSegment.reply(event.message_id)
-                        + OB11_MessageSegment.image(path)
-                    )
+                    return await matcher.send(OB11_MessageSegment.image(path))
             else:
-                return await matcher.send(Message)
+                return await matcher.send(content)
+    elif isinstance(event, KOOKMessageEvent):
+        if force_pic:
+            path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+            any = await bot.send(
+                event, KOOKMessageSegment.image(await bot.upload_file(path))
+            )
+            return any
+        if plain:
+            return await bot.send(event, KOOKMessageSegment.text(content))
+        else:
+            if PICABLE == "Auto":
+                if len(str(content)) > NUMLIMIT:
+                    if URLABLE == "True":
+                        url = await get_url(str(content))
+                        path = await txt_to_pic(
+                            str(content), width=PIC_WIDTH, quality=100
+                        )
+                        return await bot.send(
+                            event,
+                            KOOKMessage(
+                                KOOKMessage(
+                                    KOOKMessageSegment.image(
+                                        await bot.upload_file(path)
+                                    )
+                                )
+                                + KOOKMessage(KOOKMessageSegment.text(url))
+                            ),
+                            reply_sender=True,
+                        )
+                    else:
+                        path = await txt_to_pic(
+                            str(content), width=PIC_WIDTH, quality=100
+                        )
+                        any = await bot.send(
+                            event, KOOKMessageSegment.image(await bot.upload_file(path))
+                        )
+                        return any
+                else:
+                    return await bot.send(event, KOOKMessageSegment.text(content))
+            elif PICABLE == "True":
+                if URLABLE == "True":
+                    url = await get_url(str(content))
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                    return await bot.send(
+                        event,
+                        KOOKMessage(
+                            KOOKMessage(
+                                KOOKMessageSegment.image(await bot.upload_file(path))
+                            )
+                            + KOOKMessage(KOOKMessageSegment.text(url))
+                        ),
+                        reply_sender=True,
+                    )
+                else:
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                    any = await bot.send(
+                        event, KOOKMessageSegment.image(await bot.upload_file(path))
+                    )
+                    return any
+            else:
+                return await bot.send(event, KOOKMessageSegment.text(content))
 
 
 async def delete_messages(bot: Bot, event: MessageEvent, dict_list: list):
@@ -345,6 +490,15 @@ async def delete_messages(bot: Bot, event: MessageEvent, dict_list: list):
                 except TGActionFailed:
                     return
         return
+    elif isinstance(bot, KOOKBot):
+        for eachmsg in dict_list:
+            try:
+                if isinstance(event, KOOKChannelMessageEvent):
+                    await bot.message_delete(msg_id=eachmsg.msg_id)
+                else:
+                    await bot.directMessage_delete(msg_id=eachmsg.msg_id)
+            except:
+                pass
 
 
 def set_userinfo(event: MessageEvent, bot: Bot) -> UserInfo:

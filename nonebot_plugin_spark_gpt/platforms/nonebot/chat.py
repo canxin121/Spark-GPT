@@ -1,34 +1,29 @@
-from typing import Union
-from nonebot import logger
-from nonebot.plugin import on_message
-from nonebot.params import ArgStr
-from nonebot.typing import T_State
-from nonebot.matcher import Matcher
-
 from nonebot.exception import MatcherException
+from nonebot.matcher import Matcher
+from nonebot.params import ArgStr
+from nonebot.plugin import on_message
+from nonebot.typing import T_State
+
 from .utils import (
     if_super_user,
     set_common_userinfo,
     set_public_common_userinfo,
-    set_userinfo,
     delete_messages,
     send_message,
     # reply_out,
     if_close,
     reply_message,
     MessageEvent,
-    Message,
     Bot,
-    Message_Segment,
     txt_to_pic,
     send_img,
+    KOOKChannelMessageEvent,
 )
-from ...common.user_data import common_users
-from ...common.prompt_data import prompts
-from .userlinks import users
-from ...common.mytypes import UserInfo, CommonUserInfo, BotInfo, BotData
 from ..temp_bots import temp_bots
 from ...chatbot.load_config import get_able_source
+from ...common.mytypes import BotInfo, BotData
+from ...common.prompt_data import prompts
+from ...common.user_data import common_users
 
 REFRESH_KEYWORDS = [
     "清除对话",
@@ -46,29 +41,44 @@ chat = on_message(priority=1, block=False)
 
 async def get_question_chatbot(event: MessageEvent, bot: Bot, matcher: Matcher):
     raw_text = str(event.message)
+    """因为kook不支持直接在event里获取reply的msgid或者判断是不是reply，只能出此下策"""
+    kook_reply_msgid = ""
+    if isinstance(event, KOOKChannelMessageEvent):
+        kookmsg = await bot.call_api(api="message_view", msg_id=event.msg_id)
+        if kookmsg.quote:
+            kook_reply_msgid = kookmsg.quote.id_
+
     if not (
         raw_text.startswith(("/", "."))
         or (hasattr(event, "reply") or hasattr(event, "reply_to_message"))
+        or kook_reply_msgid
     ):
         await matcher.finish()
     if bool(hasattr(event, "reply") and bool(event.reply)) or bool(
-        hasattr(event, "reply_to_message") and event.reply_to_message
+        bool(hasattr(event, "reply_to_message") and event.reply_to_message)
+        or kook_reply_msgid
     ):
         if (
-            hasattr(event, "reply") and str(event.reply.sender.user_id) == bot.self_id
-        ) or (
-            hasattr(event, "reply_to_message")
-            and str(event.reply_to_message.from_.id) == bot.self_id
+            (hasattr(event, "reply") and str(event.reply.sender.user_id) == bot.self_id)
+            or (
+                hasattr(event, "reply_to_message")
+                and str(event.reply_to_message.from_.id) == bot.self_id
+            )
+            or (kook_reply_msgid and event.event.mention[0] == bot.self_id)
         ):
             question = raw_text
             try:
                 common_userinfo = set_common_userinfo(event, bot)
-                chatbot = temp_bots.get_bot_by_msgid(common_userinfo, bot, event)
+                chatbot = temp_bots.get_bot_by_msgid(
+                    common_userinfo, bot, event, kook_msgid=kook_reply_msgid
+                )
                 return question, chatbot, common_userinfo
             except:
                 try:
                     common_userinfo = set_public_common_userinfo(bot)
-                    chatbot = temp_bots.get_bot_by_msgid(common_userinfo, bot, event)
+                    chatbot = temp_bots.get_bot_by_msgid(
+                        common_userinfo, bot, event, kook_msgid=kook_reply_msgid
+                    )
                     return question, chatbot, common_userinfo
                 except:
                     await matcher.finish()
