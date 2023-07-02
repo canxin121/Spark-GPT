@@ -9,9 +9,8 @@ from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
 from nonebot.matcher import Matcher
 from nonebot.exception import FinishedException
-
-
 from nonebot.exception import MatcherException
+from ...utils.utils import is_valid_string
 from .utils import (
     send_img,
     set_common_userinfo,
@@ -27,7 +26,6 @@ from .utils import (
     SPECIALPIC_WIDTH,
     PIC_WIDTH,
 )
-
 from ...common.web.app import start_web_ui, stop_web_ui, HOST, PORT
 from ...common.user_data import common_users
 from ...common.prompt_data import prompts
@@ -35,6 +33,25 @@ from .userlinks import users
 from ...common.mytypes import UserInfo, CommonUserInfo, BotInfo
 from ...utils.text_render import txt_to_pic
 from nonebot.params import CommandStart
+from ...common.config import config
+
+PRIVATE_COMMAND = "/"
+PUBLIC_COMMAND = "."
+
+
+def load_config():
+    global PRIVATE_COMMAND, PUBLIC_COMMAND
+    try:
+        PRIVATE_COMMAND = config.get_config("总控配置", "private_command")
+    except:
+        pass
+    try:
+        PUBLIC_COMMAND = config.get_config("总控配置", "public_command")
+    except:
+        pass
+
+
+load_config()
 
 Generated_Help_Msg_Pic = False
 Help_Msg_Path = Path(__file__).parent / "HelpMsg.jpeg"
@@ -49,27 +66,25 @@ async def help_(
     global Generated_Help_Msg_Pic
     command_start = str(foo)
     help_msg = f"""# 1.使用bot方式
-## (1).使用命令:先查询可用的bot或创建新的bot,然后使用“前缀+bot名称+你所询问的内容 或 刷新指令”,这里前缀 "/" 使用自己的bot,前缀 "." 使用公用的bot.
+## (1).使用命令:先查询可用的bot或创建新的bot,然后使用“前缀+bot名称+你所询问的内容 或 刷新指令”,这里前缀 "{PRIVATE_COMMAND}" 使用自己的bot,前缀 "{PUBLIC_COMMAND}" 使用公用的bot.
 > 当询问内容为 刷新指令 也就是 "清除对话" 或 "清空对话" 或"刷新对话" 时,将清除和bot的聊天记录,即重新开始对话
-## 一个可能的私有的bot使用示例为 “/chat 在吗?” 这里的chat就是我自己的bot,是我创建的,并且可以通过 “/所有bot” 查询
-
-## 一个可能的公用的bot使用示例为 “.chat 在吗?” 这里的chat是公用的bot,可以通过 “.所有bot” 查询,但只有本插件管理员可以创建
-
-## 一个可能的清除某个bot的聊天记录的示例为 “/chat 刷新对话”
+### 1).私有的bot使用示例为 “{PRIVATE_COMMAND}chat 在吗?” 这里的chat就是我自己的bot,是我创建的,并且可以通过 “{PRIVATE_COMMAND}所有bot” 查询
+### 2).公用的bot使用示例为 “{PUBLIC_COMMAND}chat 在吗?” 这里的chat是公用的bot,可以通过 “{PUBLIC_COMMAND}所有bot” 查询,但只有本插件管理员可以创建
+### 3).清除某个bot的聊天记录的示例为 “{PRIVATE_COMMAND}chat 刷新对话”
 ## (2).无需命令:直接回复某个bot的最后一条消息来继续对话
 > 注意公用的bot可能也在和别人对话,所以最后一条消息不一定是发给你的最后一条
 
 # 2.以下是bot管理命令列表,这里有两种不同前缀代表不用含义
-## 使用**/**前缀表示管理自己的bot
+## 使用**{PRIVATE_COMMAND}**前缀表示管理自己的bot
 
-## 使用**.** 前缀表示管理公用用户的bot
+## 使用**{PUBLIC_COMMAND}** 前缀表示管理公用用户的bot
 
 | 命令 | 命令含义 | 命令可用用户 |
 | --- | --- | --- |
 | 所有bot | 查询所有的可用的bot | 所有用户可用 |
-| 创建bot | 创建新的bot | .开头仅SparkGPT管理员可用,/开头所有用户可用 |
-| 改名bot | 更改bot的名称 | .开头仅SparkGPT管理员可用,/开头所有用户可用 |
-| 删除bot | 删除指定bot | .开头仅SparkGPT管理员可用,/开头所有用户可用 |
+| 创建bot | 创建新的bot(可覆盖同名bot) | {PRIVATE_COMMAND}开头仅SparkGPT管理员可用,{PUBLIC_COMMAND}开头所有用户可用 |
+| 改名bot | 更改bot的名称(可覆盖同名bot) | {PRIVATE_COMMAND}开头仅SparkGPT管理员可用,{PUBLIC_COMMAND}开头所有用户可用 |
+| 删除bot | 删除指定bot | {PRIVATE_COMMAND}开头仅SparkGPT管理员可用,{PUBLIC_COMMAND}开头所有用户可用 |
 
 # 3.以下是用户信息命令列表,所有命令前需要加上前缀{command_start}才能触发。
 
@@ -85,8 +100,8 @@ async def help_(
 | --- | --- | --- |
 | 所有预设 | 给出所有预设的名称 | 所有用户可用 |
 | 查询预设 | 查询指定预设的内容 | 所有用户可用 |
-| 添加预设 | 添加新的预设 | SparkGPT管理员可用 |
-| 改名预设 | 修改预设的名字 | SparkGPT管理员可用 |
+| 添加预设 | 添加新的预设(可覆盖同名预设) | SparkGPT管理员可用 |
+| 改名预设 | 修改预设的名字(可覆盖同名预设) | SparkGPT管理员可用 |
 | 删除预设 | 删除指定预设 | SparkGPT管理员可用 |
 
 # 5.以下是webui管理命令列表,所有命令前需要加上前缀{command_start}才能触发
@@ -418,14 +433,16 @@ all_bots = on_message(priority=1, block=False)
 async def all_bots_(matcher: Matcher, bot: Bot, event: MessageEvent):
     from .utils import SPECIALPIC_WIDTH
 
-    if not str(event.message).startswith(("/所有bot", ".所有bot")):
+    if not str(event.message).startswith(
+        (f"{PRIVATE_COMMAND}所有bot", f"{PUBLIC_COMMAND}所有bot")
+    ):
         await matcher.finish()
 
-    if str(event.message).startswith("/"):
-        pre_command = "/"
+    if str(event.message).startswith(PRIVATE_COMMAND):
+        pre_command = PRIVATE_COMMAND
         common_userinfo = set_common_userinfo(event=event, bot=bot)
     else:
-        pre_command = "."
+        pre_command = PUBLIC_COMMAND
         common_userinfo = set_public_common_userinfo(bot)
     path = await txt_to_pic(
         common_users.show_all_bots(common_userinfo, pre_command),
@@ -440,10 +457,12 @@ rename_bot = on_message(priority=1, block=False)
 
 @rename_bot.handle()
 async def rename_bot_(matcher: Matcher, bot: Bot, event: MessageEvent, state: T_State):
-    if not str(event.message).startswith(("/改名bot", ".改名bot")):
+    if not str(event.message).startswith(
+        (f"{PUBLIC_COMMAND}改名bot", f"{PRIVATE_COMMAND}改名bot")
+    ):
         await matcher.finish()
 
-    if str(event.message).startswith("/"):
+    if str(event.message).startswith(PRIVATE_COMMAND):
         state["common_userinfo"] = set_common_userinfo(event=event, bot=bot)
     else:
         await if_super_user(event, bot, matcher)
@@ -465,7 +484,7 @@ async def rename_bot__(
     await if_close(event, matcher, bot, state["replys"])
     state["bot_name"] = str(args)
     state["replys"].append(
-        await send_message("请输入bot要改为的名字\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
+        await send_message("请输入bot要改为的名字\n注意bot的名字只能由中文,英文,数字组成\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
     )
 
 
@@ -478,7 +497,11 @@ async def rename_bot___(
     args: str = ArgStr("new_bot_name"),
 ):
     await if_close(event, matcher, bot, state["replys"])
-    new_botname = str(args).replace("\n", "")
+    new_botname = str(args).replace("\n", "").replace("\r", "").replace(" ", "")
+    if not is_valid_string(new_botname):
+        await send_message("bot名称不能包含特殊字符,请重新开始")
+        await delete_messages(bot,event,state["replys"])
+        await matcher.finish()
     try:
         common_users.rename_bot(
             state["common_userinfo"], state["bot_name"], new_botname

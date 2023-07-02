@@ -31,6 +31,8 @@ COMMENTS = (
             "pic_able": PICABLE,
             "url_able": URLABLE,
             "num_limit": NUM_LIMIT,
+            "private_command": "私人的bot的控制和使用前缀,默认‘/’",
+            "public_command": "公用的bot的控制和使用前缀,默认‘.’",
             "pic_width": "一般文字转图片的宽度",
             "specialpic_width": "命令 所有预设 所有bot 使用的文转图的宽度大致范围",
         },

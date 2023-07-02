@@ -1,5 +1,4 @@
 from pathlib import Path
-
 import imgkit
 import markdown
 from charset_normalizer import from_bytes

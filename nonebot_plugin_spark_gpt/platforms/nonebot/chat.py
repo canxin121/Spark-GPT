@@ -3,7 +3,7 @@ from nonebot.matcher import Matcher
 from nonebot.params import ArgStr
 from nonebot.plugin import on_message
 from nonebot.typing import T_State
-
+from ...utils.utils import is_valid_string
 from .utils import (
     if_super_user,
     set_common_userinfo,
@@ -40,6 +40,8 @@ chat = on_message(priority=1, block=False)
 
 
 async def get_question_chatbot(event: MessageEvent, bot: Bot, matcher: Matcher):
+    from .main import PRIVATE_COMMAND, PUBLIC_COMMAND
+
     raw_text = str(event.message)
     """因为kook不支持直接在event里获取reply的msgid或者判断是不是reply，只能出此下策"""
     kook_reply_msgid = ""
@@ -49,7 +51,7 @@ async def get_question_chatbot(event: MessageEvent, bot: Bot, matcher: Matcher):
             kook_reply_msgid = kookmsg.quote.id_
 
     if not (
-        raw_text.startswith(("/", "."))
+        raw_text.startswith((PRIVATE_COMMAND, PUBLIC_COMMAND))
         or (hasattr(event, "reply") or hasattr(event, "reply_to_message"))
         or kook_reply_msgid
     ):
@@ -85,9 +87,9 @@ async def get_question_chatbot(event: MessageEvent, bot: Bot, matcher: Matcher):
         else:
             await matcher.finish()
     else:
-        if raw_text.startswith("/"):
+        if raw_text.startswith(PRIVATE_COMMAND):
             common_userinfo = set_common_userinfo(event, bot)
-        elif raw_text.startswith("."):
+        elif raw_text.startswith(PUBLIC_COMMAND):
             common_userinfo = set_public_common_userinfo(bot)
         try:
             question, chatbot = temp_bots.get_bot_by_text(
@@ -144,15 +146,19 @@ new_bot = on_message(priority=1, block=False)
 
 @new_bot.handle()
 async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_State):
+    from .main import PRIVATE_COMMAND, PUBLIC_COMMAND
+
     raw_message = str(event.message)
-    if not raw_message.startswith((".创建bot", "/创建bot")):
+    if not raw_message.startswith(
+        (f"{PRIVATE_COMMAND}创建bot", f"{PUBLIC_COMMAND}创建bot")
+    ):
         await matcher.finish()
-    if raw_message.startswith("."):
+    if raw_message.startswith(PUBLIC_COMMAND):
         await if_super_user(event, bot, matcher)
-        state["pre_command"] = "."
+        state["pre_command"] = PUBLIC_COMMAND
         state["common_userinfo"] = set_public_common_userinfo(bot)
     else:
-        state["pre_command"] = "/"
+        state["pre_command"] = PRIVATE_COMMAND
         state["common_userinfo"] = set_common_userinfo(event, bot)
     state["able_source_dict"], able_source_str = get_able_source()
     state["replys"] = []
@@ -184,7 +190,7 @@ async def new_bot__(
         await matcher.finish()
     state["replys"].append(
         await send_message(
-            "请为这个新bot设置一个独一无二的昵称\n输入'算了'或'取消'可以结束当前操作",
+            "请为这个新bot设置一个独一无二的昵称\n只允许使用中文,英文,数字组成\n输入'算了'或'取消'可以结束当前操作",
             matcher,
             bot,
             event,
@@ -203,9 +209,10 @@ async def new_bot___(
     from .utils import SPECIALPIC_WIDTH
 
     await if_close(event, matcher, bot, state["replys"])
-    bot_nickname = str(args).replace("\n", "").replace(" ", "").replace("\r", "")
-    if not bot_nickname:
-        await send_message("bot的名称不能仅为换行符或空格或空白", matcher, bot, event)
+    bot_nickname = str(args).replace("\n", "").replace("\r", "").replace(" ", "")
+    if not is_valid_string(bot_nickname):
+        await send_message("bot的名称不能包含特殊字符,只允许中文英文和数字,请重新开始", matcher, bot, event)
+        await delete_messages(bot, event, state["replys"])
         await matcher.finish()
     else:
         state["bot_nickname"] = bot_nickname
@@ -279,15 +286,23 @@ delete_bot = on_message(priority=1, block=False)
 
 @delete_bot.handle()
 async def delete_bot_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_State):
-    if not str(event.message).startswith(("/删除bot", ".删除bot")):
+    from .main import PRIVATE_COMMAND, PUBLIC_COMMAND
+
+    if not str(event.message).startswith(
+        (f"{PRIVATE_COMMAND}删除bot", f"{PUBLIC_COMMAND}删除bot")
+    ):
         await matcher.finish()
-    if str(event.message).startswith("/"):
+    if str(event.message).startswith(PRIVATE_COMMAND):
         state["common_userinfo"] = set_common_userinfo(event, bot)
-        plain_message = str(event.message).replace("/删除bot", "").replace(" ", "")
+        plain_message = (
+            str(event.message).replace(f"{PRIVATE_COMMAND}删除bot", "").replace(" ", "")
+        )
     else:
         await if_super_user(event, bot, matcher)
         state["common_userinfo"] = set_public_common_userinfo(bot)
-        plain_message = str(event.message).replace(".删除bot", "").replace(" ", "")
+        plain_message = (
+            str(event.message).replace(f"{PUBLIC_COMMAND}删除bot", "").replace(" ", "")
+        )
     state["replys"] = []
     if not plain_message:
         state["replys"].append(

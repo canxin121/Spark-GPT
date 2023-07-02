@@ -1,5 +1,5 @@
 import uuid
-
+import re
 import aiohttp
 
 
@@ -31,3 +31,7 @@ async def get_url(text):
                 if retries == 0:
                     url = f"上传失败：{str(e)}"
                     return url
+
+def is_valid_string(s):
+    pattern = re.compile(r'^[\u4e00-\u9fa5a-zA-Z0-9]+$')
+    return bool(pattern.match(s))

@@ -42,6 +42,8 @@ CONFIG_NAMES = (
         "XSRF_TOKEN",
         "specialpic_width",
         "pic_width",
+        "public_command",
+        "private_command"
     ],
 )
 
@@ -65,6 +67,8 @@ class Config(BaseModel):
                 "num_limit": "500",
                 "pic_width": "1800",
                 "specialpic_width": "400",
+                "private_command":"/",
+                "public_command":"."
             },
             "Newbing配置": {
                 "cookie": "",
