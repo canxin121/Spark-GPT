@@ -77,7 +77,7 @@ class CommonUsers(BaseModel):
 
     def show_all_bots(self, common_userinfo: CommonUserInfo, pre_command: str):
         if len(self.user_dict[common_userinfo].bots.keys()) == 0:
-            return "当前没有可用的bot,请使用/help命令获取更多帮助"
+            return "当前没有可用的bot,请使用/shelp命令获取更多帮助"
         msg = f"所有可用的bot如下\n使用命令'{pre_command}'+bot名称+问题即可进行对话\n\n| bot名称 | bot来源 | bot预设名 |\n| --- | --- | --- |\n"
         for botinfo, botdata in self.user_dict[common_userinfo].bots.items():
             prompt_name = botdata.prompt_nickname if botdata.prompt_nickname else "未知"
