@@ -34,10 +34,9 @@ from ...common.mytypes import UserInfo, CommonUserInfo, BotInfo
 from ...utils.text_render import txt_to_pic
 from nonebot.params import CommandStart
 from ...common.config import config
+from ...common.load_config import get_help_pic
 
 
-
-Generated_Help_Msg_Pic = False
 Help_Msg_Path = Path(__file__).parent / "HelpMsg.jpeg"
 
 help = on_command("shelp", aliases={"s帮助", "sparkhelp"}, priority=1, block=False)
@@ -47,8 +46,7 @@ help = on_command("shelp", aliases={"s帮助", "sparkhelp"}, priority=1, block=F
 async def help_(
     matcher: Matcher, event: MessageEvent, bot: Bot, foo: Annotated[str, CommandStart()]
 ):
-    from ...common.load_config import PRIVATE_COMMAND,PUBLIC_COMMAND
-    global Generated_Help_Msg_Pic
+    from ...common.load_config import PRIVATE_COMMAND,PUBLIC_COMMAND,Generated_Help_Msg_Pic
     command_start = str(foo)
     help_msg = f"""# 1.使用bot方式
 ## (1).使用命令:先查询可用的bot或创建新的bot,然后使用“前缀+bot名称+你所询问的内容 或 刷新指令”,这里前缀 "{PRIVATE_COMMAND}" 使用自己的bot,前缀 "{PUBLIC_COMMAND}" 使用公用的bot.
@@ -98,7 +96,7 @@ async def help_(
 """
     if not Generated_Help_Msg_Pic:
         await txt_to_pic(help_msg, Help_Msg_Path, width=PIC_WIDTH, quality=100)
-        Generated_Help_Msg_Pic = True
+        get_help_pic()
     await send_img(Help_Msg_Path, matcher, bot, event)
     await matcher.finish()
 

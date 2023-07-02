@@ -10,6 +10,8 @@ from .tongyiqianwen import load_config as load_tongyiqianwen_config
 from ..platforms.nonebot.utils import load_config as load_common_config
 from ..common.config import CONFIG_SOURCE
 from ..common.load_config import load_command_config
+
+
 def get_able_source():
     from .bard import ABLE as BARD_ABLE
     from .chatgpt_web import ABLE as CHATGPTWEB_ABLE
