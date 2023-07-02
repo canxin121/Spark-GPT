@@ -4,7 +4,14 @@ from nonebot.plugin import PluginMetadata
 
 __plugin_meta__ = PluginMetadata(
     name="Spark_GPT",
-    description="提供多平台数据互通的多来源人格化gpt语言模型便捷使用,提供webui用以配置和管理预设人格",
+    description="将poe,chatgpt,slack claude,Newbing,google bard,讯飞星火模型(SparkDesk),通义千问等接入qq,tg,kook(原开黑啦)多平台用户绑定实现数据互通,并提供webui进行便捷配置,自适应文转图,实现预设人格化bot的便捷创建,使用和管理",
     usage="查看/help命令",
     extra={},
+    supported_adapters=[
+        "nonebot.adapters.kaiheila",
+        "nonebot.adapters.telegram",
+        "nonebot.adapters.onebot.v11",
+    ],
+    type="application",
+    homepage="https://github.com/canxin121/Spark-GPT",
 )
