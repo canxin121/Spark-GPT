@@ -56,9 +56,13 @@ class CommonUsers(BaseModel):
 
     def get_bot_by_text(self, common_userinfo: CommonUserInfo, text: str) -> BotData:
         """根据text是否以某个bot的名字开头来获取对应的botdata"""
+        from .load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
+
         bots = self.user_dict[common_userinfo].bots
         for bot, bot_data in bots.items():
-            if text.startswith((f"/{bot.nickname}", f".{bot.nickname}")):
+            if text.startswith(
+                (f"{PRIVATE_COMMAND}{bot.nickname}", f"{PUBLIC_COMMAND}{bot.nickname}")
+            ):
                 return bot, bot_data
 
     def delete_bot(self, common_userinfo: CommonUserInfo, botinfo: BotInfo):
