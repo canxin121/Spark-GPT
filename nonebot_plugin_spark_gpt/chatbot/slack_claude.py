@@ -46,7 +46,7 @@ class Slack_Claude_Bot:
     ):
         self.lock = asyncio.Lock()
         self.nickname = bot_info.nickname
-        
+
         self.bot_data = bot_data
         self.common_userinfo = common_userinfo
         if not (SLACK_USER_TOKEN and CHANNEL_ID and CLAUDE_ID):
@@ -60,50 +60,78 @@ class Slack_Claude_Bot:
     async def refresh(self):
         self.bot_data.msg_ts = ""
         self.bot_data.thread_ts = ""
-        
+
         try:
             _ = await self.claude_chat(question=self.bot_data.prompt)
-            
+
             return
         except Exception as e:
-            
             error = f"Claude Slack刷新时error:{str(e)}"
             logger.error(error)
             raise Exception(error)
 
     async def ask(self, question: str):
-        
         if not self.bot_data.thread_ts:
             try:
                 _ = await self.claude_chat(question=self.bot_data.prompt)
             except Exception as e:
-                
                 error = f"Claude Slack加载预设时error:{str(e)}"
                 logger.error(error)
                 raise Exception(error)
         try:
             answer = await self.claude_chat(question=question)
-            
+
             return answer
         except Exception as e:
-            
             error = f"Claude Slack询问时error:{str(e)}"
             logger.error(error)
             raise Exception(error)
 
     async def receive_message(self):
-        try:
-            # 使用Web客户端调用conversations.replies方法
-            result = await CLIENT.conversations_replies(
-                ts=self.bot_data.thread_ts,
-                channel=CHANNEL_ID,
-                oldest=self.bot_data.msg_ts,
-            )
-            return result
-        except SlackApiError as e:
-            error = f"Claude Slack在发送消息到频道{CHANNEL_ID}时error: {e}"
-            logger.error(error)
-            raise Exception(error)
+        retry = 3
+        detail_error = "未知错误"
+        while retry > 0:
+            await asyncio.sleep(1)
+            try:
+                # 使用Web客户端调用conversations.replies方法
+                result = await CLIENT.conversations_replies(
+                    ts=self.bot_data.thread_ts,
+                    channel=CHANNEL_ID,
+                    oldest=self.bot_data.msg_ts,
+                )
+                result = result.data
+                if (
+                    not result
+                    or len(result["messages"]) < 1
+                    or result["messages"][-1]["user"] != CLAUDE_ID
+                    or (
+                        result["messages"][-1]["text"] == "_Typing…_"
+                        or (
+                            result["messages"][-1]["text"].startswith(
+                                "\n&gt; _*Please note:*"
+                            )
+                            and result["messages"][-2]["text"] == "_Typing…_"
+                        )
+                    )
+                ):
+                    raise Exception("slack的claude没有回复")
+                elif "error" in result.keys():
+                    raise Exception(result["error"])
+                elif result["ok"]:
+                    if result["messages"][-1]["text"].startswith(
+                        "\n&gt; _*Please note:*"
+                    ):
+                        return result["messages"][-2]["text"]
+                    else:
+                        return result["messages"][-1]["text"]
+                else:
+                    raise Exception("未知错误")
+            except Exception as e:
+                detail_error = str(e)
+                error = f"Claude Slack在获取消息到频道{CHANNEL_ID}时error: {e}"
+                logger.error(error)
+                retry -= 1
+        raise Exception(detail_error)
 
     async def update_message(self, text: str):
         try:
@@ -111,11 +139,11 @@ class Slack_Claude_Bot:
             result = await CLIENT.chat_update(
                 channel=CHANNEL_ID,
                 ts=self.bot_data.msg_ts,
-                text=f"<@{CLAUDE_ID}>{text}",
+                text=f"<@{CLAUDE_ID}>{PRE_MSG}{text}",
             )
             return result
         except Exception as e:
-            error = f"Claude Slack在获取claude发送的消息时error: {e}"
+            error = f"在更新发向claude的消息时error: {e}"
             logger.error(error)
             raise Exception(error)
 
@@ -129,56 +157,28 @@ class Slack_Claude_Bot:
         if result["ok"]:
             return result["ts"]
         else:
-            raise SlackApiError
+            result = result["ok"]
+            error = f"在发向claude的消息时error:{result}"
+            logger.error(error)
+            raise Exception(error)
 
     async def get_msg(self, question: str):
         response = "_Typing…_"
-        start_time = time.time()
-        max_retries = 3
-        reties = 0
-        while response.strip().endswith("_Typing…_"):
-            time.sleep(RECEIVE_INTERVAL)
-            replies = await self.receive_message()
-            # 如果replies['ok']为False或消息列表长度小于等于1,则表示没有响应
-            if not replies:
-                raise SlackApiError("未收到Claude响应,请重试.")
-            if not replies["ok"] or (
-                time.time() - start_time > 10 and len(replies["messages"]) <= 1
-            ):
-                if replies["error"] == "ratelimited":
-                    logger.error(f"Claude slack获取Clude发送的消息时被限速了,将在5秒后重试")
-                    time.sleep(5)
-                    continue
-                # 如果重试次数超过{max_retries}次,则返回未响应
-                # 否则更新消息从而触发@Claude的响应
-                if reties >= max_retries:
-                    # 解锁会话
-                    raise f"以重试{max_retries}次,未收到Claude响应,将重试."
-                else:
-                    # 如果重试次数未超过{max_retries}次,则更新消息从而触发@Claude的响应
-                    try:
-                        await self.update_message(CHANNEL_ID, question)
-                    except Exception as e:
-                        pass
-                    start_time = time.time()
-                    reties += 1
-                    continue
-            if len(replies["messages"]) <= 1:
-                continue
-            for index, message in enumerate(replies["messages"][1:], start=1):
-                if message["user"] != CLAUDE_ID:
-                    continue
-                response = message["text"]
-                if index < len(replies["messages"]) - 1 and any(
-                    warn_tip in replies["messages"][index + 1]["text"]
-                    for warn_tip in ["*Please note:*", "Oops! Claude was un"]
-                ):
-                    await CLIENT.chat_delete(
-                        channel=CHANNEL_ID,
-                        ts=replies["messages"][-1]["ts"],
-                        as_user=True,
-                    )
-                break
+        retry = 3
+        detail_error = "未知错误"
+        while response.endswith("_Typing…_"):
+            while retry > 0:
+                try:
+                    response = await self.receive_message()
+                    if not response.endswith("_Typing…_"):
+                        break
+                except Exception as e:
+                    detail_error = str(e)
+                    if detail_error == "slack的claude没有回复":
+                        await self.update_message(question)
+                    retry -= 1
+            if retry <= 0:
+                raise Exception(detail_error)
         return response
 
     async def claude_chat(self, question: str):
@@ -204,6 +204,6 @@ class Slack_Claude_Bot:
             logger.error(error)
             raise Exception(error)
         except Exception as e:
-            error = f"Claude Slack在获取消息时error{str(e)}"
+            error = f"Claude Slack在获取消息时error{str(e)},如果多次无回复可以尝试刷新对话"
             logger.error(error)
             raise Exception(error)

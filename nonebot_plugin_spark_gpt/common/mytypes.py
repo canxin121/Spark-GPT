@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Dict, List, Literal, Optional, Set, Tuple
 from pydantic import BaseModel
-from EdgeGPT import Chatbot
+from EdgeGPT.EdgeGPT import Chatbot
 
 PLATFORM = Literal["OneBot V11", "Telegram", "Kaiheila"]
 SOURCE = Literal[

@@ -1,10 +1,7 @@
 import asyncio
-from typing import Dict, Literal
 from nonebot.log import logger
 from nonebot.utils import run_sync
-from pydantic import BaseModel
 from ..common.config import config
-from EdgeGPT import Chatbot, ConversationStyle, ConversationStyle
 from ..common.mytypes import CommonUserInfo, BotData, BotInfo
 from ..common.user_data import common_users
 import poe
