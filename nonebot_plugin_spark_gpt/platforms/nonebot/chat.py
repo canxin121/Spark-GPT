@@ -147,6 +147,7 @@ new_bot = on_message(priority=1, block=False)
 @new_bot.handle()
 async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_State):
     from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
+    from .utils import SPECIALPIC_WIDTH
 
     raw_message = str(event.message)
     if not raw_message.startswith(
@@ -162,15 +163,12 @@ async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_Sta
         state["common_userinfo"] = set_common_userinfo(event, bot)
     state["able_source_dict"], able_source_str = get_able_source()
     state["replys"] = []
-    state["replys"].append(
-        await send_message(
-            f"请输入要创建的bot的来源的序号\n可选项有:\n{able_source_str}输入'算了'或'取消'可以结束当前操作",
-            matcher,
-            bot,
-            event,
-            force_pic=True,
-        )
+    path = await txt_to_pic(
+        f"请输入要创建的bot的来源的序号\n可选项有:\n{able_source_str}输入'算了'或'取消'可以结束当前操作",
+        width=SPECIALPIC_WIDTH + 400,
+        quality=100,
     )
+    state["replys"].append(await send_img(path, matcher, bot, event))
 
 
 @new_bot.got("source_index")
