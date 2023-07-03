@@ -168,6 +168,7 @@ async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_Sta
             matcher,
             bot,
             event,
+            force_pic=True,
         )
     )
 

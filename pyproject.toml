@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot_plugin_spark_gpt"
-version = "1.0.6"
+version = "1.0.7"
 description = "Spark-GPT,将多种来源的gpt接入qq,TG及更多平台,提供webui进行实时配置热更新,效率高超,使用便捷,管理完善,功能强大"
 authors = ["canxin121 <1969730106@qq.com>"]
 readme = "README.md"
@@ -15,6 +15,7 @@ python = "^3.9"
 aiohttp = "^3.8.4"
 bidict = "^0.22.1"
 edgegpt = "0.11.8"
+Sydneygpt = "0.11.8"
 fastapi = "^0.98.0"
 httpx = "^0.24.1"
 markdown = "^3.4.3"

@@ -12,6 +12,7 @@ SOURCE = Literal[
     "slack claude",
     "spark desk",
     "bing",
+    "sydneybing",
     "bard",
     "通义千问",
 ]

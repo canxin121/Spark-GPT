@@ -114,6 +114,7 @@ class Slack_Claude_Bot:
                         )
                     )
                 ):
+                    await asyncio.sleep(1)
                     raise Exception("slack的claude没有回复")
                 elif "error" in result.keys():
                     raise Exception(result["error"])

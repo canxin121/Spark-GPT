@@ -23,24 +23,48 @@ def get_able_source():
     from .tongyiqianwen import ABLE as TongYiQianWen_ABLE
 
     able_dict = {
-        "poe chatgpt": POE_ABLE,
-        "poe claude": POE_ABLE,
-        "chatgpt web": CHATGPTWEB_ABLE,
-        "slack claude": SLACKCLAUDE_ABLE,
-        "spark desk": SPARKDESK_ABLE,
-        "bing": NEWBING_ABLE,
-        "bard": BARD_ABLE,
-        "通义千问": TongYiQianWen_ABLE,
+        "poe chatgpt": {"able": POE_ABLE, "des": "poe网站的chatgpt,支持预设最长约830字"},
+        "poe claude": {"able": POE_ABLE, "des": "poe网站的claude,支持预设最长约830字"},
+        "chatgpt web": {
+            "able": CHATGPTWEB_ABLE,
+            "des": "openai官网的chatgpt网页版,支持预设最长约5400字",
+        },
+        "slack claude": {
+            "able": SLACKCLAUDE_ABLE,
+            "des": "slack网站的claude,支持非常长的预设",
+        },
+        "sydneybing": {
+            "able": NEWBING_ABLE,
+            "des": "微软的Newbing越狱版,支持长度约4000的预设",
+        },
+        "spark desk": {
+            "able": SPARKDESK_ABLE,
+            "des": "讯飞的讯飞星火语言模型,不支持预设",
+        },
+        "通义千问": {
+            "able": TongYiQianWen_ABLE,
+            "des": "阿里的通义千问,不支持预设",
+        },
+        "bing": {
+            "able": NEWBING_ABLE,
+            "des": "微软的Newbing,不支持预设",
+        },
+        "bard": {
+            "able": BARD_ABLE,
+            "des": "谷歌的Bard,不支持预设",
+        },
     }
     source_dict = {}
-    source_dict_str = ""
+    source_dict_str = "\n\n| 序号 | 来源名称 | 来源介绍 |\n| --- | --- | --- |\n"
     i = 0
-    for source, ABLE in able_dict.items():
-        if ABLE:
+    for source, dict in able_dict.items():
+        if dict["able"]:
             i += 1
-            key = str(i)
-            source_dict[key] = source
-            source_dict_str += f"{key}: {source}\n"
+            order = str(i)
+            des = dict["des"]
+            source_dict[order] = source
+            source_dict_str += f"| {order} | {source} | {des} |\n"
+    source_dict_str += "\n"
 
     return source_dict, source_dict_str
 

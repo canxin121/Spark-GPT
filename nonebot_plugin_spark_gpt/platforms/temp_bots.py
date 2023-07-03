@@ -11,12 +11,14 @@ from ..chatbot.newbing import Newbing_bot
 from ..chatbot.slack_claude import Slack_Claude_Bot
 from ..chatbot.spark_desk import SparkBot
 from ..chatbot.tongyiqianwen import TongYiQianWen
+from ..chatbot.sydneybing import SydneyBing_bot
 from ..common.mytypes import CommonUserInfo, BotInfo, BotData
 from ..common.user_data import common_users
 
 CHATBOT = Union[
     SparkBot,
     Newbing_bot,
+    SydneyBing_bot,
     ChatGPT_web_Bot,
     Slack_Claude_Bot,
     Poe_bot,
@@ -140,6 +142,10 @@ class Temp_Bots(BaseModel):
             )
         elif botdata.source == "bing":
             bot_links.bot_dict[botinfo] = Newbing_bot(
+                common_userinfo=common_userinfo, bot_info=botinfo, bot_data=botdata
+            )
+        elif botdata.source == "sydneybing":
+            bot_links.bot_dict[botinfo] = SydneyBing_bot(
                 common_userinfo=common_userinfo, bot_info=botinfo, bot_data=botdata
             )
         elif botdata.source == "chatgpt web":
