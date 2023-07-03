@@ -26,11 +26,11 @@
 # ！！！项目重构已完成，新版本将无法兼容旧版本配置文件和预设文件，请手动保存原来的配置并手动转移至新版本
 # 新版本数据位置为data/sparp_gpt，其中的common文件夹中的prompt和config是可以由旧版本手动打开替换其中的部分内容的,其余数据如创建的bot均无法转移
 
-# 最新版本支持qq，tg，开黑啦(kook)三端互通数据同时使用(安装并配置好对应的nonebot适配器即可),支持poe，chatgpt网页版，slack claude，newbing，bard，通义千问，讯飞星火大模型的来源。
+# 最新版本支持qq，tg，开黑啦(kook)三端互通数据同时使用(安装并配置好对应的nonebot适配器即可),支持poe（gpt+claude），chatgpt网页版，slack claude，newbing，sydney bing，bard，通义千问，讯飞星火大模型的来源。
 # 具体使用请使用/shelp命令获取帮助面板
 
 >
-## [教程-残心小站-文档库(暂未更新)](https://canxin121.github.io/docs/docs/Spark_GPT.html )
+## [教程-残心小站-文档库(已更新从零开始教程和)](https://canxin121.github.io/docs/docs/Spark_GPT.html )
 
 > 用户交流群:[610948446](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=KHGqjjbiz6fpRr-W2X9SugTXThKFiprJ&authKey=LhpClaGtc4%2Ff3EL7f4IIIt7F94vLHJj4HSS8c2YCE55nRBRBtftzla%2Bgj7pa0fWX&noverify=0&group_code=610948446
 )
