@@ -38,8 +38,7 @@ class SydneyBing_bot:
             except Exception as e:
                 detail_error = str(e)
                 logger.error(f"Sydneybing刷新时error:{detail_error}")
-                if retry > 0:
-                    retry -= 1
+                retry -= 1
         if retry <= 0:
             error = f"Sydneybing刷新时报错次数超过上限{detail_error}"
             logger.error(error)
@@ -51,19 +50,28 @@ class SydneyBing_bot:
             detail_error = "未知错误"
             while retry > 0:
                 try:
-                    await self.chatbot.ask(
-                        prompt=self.botdata.prompt,
-                        conversation_style=ConversationStyle.creative,
-                        simplify_response=True,
-                        wss_link=WSS_LINK,
-                        locale="en-us",
+                    _ = await asyncio.wait_for(
+                        self.chatbot.ask(
+                            prompt=self.botdata.prompt,
+                            conversation_style=ConversationStyle.creative,
+                            simplify_response=True,
+                            wss_link=WSS_LINK,
+                            locale="en-us",
+                        ),
+                        timeout=360,
                     )
                     return
+                except asyncio.TimeoutError:
+                    error = "Sydneybing在初始化预设时超时无响应"
+                    logger.error(error)
+                    raise Exception(error)
                 except Exception as e:
                     detail_error = str(e)
                     logger.error(f"Sydneybing在初始化预设时error:{detail_error}")
                     retry -= 1
-        raise Exception(f"Sydneybing在初始化预设时出错次数超过上限{detail_error}")
+        error = f"Sydneybing在初始化预设时出错次数超过上限{detail_error}"
+        logger.error(error)
+        raise Exception(error)
 
     async def ask(self, question):
         from .newbing import PROXY, COOKIES, WSS_LINK
@@ -82,7 +90,7 @@ class SydneyBing_bot:
                         wss_link=WSS_LINK,
                         locale="en-us",
                     ),
-                    timeout=360,  
+                    timeout=360,
                 )
                 left, source_text, suggests = (
                     str(raw_json["messages_left"]),
@@ -113,7 +121,7 @@ class SydneyBing_bot:
                                     wss_link=WSS_LINK,
                                     locale="en-us",
                                 ),
-                                timeout=360,  
+                                timeout=360,
                             )
 
                             left, source_text, suggests = (

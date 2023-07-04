@@ -53,22 +53,19 @@ class Newbing_bot:
 
     async def refresh(self):
         retry = 3
-
+        detail_error = "未知错误"
         while retry > 0:
             try:
                 if len(PROXY) > 0:
                     self.chatbot = await Chatbot.create(cookies=COOKIES, proxy=PROXY)
                 else:
                     self.chatbot = await Chatbot.create(cookies=COOKIES)
-
                 return
             except Exception as e:
-                logger.error(f"Newbing刷新时error:{str(e)}")
-                if retry > 0:
-                    retry += 1
-                else:
-                    raise e
-        error = "Newbing刷新时报错次数超过上限"
+                retry -= 1
+                detail_error = str(e)
+                logger.error(f"Newbing刷新时error:{detail_error}")
+        error = f"Newbing刷新时报错次数超过上限{detail_error}"
         logger.error(error)
         raise Exception(error)
 
@@ -88,7 +85,7 @@ class Newbing_bot:
                         wss_link=WSS_LINK,
                         locale="en-us",
                     ),
-                    timeout=360,  
+                    timeout=360,
                 )
                 left, source_text, suggests = (
                     str(raw_json["messages_left"]),
@@ -119,7 +116,7 @@ class Newbing_bot:
                                     wss_link=WSS_LINK,
                                     locale="en-us",
                                 ),
-                                timeout=360,  
+                                timeout=360,
                             )
                             left, source_text, suggests = (
                                 str(raw_json["messages_left"]),

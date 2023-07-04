@@ -16,7 +16,6 @@ from .utils import (
     Bot,
     txt_to_pic,
     send_img,
-    KOOKChannelMessageEvent,
 )
 from ..temp_bots import temp_bots
 from ...chatbot.load_config import get_able_source
