@@ -73,7 +73,7 @@ pipx install nb-cli
 
 先找到一个目录,用来存放nb项目文件夹  
 比如我这里可以在win桌面按住shift再点击右键,打开一个powershell,就相当于吧nb项目文件夹创建在桌面上
-![打开powershell](/resource/Spark_GPT/1.png)  
+![打开powershell](/source/1.png)  
 在命令行工具如powershell中输入
 
 ```
@@ -82,17 +82,17 @@ nb
 
 此时应该出现了交互式的面板用以创建nb项目,交互方式是鼠标点击选中或者上下键切换空格键选中，然后按enter提交并进入下一个界面  
 这里我们选择创建一个Nonebot项目并回车，而后提示输入一个名称，这里我们自己想一个名字输入就可以，这个名字是创建完成后文件夹的名字  
-![nb-cli](/resource/Spark_GPT/2.png)  
+![nb-cli](/source/2.png)  
 然后选择bootstrap按enter  
-![nb-cli](/resource/Spark_GPT/3.png)  
+![nb-cli](/source/3.png)  
 然后选中如图绿色驱动器的并enter  
-![nb-cli](/resource/Spark_GPT/4.png)  
+![nb-cli](/source/4.png)  
 然后选中如图绿色的适配器并enter  
-![nb-cli](/resource/Spark_GPT/5.png)  
+![nb-cli](/source/5.png)  
 然后选中如图连续输入两次Y来创建项目  
-![nb-cli](/resource/Spark_GPT/6.png)  
+![nb-cli](/source/6.png)  
 最后提示我们选择内置插件，这里可以选择echo并回车，也可以不选，但是不要选择singlesession  
-![nb-cli](/resource/Spark_GPT/7.png)
+![nb-cli](/source/7.png)
 至此nb项目文件夹已经创建完毕
 
 ### 2.安装本插件及依赖软件
@@ -100,7 +100,7 @@ nb
 #### (1).使用nb命令一键安装插件，其他nb插件安装同理，可以去商店看看，有众多实用和有趣插件
 
 完成上一步(3)后，我们关闭powershell，并且打开这个新创建的nb项目的文件夹，在文件夹里面重新打开powershell  
-![nb-cli](/resource/Spark_GPT/8.png)  
+![nb-cli](/source/8.png)  
 在命令行中输入
 
 ```
@@ -127,18 +127,18 @@ brew install --cask wkhtmltopdf
 
 在[下载页面](https://wkhtmltopdf.org/downloads.html)下载对应版本安装，并将安装的目录下的bin目录添加到系统环境变量  
 例如windows操作如下  
-![nb-cli](/resource/Spark_GPT/9.png)  
+![nb-cli](/source/9.png)  
 打开上面超链接，下载所指软件并安装，注意在安装时要注意记住你安装的路径是什么  
-![nb-cli](/resource/Spark_GPT/10.png)    
+![nb-cli](/source/10.png)    
 根据上如的安装路径，我们来添加系统环境变量  
 首先搜索打开编辑系统环境变量界面  
-![nb-cli](/resource/Spark_GPT/11.png)  
+![nb-cli](/source/11.png)  
 点击编辑系统环境变量  
-![nb-cli](/resource/Spark_GPT/12.png)  
+![nb-cli](/source/12.png)  
 双击编辑系统变量中的Path变量  
-![nb-cli](/resource/Spark_GPT/13.png)  
+![nb-cli](/source/13.png)  
 点击新建，并且在新的编辑框中输入你刚才记下的安装路径，后面在加上 /bin  ,比如我的安装路径是C:\Program Files\wkhtmltopdf，我就填写C:\Program Files\wkhtmltopdf\bin  
-![nb-cli](/resource/Spark_GPT/14.png)  
+![nb-cli](/source/14.png)  
 最后记得一直点确定并关闭，确保保存成功
 ### 3.配置本插件的env设置
 只有两个配置项,用以配置webui的地址  
@@ -189,11 +189,11 @@ kaiheila_bots =[{"token": "1/MTA2MjE=/DnbsqfmN6/IfVCrdOiGXKcQ=="}]
 ## 二. Webui配置介绍
 
 首页可以选择进入配置和预设两个配置面板  
-![webui首页](/resource/Spark_GPT/15.png)  
+![webui首页](/source/15.png)  
 配置界面可以配置各个来源的gpt所需的内容，各项均有小字注释来解释  
-![webui配置界面](/resource/Spark_GPT/16.png)  
+![webui配置界面](/source/16.png)  
 预设界面可以删除添加改名预设以及修改预设对应内容，点击左侧对应预设才会在右侧显示并可以显示对应预设  
-![webui预设界面](/resource/Spark_GPT/17.png)  
+![webui预设界面](/source/17.png)  
 
 ## 三. 控制命令介绍
 #### 1.使用bot方式

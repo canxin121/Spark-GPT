@@ -82,7 +82,7 @@ class SydneyBing_bot:
                         wss_link=WSS_LINK,
                         locale="en-us",
                     ),
-                    timeout=100,  # 设置 5 秒的超时时间
+                    timeout=180,  # 设置 5 秒的超时时间
                 )
                 left, source_text, suggests = (
                     str(raw_json["messages_left"]),
@@ -113,7 +113,7 @@ class SydneyBing_bot:
                                     wss_link=WSS_LINK,
                                     locale="en-us",
                                 ),
-                                timeout=100,  # 设置 5 秒的超时时间
+                                timeout=180,  # 设置 5 秒的超时时间
                             )
 
                             left, source_text, suggests = (
