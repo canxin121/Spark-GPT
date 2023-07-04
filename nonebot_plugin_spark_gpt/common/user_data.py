@@ -46,13 +46,21 @@ class CommonUsers(BaseModel):
     def rename_bot(self, common_userinfo: CommonUserInfo, oldname: str, newname: str):
         """更改某个bot的名称"""
         bots = self.user_dict[common_userinfo].bots
-        for bot, bot_data in bots.items():
+        old_bot = None
+        origin_bot = None
+        for bot in bots.keys():
             if bot.nickname == oldname:
-                bot.nickname = newname
-                bot_data.nickname = newname
-                self.save_userdata(common_userinfo)
-                return
-        raise Exception("没有这个名称的bot")
+                old_bot = bot
+            if bot.nickname == newname:
+                origin_bot = bot
+        if old_bot:
+            if origin_bot:
+                del bots[origin_bot]
+            bots[old_bot].nickname = newname
+            old_bot.nickname = newname
+            self.save_userdata(common_userinfo)
+        else:
+            raise Exception("没有这个名称的bot")
 
     def get_bot_by_text(self, common_userinfo: CommonUserInfo, text: str) -> BotData:
         """根据text是否以某个bot的名字开头来获取对应的botdata"""

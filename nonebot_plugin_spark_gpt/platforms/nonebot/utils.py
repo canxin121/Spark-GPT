@@ -177,10 +177,10 @@ async def reply_message(
     content: str,
     plain: bool = True,
 ):
+    from ...common.load_config import PICABLE, NUMLIMIT, URLABLE, PIC_WIDTH
+
     """跨平台回复消息"""
     if isinstance(event, TGMessageEvent):
-        from ...common.load_config import PICABLE, NUMLIMIT, URLABLE, PIC_WIDTH
-
         if plain:
             any = await send_TGMessageText_with_retry(
                 content, bot, event, reply_to_message_id=event.message_id
