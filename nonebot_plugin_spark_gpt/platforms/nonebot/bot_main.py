@@ -10,7 +10,6 @@ from .utils import (
     set_public_common_userinfo,
     delete_messages,
     send_message,
-    # reply_out,
     if_close,
     reply_message,
     MessageEvent,
@@ -24,6 +23,7 @@ from ...chatbot.load_config import get_able_source
 from ...common.mytypes import BotInfo, BotData
 from ...common.prompt_data import prompts
 from ...common.user_data import common_users
+from .utils import get_question_chatbot
 
 REFRESH_KEYWORDS = [
     "清除对话",
@@ -37,68 +37,6 @@ REFRESH_KEYWORDS = [
 ]
 
 chat = on_message(priority=1, block=False)
-
-
-async def get_question_chatbot(event: MessageEvent, bot: Bot, matcher: Matcher):
-    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
-
-    raw_text = str(event.message)
-    """因为kook不支持直接在event里获取reply的msgid或者判断是不是reply，只能出此下策"""
-    kook_reply_msgid = ""
-    if isinstance(event, KOOKChannelMessageEvent):
-        kookmsg = await bot.call_api(api="message_view", msg_id=event.msg_id)
-        if kookmsg.quote:
-            kook_reply_msgid = kookmsg.quote.id_
-
-    if not (
-        raw_text.startswith((PRIVATE_COMMAND, PUBLIC_COMMAND))
-        or (hasattr(event, "reply") or hasattr(event, "reply_to_message"))
-        or kook_reply_msgid
-    ):
-        await matcher.finish()
-    if bool(hasattr(event, "reply") and bool(event.reply)) or bool(
-        bool(hasattr(event, "reply_to_message") and event.reply_to_message)
-        or kook_reply_msgid
-    ):
-        if (
-            (hasattr(event, "reply") and str(event.reply.sender.user_id) == bot.self_id)
-            or (
-                hasattr(event, "reply_to_message")
-                and str(event.reply_to_message.from_.id) == bot.self_id
-            )
-            or (kook_reply_msgid and event.event.mention[0] == bot.self_id)
-        ):
-            question = raw_text
-            try:
-                common_userinfo = set_common_userinfo(event, bot)
-                chatbot = temp_bots.get_bot_by_msgid(
-                    common_userinfo, bot, event, kook_msgid=kook_reply_msgid
-                )
-                return question, chatbot, common_userinfo
-            except:
-                try:
-                    common_userinfo = set_public_common_userinfo(bot)
-                    chatbot = temp_bots.get_bot_by_msgid(
-                        common_userinfo, bot, event, kook_msgid=kook_reply_msgid
-                    )
-                    return question, chatbot, common_userinfo
-                except:
-                    await matcher.finish()
-        else:
-            await matcher.finish()
-    else:
-        if raw_text.startswith(PRIVATE_COMMAND):
-            common_userinfo = set_common_userinfo(event, bot)
-        elif raw_text.startswith(PUBLIC_COMMAND):
-            common_userinfo = set_public_common_userinfo(bot)
-        try:
-            question, chatbot = temp_bots.get_bot_by_text(
-                common_userinfo=common_userinfo, text=raw_text
-            )
-            return question, chatbot, common_userinfo
-        except Exception as e:
-            # logger.error(str(e))
-            await matcher.finish()
 
 
 @chat.handle()
@@ -146,8 +84,7 @@ new_bot = on_message(priority=1, block=False)
 
 @new_bot.handle()
 async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_State):
-    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
-    from .utils import SPECIALPIC_WIDTH
+    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND,SPECIALPIC_WIDTH
 
     raw_message = str(event.message)
     if not raw_message.startswith(
@@ -205,7 +142,7 @@ async def new_bot___(
     bot: Bot,
     args: str = ArgStr("bot_nickname"),
 ):
-    from .utils import SPECIALPIC_WIDTH
+    from ...common.load_config import SPECIALPIC_WIDTH
 
     await if_close(event, matcher, bot, state["replys"])
     bot_nickname = str(args).replace("\n", "").replace("\r", "").replace(" ", "")
@@ -332,6 +269,78 @@ async def delete_bot__(
         )
         await send_message("成功删除了该bot", matcher, bot, event)
         await matcher.finish()
+    except MatcherException:
+        await delete_messages(bot, event, state["replys"])
+        raise
+    except Exception as e:
+        await send_message(str(e), matcher, bot, event)
+        await matcher.finish()
+
+
+rename_bot = on_message(priority=1, block=False)
+
+
+@rename_bot.handle()
+async def rename_bot_(matcher: Matcher, bot: Bot, event: MessageEvent, state: T_State):
+    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
+
+    if not str(event.message).startswith(
+        (f"{PUBLIC_COMMAND}改名bot", f"{PRIVATE_COMMAND}改名bot")
+    ):
+        await matcher.finish()
+
+    if str(event.message).startswith(PRIVATE_COMMAND):
+        state["common_userinfo"] = set_common_userinfo(event=event, bot=bot)
+    else:
+        await if_super_user(event, bot, matcher)
+        state["common_userinfo"] = set_public_common_userinfo(bot)
+    state["replys"] = []
+    state["replys"].append(
+        await send_message("请输入要更改的bot的名称\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
+    )
+
+
+@rename_bot.got("bot_name")
+async def rename_bot__(
+    matcher: Matcher,
+    state: T_State,
+    bot: Bot,
+    event: MessageEvent,
+    args: str = ArgStr("bot_name"),
+):
+    await if_close(event, matcher, bot, state["replys"])
+    state["bot_name"] = str(args)
+    state["replys"].append(
+        await send_message(
+            "请输入bot要改为的名字\n注意bot的名字只能由中文,英文,数字组成\n输入'取消'或'算了'可以结束当前操作",
+            matcher,
+            bot,
+            event,
+        )
+    )
+
+
+@rename_bot.got("new_bot_name")
+async def rename_bot___(
+    matcher: Matcher,
+    state: T_State,
+    bot: Bot,
+    event: MessageEvent,
+    args: str = ArgStr("new_bot_name"),
+):
+    await if_close(event, matcher, bot, state["replys"])
+    new_botname = str(args).replace("\n", "").replace("\r", "").replace(" ", "")
+    if not is_valid_string(new_botname):
+        await send_message("bot名称不能包含特殊字符,请重新开始")
+        await delete_messages(bot, event, state["replys"])
+        await matcher.finish()
+    try:
+        common_users.rename_bot(
+            state["common_userinfo"], state["bot_name"], new_botname
+        )
+        await send_message("成功更改了对应的bot的名称", matcher, bot, event)
+        await matcher.finish()
+
     except MatcherException:
         await delete_messages(bot, event, state["replys"])
         raise

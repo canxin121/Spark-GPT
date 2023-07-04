@@ -23,8 +23,6 @@ from .utils import (
     MessageEvent,
     Message,
     Bot,
-    SPECIALPIC_WIDTH,
-    PIC_WIDTH,
 )
 from ...common.web.app import start_web_ui, stop_web_ui, HOST, PORT
 from ...common.user_data import common_users
@@ -46,7 +44,13 @@ help = on_command("shelp", aliases={"s帮助", "sparkhelp"}, priority=1, block=F
 async def help_(
     matcher: Matcher, event: MessageEvent, bot: Bot, foo: Annotated[str, CommandStart()]
 ):
-    from ...common.load_config import PRIVATE_COMMAND,PUBLIC_COMMAND,Generated_Help_Msg_Pic
+    from ...common.load_config import (
+        PRIVATE_COMMAND,
+        PUBLIC_COMMAND,
+        Generated_Help_Msg_Pic,
+        PIC_WIDTH,
+    )
+
     command_start = str(foo)
     help_msg = f"""# 1.使用bot方式
 ## (1).使用命令:先查询可用的bot或创建新的bot,然后使用“前缀+bot名称+你所询问的内容 或 刷新指令”,这里前缀 "{PRIVATE_COMMAND}" 使用自己的bot,前缀 "{PUBLIC_COMMAND}" 使用公用的bot.
@@ -210,7 +214,7 @@ all_prompts = on_command("所有预设", priority=1, block=False)
 
 @all_prompts.handle()
 async def all_prompts_(bot: Bot, matcher: Matcher, event: MessageEvent):
-    from .utils import SPECIALPIC_WIDTH
+    from ...common.load_config import SPECIALPIC_WIDTH
 
     path = await txt_to_pic(prompts.show_list(), width=SPECIALPIC_WIDTH)
     await send_img(path, matcher, bot, event)
@@ -414,8 +418,7 @@ all_bots = on_message(priority=1, block=False)
 
 @all_bots.handle()
 async def all_bots_(matcher: Matcher, bot: Bot, event: MessageEvent):
-    from .utils import SPECIALPIC_WIDTH
-    from ...common.load_config import PRIVATE_COMMAND,PUBLIC_COMMAND
+    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND, SPECIALPIC_WIDTH
 
     if not str(event.message).startswith(
         (f"{PRIVATE_COMMAND}所有bot", f"{PUBLIC_COMMAND}所有bot")
@@ -434,70 +437,3 @@ async def all_bots_(matcher: Matcher, bot: Bot, event: MessageEvent):
     )
     await send_img(path, matcher, bot, event)
     await matcher.finish()
-
-
-rename_bot = on_message(priority=1, block=False)
-
-
-@rename_bot.handle()
-async def rename_bot_(matcher: Matcher, bot: Bot, event: MessageEvent, state: T_State):
-    from ...common.load_config import PRIVATE_COMMAND,PUBLIC_COMMAND
-    
-    if not str(event.message).startswith(
-        (f"{PUBLIC_COMMAND}改名bot", f"{PRIVATE_COMMAND}改名bot")
-    ):
-        await matcher.finish()
-
-    if str(event.message).startswith(PRIVATE_COMMAND):
-        state["common_userinfo"] = set_common_userinfo(event=event, bot=bot)
-    else:
-        await if_super_user(event, bot, matcher)
-        state["common_userinfo"] = set_public_common_userinfo(bot)
-    state["replys"] = []
-    state["replys"].append(
-        await send_message("请输入要更改的bot的名称\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
-    )
-
-
-@rename_bot.got("bot_name")
-async def rename_bot__(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("bot_name"),
-):
-    await if_close(event, matcher, bot, state["replys"])
-    state["bot_name"] = str(args)
-    state["replys"].append(
-        await send_message("请输入bot要改为的名字\n注意bot的名字只能由中文,英文,数字组成\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
-    )
-
-
-@rename_bot.got("new_bot_name")
-async def rename_bot___(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("new_bot_name"),
-):
-    await if_close(event, matcher, bot, state["replys"])
-    new_botname = str(args).replace("\n", "").replace("\r", "").replace(" ", "")
-    if not is_valid_string(new_botname):
-        await send_message("bot名称不能包含特殊字符,请重新开始")
-        await delete_messages(bot,event,state["replys"])
-        await matcher.finish()
-    try:
-        common_users.rename_bot(
-            state["common_userinfo"], state["bot_name"], new_botname
-        )
-        await send_message("成功更改了对应的bot的名称", matcher, bot, event)
-        await matcher.finish()
-
-    except MatcherException:
-        await delete_messages(bot, event, state["replys"])
-        raise
-    except Exception as e:
-        await send_message(str(e), matcher, bot, event)
-        await matcher.finish()

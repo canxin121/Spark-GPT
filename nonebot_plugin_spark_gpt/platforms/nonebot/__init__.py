@@ -1,2 +1,2 @@
-from . import main
-from . import chat
+from . import config_main
+from . import bot_main

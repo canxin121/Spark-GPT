@@ -46,47 +46,6 @@ MessageEvent = Union[
 ]
 Bot = Union[OB11_BOT, TGBot, QQGUILDBot, KOOKBot]
 
-PICABLE = "Auto"
-NUMLIMIT = 850
-URLABLE = "True"
-PIC_WIDTH = 1800
-SPECIALPIC_WIDTH = 600
-
-
-def load_config():
-    global PICABLE, NUMLIMIT, URLABLE, PIC_WIDTH, SPECIALPIC_WIDTH
-
-    try:
-        PICABLE = config.get_config("总控配置", "pic_able")
-    except:
-        PICABLE = "Auto"
-    try:
-        PIC_WIDTH = int(config.get_config("总控配置", "pic_width"))
-    except:
-        PIC_WIDTH = 1800
-    try:
-        SPECIALPIC_WIDTH = int(config.get_config("总控配置", "specialpic_width"))
-    except:
-        SPECIALPIC_WIDTH = 600
-
-    if PICABLE == "Auto":
-        try:
-            NUMLIMIT = int(config.get_config("总控配置", "num_limit"))
-        except:
-            NUMLIMIT = 800
-        try:
-            URLABLE = config.get_config("总控配置", "url_able")
-        except:
-            URLABLE = False
-    if PICABLE == "True":
-        try:
-            URLABLE = config.get_config("总控配置", "url_able")
-        except:
-            URLABLE = False
-
-
-load_config()
-
 
 async def if_close(
     event: MessageEvent,
@@ -114,6 +73,68 @@ async def if_super_user(event: MessageEvent, bot: Bot, mathcer: Matcher):
         await mathcer.finish()
     else:
         return
+
+
+async def get_question_chatbot(event: MessageEvent, bot: Bot, matcher: Matcher):
+    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
+    from ..temp_bots import temp_bots
+
+    raw_text = str(event.message)
+    """因为kook不支持直接在event里获取reply的msgid或者判断是不是reply，只能出此下策"""
+    kook_reply_msgid = ""
+    if isinstance(event, KOOKChannelMessageEvent):
+        kookmsg = await bot.call_api(api="message_view", msg_id=event.msg_id)
+        if kookmsg.quote:
+            kook_reply_msgid = kookmsg.quote.id_
+
+    if not (
+        raw_text.startswith((PRIVATE_COMMAND, PUBLIC_COMMAND))
+        or (hasattr(event, "reply") or hasattr(event, "reply_to_message"))
+        or kook_reply_msgid
+    ):
+        await matcher.finish()
+    if bool(hasattr(event, "reply") and bool(event.reply)) or bool(
+        bool(hasattr(event, "reply_to_message") and event.reply_to_message)
+        or kook_reply_msgid
+    ):
+        if (
+            (hasattr(event, "reply") and str(event.reply.sender.user_id) == bot.self_id)
+            or (
+                hasattr(event, "reply_to_message")
+                and str(event.reply_to_message.from_.id) == bot.self_id
+            )
+            or (kook_reply_msgid and event.event.mention[0] == bot.self_id)
+        ):
+            question = raw_text
+            try:
+                common_userinfo = set_common_userinfo(event, bot)
+                chatbot = temp_bots.get_bot_by_msgid(
+                    common_userinfo, bot, event, kook_msgid=kook_reply_msgid
+                )
+                return question, chatbot, common_userinfo
+            except:
+                try:
+                    common_userinfo = set_public_common_userinfo(bot)
+                    chatbot = temp_bots.get_bot_by_msgid(
+                        common_userinfo, bot, event, kook_msgid=kook_reply_msgid
+                    )
+                    return question, chatbot, common_userinfo
+                except:
+                    await matcher.finish()
+        else:
+            await matcher.finish()
+    else:
+        if raw_text.startswith(PRIVATE_COMMAND):
+            common_userinfo = set_common_userinfo(event, bot)
+        elif raw_text.startswith(PUBLIC_COMMAND):
+            common_userinfo = set_public_common_userinfo(bot)
+        try:
+            question, chatbot = temp_bots.get_bot_by_text(
+                common_userinfo=common_userinfo, text=raw_text
+            )
+            return question, chatbot, common_userinfo
+        except Exception as e:
+            await matcher.finish()
 
 
 async def send_TGMessageText_with_retry(
@@ -158,6 +179,8 @@ async def reply_message(
 ):
     """跨平台回复消息"""
     if isinstance(event, TGMessageEvent):
+        from ...common.load_config import PICABLE, NUMLIMIT, URLABLE, PIC_WIDTH
+
         if plain:
             any = await send_TGMessageText_with_retry(
                 content, bot, event, reply_to_message_id=event.message_id
@@ -336,6 +359,8 @@ async def send_message(
     plain: bool = True,
     force_pic=False,
 ):
+    from ...common.load_config import PIC_WIDTH, NUMLIMIT, PICABLE, URLABLE
+
     """跨平台回复消息"""
     if isinstance(event, TGMessageEvent):
         if force_pic:

@@ -7,7 +7,6 @@ from .slack_claude import load_config as load_slack_claude_config
 from .bard import load_config as load_bard_config
 from .spark_desk import load_config as load_spark_desk_config
 from .tongyiqianwen import load_config as load_tongyiqianwen_config
-from ..platforms.nonebot.utils import load_config as load_common_config
 from ..common.config import CONFIG_SOURCE
 from ..common.load_config import load_command_config
 
