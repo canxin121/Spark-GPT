@@ -68,6 +68,8 @@ async def help_(
 | 改名bot | 更改bot的名称(可覆盖同名bot) | {PRIVATE_COMMAND}开头仅SparkGPT管理员可用,{PUBLIC_COMMAND}开头所有用户可用 |
 | 删除bot | 删除指定bot | {PRIVATE_COMMAND}开头仅SparkGPT管理员可用,{PUBLIC_COMMAND}开头所有用户可用 |
 
+> 来源为bing和sydneybing的bot可以通过请求内容为"creative", "创造", "balanced", "均衡", "precise", "精确"来切换到对应模式
+
 # 3.以下是用户信息命令列表,所有命令前需要加上前缀{command_start}才能触发。
 
 | 命令 | 命令含义 | 命令可用用户 |
