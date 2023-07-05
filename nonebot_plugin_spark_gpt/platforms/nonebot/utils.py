@@ -7,14 +7,15 @@ from nonebot import logger
 from nonebot.adapters.kaiheila import Message as KOOKMessage
 from nonebot.adapters.kaiheila import MessageSegment as KOOKMessageSegment
 from nonebot.adapters.kaiheila.bot import Bot as KOOKBot
-from nonebot.adapters.kaiheila.event import MessageEvent as KOOKMessageEvent
 from nonebot.adapters.kaiheila.event import (
     ChannelMessageEvent as KOOKChannelMessageEvent,
 )
+from nonebot.adapters.kaiheila.event import MessageEvent as KOOKMessageEvent
 from nonebot.adapters.onebot.v11 import Bot as OB11_BOT
 from nonebot.adapters.onebot.v11 import Message as OB11_Message
 from nonebot.adapters.onebot.v11 import MessageEvent as OB11_MessageEvent
 from nonebot.adapters.onebot.v11 import MessageSegment as OB11_MessageSegment
+from nonebot.adapters.onebot.v11.exception import ActionFailed as OB11_ActionFailed
 from nonebot.adapters.qqguild import Message as QQGUILDMessage
 from nonebot.adapters.qqguild import MessageSegment as QQGUILDMessageSegment
 from nonebot.adapters.qqguild.bot import Bot as QQGUILDBot
@@ -221,9 +222,13 @@ async def reply_message(
 
     elif isinstance(event, OB11_MessageEvent):
         if plain:
-            return await matcher.send(
-                OB11_MessageSegment.reply(event.message_id) + content
-            )
+            try:
+                return await matcher.send(
+                    OB11_MessageSegment.reply(event.message_id)
+                    + OB11_MessageSegment.text(content)
+                )
+            except OB11_ActionFailed as e:
+                return await matcher.send(OB11_MessageSegment.text(content))
         else:
             if PICABLE == "Auto":
                 if len(str(content)) > NUMLIMIT:
@@ -232,42 +237,66 @@ async def reply_message(
                         path = await txt_to_pic(
                             str(content), width=PIC_WIDTH, quality=100
                         )
+                        try:
+                            return await matcher.send(
+                                OB11_MessageSegment.reply(event.message_id)
+                                + OB11_MessageSegment.image(path)
+                                + OB11_MessageSegment.text(url)
+                            )
+                        except:
+                            return await matcher.send(
+                                OB11_MessageSegment.image(path)
+                                + OB11_MessageSegment.text(url)
+                            )
+                    else:
+                        path = await txt_to_pic(
+                            str(content), width=PIC_WIDTH, quality=100
+                        )
+                        try:
+                            return await matcher.send(
+                                OB11_MessageSegment.reply(event.message_id)
+                                + OB11_MessageSegment.image(path)
+                            )
+                        except:
+                            return await matcher.send(OB11_MessageSegment.image(path))
+                else:
+                    try:
+                        return await matcher.send(
+                            OB11_MessageSegment.reply(event.message_id) + content
+                        )
+                    except:
+                        return await matcher.send(content)
+            elif PICABLE == "True":
+                if URLABLE == "True":
+                    url = await get_url(str(content))
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                    try:
                         return await matcher.send(
                             OB11_MessageSegment.reply(event.message_id)
                             + OB11_MessageSegment.image(path)
                             + OB11_MessageSegment.text(url)
                         )
-                    else:
-                        path = await txt_to_pic(
-                            str(content), width=PIC_WIDTH, quality=100
+                    except:
+                        return await matcher.send(
+                            OB11_MessageSegment.image(path)
+                            + OB11_MessageSegment.text(url)
                         )
+                else:
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
+                    try:
                         return await matcher.send(
                             OB11_MessageSegment.reply(event.message_id)
                             + OB11_MessageSegment.image(path)
                         )
-                else:
+                    except:
+                        return await matcher.send(OB11_MessageSegment.image(path))
+            else:
+                try:
                     return await matcher.send(
                         OB11_MessageSegment.reply(event.message_id) + content
                     )
-            elif PICABLE == "True":
-                if URLABLE == "True":
-                    url = await get_url(str(content))
-                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
-                    return await matcher.send(
-                        OB11_MessageSegment.reply(event.message_id)
-                        + OB11_MessageSegment.image(path)
-                        + OB11_MessageSegment.text(url)
-                    )
-                else:
-                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
-                    return await matcher.send(
-                        OB11_MessageSegment.reply(event.message_id)
-                        + OB11_MessageSegment.image(path)
-                    )
-            else:
-                return await matcher.send(
-                    OB11_MessageSegment.reply(event.message_id) + content
-                )
+                except:
+                    return await matcher.send(content)
     elif isinstance(event, KOOKMessageEvent):
         if plain:
             return await bot.send(
