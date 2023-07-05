@@ -1,6 +1,7 @@
+from nonebot.plugin import PluginMetadata
+
 from . import platforms
 from .common.web import app
-from nonebot.plugin import PluginMetadata
 
 __plugin_meta__ = PluginMetadata(
     name="Spark_GPT",

@@ -78,7 +78,7 @@ class Newbing_bot:
         if question in ["1", "2", "3"] and self.botdata.last_suggests:
             question = self.botdata.last_suggests[int(question) - 1]
         if self.botdata.prefix:
-            question = self.botdata.prefix + "\n\n" + question
+            question = self.botdata.prefix + "\n" + question
         retry = 3
         detail_error = "未知错误"
         while retry >= 0:

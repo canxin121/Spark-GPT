@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from ..config import config
 from ..prompt_data import prompts
+from ..prefix_data import prefixs
 from ...chatbot.load_config import load_config
 import uvicorn
 
@@ -152,6 +153,81 @@ class Fastapp:
                 },
             )
 
+    @app.post("/prefix")
+    @app.post("/prefix/{prefix_name}")
+    @app.get("/prefix")
+    @app.get("/prefix/{prefix_name}")
+    async def show_edit_prefix(request: Request, prefix_name: str = ""):
+        if not ABLE:
+            return "已关闭webui,禁止访问"
+        form = await request.form()
+        if "change_key" in form.keys() and form["change_key"] == "True":
+            new_name = form["new_key"]
+            try:
+                prefixs.rename(old_name=prefix_name, new_name=new_name)
+            except:
+                pass
+            return TEMPLATES.TemplateResponse(
+                "prefix.html",
+                {
+                    "request": request,
+                    "prefixs": prefixs.prefixs,
+                    "prefix_name": prefix_name,
+                    "saved": True,
+                },
+            )
+        elif "save" in form.keys() and form["save"] == "True":
+            new_prefix = form["prefix_value"]
+            try:
+                prefixs.change(prefix_name=prefix_name, prefix=new_prefix)
+            except:
+                pass
+            return TEMPLATES.TemplateResponse(
+                "prefix.html",
+                {
+                    "request": request,
+                    "prefixs": prefixs.prefixs,
+                    "prefix_name": prefix_name,
+                },
+            )
+        elif "delete_key" in form.keys() and form["delete_key"] == "True":
+            try:
+                prefixs.delete(prefix_name=prefix_name)
+            except:
+                pass
+            return TEMPLATES.TemplateResponse(
+                "prefix.html",
+                {
+                    "request": request,
+                    "prefixs": prefixs.prefixs,
+                    "prefix_name": prefix_name,
+                },
+            )
+
+        elif "add_key" in form.keys() and form["add_key"] == "True":
+            new_key = form["new_key"]
+            try:
+                prefixs.add(prefix_name=new_key, prefix="请在这里输入要设置的预设内容")
+            except:
+                pass
+            return TEMPLATES.TemplateResponse(
+                "prefix.html",
+                {
+                    "request": request,
+                    "prefixs": prefixs.prefixs,
+                    "prefix_name": prefix_name,
+                },
+            )
+        else:
+            return TEMPLATES.TemplateResponse(
+                "prefix.html",
+                {
+                    "request": request,
+                    "prefixs": prefixs.prefixs,
+                    "prefix_name": prefix_name,
+                },
+            )
+
     @app.post("/prompt")
     @app.post("/prompt/{prompt_name}")
     @app.get("/prompt")
@@ -170,7 +246,7 @@ class Fastapp:
                 "prompt.html",
                 {
                     "request": request,
-                    "prompts": prompts.prompts,
+                    "prompts": prompts.prefixs,
                     "prompt_name": prompt_name,
                     "saved": True,
                 },
@@ -185,7 +261,7 @@ class Fastapp:
                 "prompt.html",
                 {
                     "request": request,
-                    "prompts": prompts.prompts,
+                    "prompts": prompts.prefixs,
                     "prompt_name": prompt_name,
                 },
             )
@@ -198,7 +274,7 @@ class Fastapp:
                 "prompt.html",
                 {
                     "request": request,
-                    "prompts": prompts.prompts,
+                    "prompts": prompts.prefixs,
                     "prompt_name": prompt_name,
                 },
             )
@@ -213,7 +289,7 @@ class Fastapp:
                 "prompt.html",
                 {
                     "request": request,
-                    "prompts": prompts.prompts,
+                    "prompts": prompts.prefixs,
                     "prompt_name": prompt_name,
                 },
             )
@@ -222,7 +298,7 @@ class Fastapp:
                 "prompt.html",
                 {
                     "request": request,
-                    "prompts": prompts.prompts,
+                    "prompts": prompts.prefixs,
                     "prompt_name": prompt_name,
                 },
             )

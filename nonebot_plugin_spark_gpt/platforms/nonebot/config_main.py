@@ -22,6 +22,7 @@ from .utils import (
 from ...common.web.app import start_web_ui, stop_web_ui, HOST, PORT
 from ...common.user_data import common_users
 from ...common.prompt_data import prompts
+from ...common.prefix_data import prefixs
 from .userlinks import users
 from ...common.mytypes import CommonUserInfo
 from ...utils.text_render import txt_to_pic
@@ -85,7 +86,17 @@ async def help_(
 | 改名预设 | 修改预设的名字(可覆盖同名预设) | SparkGPT管理员可用 |
 | 删除预设 | 删除指定预设 | SparkGPT管理员可用 |
 
-# 5.以下是webui管理命令列表,所有命令前需要加上前缀{command_start}才能触发
+# 5.以下是前缀管理命令列表,所有命令前需要加上前缀{command_start}才能触发。
+
+| 命令 | 命令含义 | 命令可用用户 |
+| --- | --- | --- |
+| 所有前缀 | 给出所有前缀的名称 | 所有用户可用 |
+| 查询前缀 | 查询指定前缀的内容 | 所有用户可用 |
+| 添加前缀 | 添加新的前缀(可覆盖同名前缀) | SparkGPT管理员可用 |
+| 改名前缀 | 修改前缀的名字(可覆盖同名前缀) | SparkGPT管理员可用 |
+| 删除前缀 | 删除指定前缀 | SparkGPT管理员可用 |
+
+# 6.以下是webui管理命令列表,所有命令前需要加上前缀{command_start}才能触发
 
 | 命令 | 命令含义 | 命令可用用户 |
 | --- | --- | --- |
@@ -407,27 +418,205 @@ async def change_prompt_name___(
         await matcher.finish()
 
 
-all_bots = on_message(priority=1, block=False)
+all_prefixs = on_command("所有前缀", priority=1, block=False)
 
 
-@all_bots.handle()
-async def all_bots_(matcher: Matcher, bot: Bot, event: MessageEvent):
-    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND, SPECIALPIC_WIDTH
+@all_prefixs.handle()
+async def all_prefixs_(bot: Bot, matcher: Matcher, event: MessageEvent):
+    from ...common.load_config import SPECIALPIC_WIDTH
 
-    if not str(event.message).startswith(
-        (f"{PRIVATE_COMMAND}所有bot", f"{PUBLIC_COMMAND}所有bot")
-    ):
-        await matcher.finish()
-
-    if str(event.message).startswith(PRIVATE_COMMAND):
-        pre_command = PRIVATE_COMMAND
-        common_userinfo = set_common_userinfo(event=event, bot=bot)
-    else:
-        pre_command = PUBLIC_COMMAND
-        common_userinfo = set_public_common_userinfo(bot)
-    path = await txt_to_pic(
-        common_users.show_all_bots(common_userinfo, pre_command),
-        width=SPECIALPIC_WIDTH + 150,
-    )
+    path = await txt_to_pic(prefixs.show_list(), width=SPECIALPIC_WIDTH)
     await send_img(path, matcher, bot, event)
     await matcher.finish()
+
+
+show_prefix = on_command("查询前缀", priority=1, block=False)
+
+
+@show_prefix.handle()
+async def show_prefix_(
+    matcher: Matcher,
+    state: T_State,
+    bot: Bot,
+    event: MessageEvent,
+    args: Message = CommandArg(),
+):
+    state["replys"] = []
+    if not args:
+        state["replys"].append(
+            await send_message(
+                "请输入前缀的名称,区分大小写\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event
+            )
+        )
+
+    else:
+        matcher.set_arg("prefix", args)
+
+
+@show_prefix.got("prefix")
+async def show_prefix__(
+    matcher: Matcher,
+    state: T_State,
+    event: MessageEvent,
+    bot: Bot,
+    args: str = ArgStr("prefix"),
+):
+    await if_close(event, matcher, bot, state["replys"])
+    try:
+        prefix = prefixs.show_prefix(str(args))
+        await send_message(prefix, matcher, bot, event, plain=False)
+        await matcher.finish()
+
+    except MatcherException:
+        await delete_messages(bot, event, state["replys"])
+        raise
+    except Exception as e:
+        await send_message(str(e), matcher, bot, event)
+        await matcher.finish()
+
+
+delete_prefix = on_command("删除前缀", priority=1, block=False)
+
+
+@delete_prefix.handle()
+async def delete_prefix_(
+    matcher: Matcher,
+    state: T_State,
+    event: MessageEvent,
+    bot: Bot,
+    args: Message = CommandArg(),
+):
+    await if_super_user(event, bot, matcher)
+    state["replys"] = []
+    if not args:
+        state["replys"].append(
+            await send_message(
+                "请输入前缀的名称,区分大小写\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event
+            )
+        )
+
+    else:
+        matcher.set_arg("prefix", args)
+
+
+@delete_prefix.got("prefix")
+async def delete_prefix__(
+    matcher: Matcher,
+    event: MessageEvent,
+    state: T_State,
+    bot: Bot,
+    args: str = ArgStr("prefix"),
+):
+    await if_close(event, matcher, bot, state["replys"])
+    prefix_name = str(args).replace("\n", "")
+    try:
+        prefixs.delete(prefix_name)
+        await send_message("成功删除了该前缀", matcher, bot, event)
+        await matcher.finish()
+
+    except MatcherException:
+        await delete_messages(bot, event, state["replys"])
+        raise
+    except Exception as e:
+        await send_message(str(e), matcher, bot, event)
+        await matcher.finish()
+
+
+add_prefix = on_command("添加前缀", priority=1, block=False)
+
+
+@add_prefix.handle()
+async def add_prefix_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_State):
+    await if_super_user(event, bot, matcher)
+    state["replys"] = []
+    state["replys"].append(
+        await send_message("请输入前缀的要设为的名称\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
+    )
+
+
+@add_prefix.got("prefix_name")
+async def add_prefix__(
+    matcher: Matcher,
+    state: T_State,
+    bot: Bot,
+    event: MessageEvent,
+    args: str = ArgStr("prefix_name"),
+):
+    await if_close(event, matcher, bot, state["replys"])
+    state["prefix_name"] = str(args)
+    state["replys"].append(
+        await send_message("请输入前缀的内容\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
+    )
+
+
+@add_prefix.got("prefix")
+async def add_prefix___(
+    matcher: Matcher,
+    state: T_State,
+    bot: Bot,
+    event: MessageEvent,
+    args: str = ArgStr("prefix"),
+):
+    await if_close(event, matcher, bot, state["replys"])
+    try:
+        prefixs.add(state["prefix_name"], str(args))
+        await send_message("成功添加了对应的前缀", matcher, bot, event)
+        await matcher.finish()
+
+    except MatcherException:
+        await delete_messages(bot, event, state["replys"])
+        raise
+    except Exception as e:
+        await send_message(str(e), matcher, bot, event)
+        await matcher.finish()
+
+
+change_prefix_name = on_command("改名前缀", priority=1, block=False)
+
+
+@change_prefix_name.handle()
+async def change_prefix_name_(
+    matcher: Matcher, bot: Bot, event: MessageEvent, state: T_State
+):
+    await if_super_user(event, bot, matcher)
+    state["replys"] = []
+    state["replys"].append(
+        await send_message("请输入要更改的前缀的名称\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
+    )
+
+
+@change_prefix_name.got("prefix_name")
+async def change_prefix_name__(
+    matcher: Matcher,
+    state: T_State,
+    bot: Bot,
+    event: MessageEvent,
+    args: str = ArgStr("prefix_name"),
+):
+    await if_close(event, matcher, bot, state["replys"])
+    state["prefix_name"] = str(args)
+    state["replys"].append(
+        await send_message("请输入前缀要改为的名字\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
+    )
+
+
+@change_prefix_name.got("new_prefix_name")
+async def change_prefix_name___(
+    matcher: Matcher,
+    state: T_State,
+    bot: Bot,
+    event: MessageEvent,
+    args: str = ArgStr("new_prefix_name"),
+):
+    await if_close(event, matcher, bot, state["replys"])
+    try:
+        prefixs.rename(old_name=state["prefix_name"], new_name=str(args))
+        await send_message("成功更改了对应的前缀的名称", matcher, bot, event)
+        await matcher.finish()
+
+    except MatcherException:
+        await delete_messages(bot, event, state["replys"])
+        raise
+    except Exception as e:
+        await send_message(str(e), matcher, bot, event)
+        await matcher.finish()

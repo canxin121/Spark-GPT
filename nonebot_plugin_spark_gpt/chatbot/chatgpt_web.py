@@ -79,7 +79,7 @@ class ChatGPT_web_Bot:
         if not self.botdata.conversation_id:
             await self.refresh()
         if self.botdata.prefix:
-            question = self.botdata.prefix + "\n\n" + question
+            question = self.botdata.prefix + "\n" + question
         try:
             answer = await self.send_query(question=question)
 

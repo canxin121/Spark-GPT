@@ -21,6 +21,7 @@ from ..temp_bots import temp_bots
 from ...chatbot.load_config import get_able_source
 from ...common.mytypes import BotInfo, BotData
 from ...common.prompt_data import prompts
+from ...common.prefix_data import prefixs
 from ...common.user_data import common_users
 from .utils import get_question_chatbot
 
@@ -101,7 +102,7 @@ async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_Sta
     state["replys"] = []
     path = await txt_to_pic(
         f"请输入要创建的bot的来源的序号\n可选项有:\n{able_source_str}输入'算了'或'取消'可以结束当前操作",
-        width=SPECIALPIC_WIDTH + 400,
+        width=SPECIALPIC_WIDTH + 450,
         quality=100,
     )
     state["replys"].append(await send_img(path, matcher, bot, event))
@@ -165,6 +166,7 @@ async def new_bot___(
         state["replys"].append(await send_img(path, matcher, bot, event))
     else:
         state["prompt_nickname"] = "无预设"
+        state["prefix_nickname"] = "无前缀"
         matcher.set_arg("prompt", "")
         matcher.set_arg("prefix", "")
 
@@ -177,6 +179,8 @@ async def new_bot____(
     event: MessageEvent,
     args: str = ArgStr("prompt"),
 ):
+    from ...common.load_config import SPECIALPIC_WIDTH
+
     await if_close(event, matcher, bot, state["replys"])
     prompt = str(args).replace("\n", "")
     prompt_nickname = "自定义预设"
@@ -196,14 +200,19 @@ async def new_bot____(
             await send_message("没有这个本地预设名", matcher, bot, event)
             await matcher.finish()
 
-    state["replys"].append(
-        await send_message(
-            "请设置这个bot的前缀\n前缀是指每次对话时都在你的问题前添加一些要求内容,来使boy的回答符合要求\n注意前缀不可太长\n\n如果无需前缀,请输入\"无\"或\"无前缀\"\n如果需要前缀,请直接输入前缀内容\n输入'算了'或'取消'可以结束当前操作",
-            matcher,
-            bot,
-            event,
+    state["prompt_nickname"] = prompt_nickname
+    state["prompt"] = prompt
+    
+    try:
+        state["prefix_nickname"]
+    except:
+        prefixs_str = prefixs.show_list()
+        path = await txt_to_pic(
+            f'请设置这个bot的前缀\n前缀是指每次对话时都在你的问题前添加一些要求内容,来使boy的回答符合要求\n如果不使用前缀,请输入"无"或"无前缀"\n如果使用本地前缀,请在前缀名前加".",如使用自己的前缀直接发送即可\n当前可用的本地前缀有\n{prefixs_str}\n输入"算了"或"取消"可以结束当前操作',
+            width=SPECIALPIC_WIDTH + 300,
+            quality=100,
         )
-    )
+        state["replys"].append(await send_img(path, matcher, bot, event))
 
 
 @new_bot.got("prefix")
@@ -215,9 +224,24 @@ async def new_bot______(
     args: str = ArgStr("prefix"),
 ):
     await if_close(event, matcher, bot, state["replys"])
+    prefix_nickname = "自定义前缀"
+
+    try:
+        prefix_nickname = state["prefix_nickname"]
+    except:
+        pass
+
     prefix = str(args)
     if prefix in ["无", "无前缀"]:
         prefix = ""
+        prefix_nickname = "无前缀"
+    elif prefix.startswith("."):
+        try:
+            prefix_nickname = prefix.replace(".", "")
+            prefix = prefixs.show_prefix(prefix_nickname)
+        except:
+            await send_message("没有这个本地前缀名", matcher, bot, event)
+            await matcher.finish()
 
     common_userinfo = state["common_userinfo"]
     bot_nickname = state["bot_nickname"]
@@ -234,6 +258,7 @@ async def new_bot______(
                 nickname=bot_nickname,
                 prompt_nickname=prompt_nickname,
                 prompt=prompt,
+                prefix_nickname=prefix_nickname,
                 prefix=prefix,
                 source=state["able_source_dict"][state["source_index"]],
             ),
@@ -380,3 +405,29 @@ async def rename_bot___(
     except Exception as e:
         await send_message(str(e), matcher, bot, event)
         await matcher.finish()
+
+
+all_bots = on_message(priority=1, block=False)
+
+
+@all_bots.handle()
+async def all_bots_(matcher: Matcher, bot: Bot, event: MessageEvent):
+    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND, SPECIALPIC_WIDTH
+
+    if not str(event.message).startswith(
+        (f"{PRIVATE_COMMAND}所有bot", f"{PUBLIC_COMMAND}所有bot")
+    ):
+        await matcher.finish()
+
+    if str(event.message).startswith(PRIVATE_COMMAND):
+        pre_command = PRIVATE_COMMAND
+        common_userinfo = set_common_userinfo(event=event, bot=bot)
+    else:
+        pre_command = PUBLIC_COMMAND
+        common_userinfo = set_public_common_userinfo(bot)
+    path = await txt_to_pic(
+        common_users.show_all_bots(common_userinfo, pre_command),
+        width=SPECIALPIC_WIDTH + 350,
+    )
+    await send_img(path, matcher, bot, event)
+    await matcher.finish()

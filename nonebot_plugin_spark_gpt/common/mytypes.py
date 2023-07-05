@@ -36,6 +36,7 @@ class BotData(BaseModel):
     """spark desk"""
     chatid: Optional[str]
     """通用"""
+    prefix_nickname: Optional[str]
     prefix: Optional[str]
     nickname: Optional[str]
     owner: Optional[str]

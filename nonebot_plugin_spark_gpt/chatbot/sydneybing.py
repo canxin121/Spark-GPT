@@ -87,7 +87,7 @@ class SydneyBing_bot:
             question = self.botdata.last_suggests[int(question) - 1]
 
         if self.botdata.prefix:
-            question = self.botdata.prefix + "\n\n" + question
+            question = self.botdata.prefix + "\n" + question
         
         retry = 3
         detail_error = "未知错误"

@@ -84,7 +84,7 @@ class Slack_Claude_Bot:
                 raise Exception(error)
 
         if self.botdata.prefix:
-            question = self.botdata.prefix + "\n\n" + question
+            question = self.botdata.prefix + "\n" + question
         try:
             answer = await self.claude_chat(question=question)
 

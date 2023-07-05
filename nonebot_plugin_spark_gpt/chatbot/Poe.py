@@ -55,7 +55,7 @@ class Poe_bot:
 
     async def ask(self, question: str):
         if self.botdata.prefix:
-            question += self.botdata.prefix + "\n\n" + question
+            question += self.botdata.prefix + "\n" + question
         if not self.botdata.handle:
             try:
                 await self.new_bot()
