@@ -54,36 +54,32 @@ class Poe_bot:
         return hash((self.common_userinfo.user_id, self.nickname))
 
     async def ask(self, question: str):
-        
+        if self.botdata.prefix:
+            question += self.botdata.prefix + "\n\n" + question
         if not self.botdata.handle:
             try:
                 await self.new_bot()
             except Exception as e:
-                
                 raise e
         try:
             answer = await self.chat(question)
-            
+
             return answer
         except Exception as e:
-            
             raise e
 
     async def refresh(self):
-        
         if not self.botdata.handle:
             try:
                 await self.new_bot()
             except Exception as e:
-                
                 raise e
         else:
             try:
                 await self.chat_break()
             except Exception as e:
-                
                 raise e
-        
+
         return
 
     @run_sync
@@ -157,9 +153,18 @@ class Poe_bot:
         detail_error = "未知错误"
         while retry > 0:
             try:
-                CLIENT.create_bot(
-                    self.botdata.handle, self.botdata.prompt, base_model=self.base_model
-                )
+                if self.botdata.prompt:
+                    CLIENT.create_bot(
+                        self.botdata.handle,
+                        self.botdata.prompt,
+                        base_model=self.base_model,
+                    )
+                else:
+                    CLIENT.create_bot(
+                        self.botdata.handle,
+                        "一个说中文的语言模型Chatgpt",
+                        base_model=self.base_model,
+                    )
                 common_users.save_userdata(common_userinfo=self.common_userinfo)
                 return
             except Exception as e:

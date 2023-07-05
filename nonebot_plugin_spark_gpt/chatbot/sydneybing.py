@@ -39,45 +39,56 @@ class SydneyBing_bot:
                 detail_error = str(e)
                 logger.error(f"Sydneybing刷新时error:{detail_error}")
                 retry -= 1
-        if retry <= 0:
-            error = f"Sydneybing刷新时报错次数超过上限{detail_error}"
+        if self.botdata.prompt:
+            if retry <= 0:
+                error = f"Sydneybing刷新时报错次数超过上限{detail_error}"
+                logger.error(error)
+                raise Exception(error)
+            if len(self.botdata.prompt) > 4000:
+                raise Exception("Sydney的预设长度不得超过4000,请重新创建")
+            else:
+                retry = 2
+                detail_error = "未知错误"
+                while retry > 0:
+                    try:
+                        _ = await asyncio.wait_for(
+                            self.chatbot.ask(
+                                prompt=self.botdata.prompt,
+                                conversation_style=ConversationStyle.creative,
+                                simplify_response=True,
+                                wss_link=WSS_LINK,
+                                locale="en-us",
+                            ),
+                            timeout=360,
+                        )
+                        return
+                    except asyncio.TimeoutError:
+                        error = "Sydneybing在初始化预设时超时无响应"
+                        logger.error(error)
+                        raise Exception(error)
+                    except Exception as e:
+                        detail_error = str(e)
+                        logger.error(f"Sydneybing在初始化预设时error:{detail_error}")
+                        retry -= 1
+            error = f"Sydneybing在初始化预设时出错次数超过上限{detail_error}"
             logger.error(error)
             raise Exception(error)
-        if len(self.botdata.prompt) > 4000:
-            raise Exception("Sydney的预设长度不得超过4000,请重新创建")
         else:
-            retry = 2
-            detail_error = "未知错误"
-            while retry > 0:
-                try:
-                    _ = await asyncio.wait_for(
-                        self.chatbot.ask(
-                            prompt=self.botdata.prompt,
-                            conversation_style=ConversationStyle.creative,
-                            simplify_response=True,
-                            wss_link=WSS_LINK,
-                            locale="en-us",
-                        ),
-                        timeout=360,
-                    )
-                    return
-                except asyncio.TimeoutError:
-                    error = "Sydneybing在初始化预设时超时无响应"
-                    logger.error(error)
-                    raise Exception(error)
-                except Exception as e:
-                    detail_error = str(e)
-                    logger.error(f"Sydneybing在初始化预设时error:{detail_error}")
-                    retry -= 1
-        error = f"Sydneybing在初始化预设时出错次数超过上限{detail_error}"
-        logger.error(error)
-        raise Exception(error)
+            return
 
     async def ask(self, question):
-        from .newbing import PROXY, COOKIES, WSS_LINK
+        from .newbing import WSS_LINK
 
+        if question in ["creative", "创造", "balanced", "均衡", "precise", "精确"]:
+            self.change_style(question)
         if not self.chatbot:
             await self.refresh()
+        if question in ["1", "2", "3"] and self.botdata.last_suggests:
+            question = self.botdata.last_suggests[int(question) - 1]
+
+        if self.botdata.prefix:
+            question = self.botdata.prefix + "\n\n" + question
+        
         retry = 3
         detail_error = "未知错误"
         while retry >= 0:
@@ -150,11 +161,12 @@ class SydneyBing_bot:
         logger.error(error)
         raise Exception(error)
 
-    def change_style(self, chat_style_index: Literal["1", "2", "3"]):
-        if chat_style_index == "1":
+    def change_style(self, chat_style_str: str):
+        if chat_style_str in ["creative", "创造"]:
             self.chatstyle = ConversationStyle.creative
-        elif chat_style_index == "2":
+        elif chat_style_str in ["balanced", "均衡"]:
             self.chatstyle = ConversationStyle.balanced
-        else:
+        elif chat_style_str in ["precise", "精确"]:
             self.chatstyle == ConversationStyle.precise
+        common_users.save_userdata(common_userinfo=self.common_userinfo)
         return

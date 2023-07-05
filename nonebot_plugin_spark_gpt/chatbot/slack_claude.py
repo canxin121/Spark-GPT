@@ -47,7 +47,7 @@ class Slack_Claude_Bot:
         self.lock = asyncio.Lock()
         self.nickname = bot_info.nickname
 
-        self.bot_data = bot_data
+        self.botdata = bot_data
         self.common_userinfo = common_userinfo
         if not (SLACK_USER_TOKEN and CHANNEL_ID and CLAUDE_ID):
             raise Exception(
@@ -58,26 +58,33 @@ class Slack_Claude_Bot:
         return hash((self.nickname, self.common_userinfo.user_id))
 
     async def refresh(self):
-        self.bot_data.msg_ts = ""
-        self.bot_data.thread_ts = ""
+        self.botdata.msg_ts = ""
+        self.botdata.thread_ts = ""
 
-        try:
-            _ = await self.claude_chat(question=self.bot_data.prompt)
+        if self.botdata.prompt:
+            try:
+                _ = await self.claude_chat(question=self.botdata.prompt)
 
+                return
+            except Exception as e:
+                error = f"Claude Slack刷新预设时error:{str(e)}"
+                logger.error(error)
+                raise Exception(error)
+        else:
+            common_users.save_userdata(self.common_userinfo)
             return
-        except Exception as e:
-            error = f"Claude Slack刷新时error:{str(e)}"
-            logger.error(error)
-            raise Exception(error)
 
     async def ask(self, question: str):
-        if not self.bot_data.thread_ts:
+        if not self.botdata.thread_ts and self.botdata.prompt:
             try:
-                _ = await self.claude_chat(question=self.bot_data.prompt)
+                _ = await self.claude_chat(question=self.botdata.prompt)
             except Exception as e:
                 error = f"Claude Slack加载预设时error:{str(e)}"
                 logger.error(error)
                 raise Exception(error)
+
+        if self.botdata.prefix:
+            question = self.botdata.prefix + "\n\n" + question
         try:
             answer = await self.claude_chat(question=question)
 
@@ -95,9 +102,9 @@ class Slack_Claude_Bot:
             try:
                 # 使用Web客户端调用conversations.replies方法
                 result = await CLIENT.conversations_replies(
-                    ts=self.bot_data.thread_ts,
+                    ts=self.botdata.thread_ts,
                     channel=CHANNEL_ID,
-                    oldest=self.bot_data.msg_ts,
+                    oldest=self.botdata.msg_ts,
                 )
                 result = result.data
                 if (
@@ -139,7 +146,7 @@ class Slack_Claude_Bot:
             # 使用Web客户端调用chat.update方法
             result = await CLIENT.chat_update(
                 channel=CHANNEL_ID,
-                ts=self.bot_data.msg_ts,
+                ts=self.botdata.msg_ts,
                 text=f"<@{CLAUDE_ID}>{PRE_MSG}{text}",
             )
             return result
@@ -153,7 +160,7 @@ class Slack_Claude_Bot:
         result = await CLIENT.chat_postMessage(
             channel=CHANNEL_ID,
             text=f"<@{CLAUDE_ID}>{PRE_MSG}{msg}",
-            thread_ts=self.bot_data.thread_ts,
+            thread_ts=self.botdata.thread_ts,
         )
         if result["ok"]:
             return result["ts"]
@@ -184,11 +191,11 @@ class Slack_Claude_Bot:
 
     async def claude_chat(self, question: str):
         try:
-            # new_ts可以理解为新发送的消息的id,而self.bot_data.thread_ts则是一个消息列的id
+            # new_ts可以理解为新发送的消息的id,而self.botdata.thread_ts则是一个消息列的id
             new_ts = await self.send_msg(question)
-            self.bot_data.msg_ts = new_ts
-            if not self.bot_data.thread_ts:
-                self.bot_data.thread_ts = new_ts
+            self.botdata.msg_ts = new_ts
+            if not self.botdata.thread_ts:
+                self.botdata.thread_ts = new_ts
             common_users.save_userdata(common_userinfo=self.common_userinfo)
         except Exception as e:
             error = f"Claud Slack在发送消息时error:{str(e)}"

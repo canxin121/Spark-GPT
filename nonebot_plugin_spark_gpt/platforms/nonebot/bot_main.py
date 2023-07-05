@@ -83,7 +83,7 @@ new_bot = on_message(priority=1, block=False)
 
 @new_bot.handle()
 async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_State):
-    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND,SPECIALPIC_WIDTH
+    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND, SPECIALPIC_WIDTH
 
     raw_message = str(event.message)
     if not raw_message.startswith(
@@ -158,14 +158,15 @@ async def new_bot___(
     ):
         prompts_str = prompts.show_list()
         path = await txt_to_pic(
-            f'请设置这个bot的预设\n如果使用本地预设,请在预设名前加".",如使用自己的预设直接发送即可\n当前可用的本地预设有\n{prompts_str}\n输入"算了"或"取消"可以结束当前操作',
+            f'请设置这个bot的预设\n如果不使用预设,请输入"无"或"无预设"\n如果使用本地预设,请在预设名前加".",如使用自己的预设直接发送即可\n当前可用的本地预设有\n{prompts_str}\n输入"算了"或"取消"可以结束当前操作',
             width=SPECIALPIC_WIDTH + 300,
             quality=100,
         )
         state["replys"].append(await send_img(path, matcher, bot, event))
     else:
         state["prompt_nickname"] = "无预设"
-        matcher.set_arg("prompt", "no prompt")
+        matcher.set_arg("prompt", "")
+        matcher.set_arg("prefix", "")
 
 
 @new_bot.got("prompt")
@@ -179,19 +180,51 @@ async def new_bot____(
     await if_close(event, matcher, bot, state["replys"])
     prompt = str(args).replace("\n", "")
     prompt_nickname = "自定义预设"
+
     try:
         prompt_nickname = state["prompt_nickname"]
     except:
         pass
-    if prompt.startswith("."):
+    if prompt in ["无", "无预设"]:
+        prompt = ""
+        prompt_nickname = "无预设"
+    elif prompt.startswith("."):
         try:
             prompt_nickname = prompt.replace(".", "")
             prompt = prompts.show_prompt(prompt_nickname)
         except:
             await send_message("没有这个本地预设名", matcher, bot, event)
             await matcher.finish()
-    bot_nickname = state["bot_nickname"]
+
+    state["replys"].append(
+        await send_message(
+            "请设置这个bot的前缀\n前缀是指每次对话时都在你的问题前添加一些要求内容,来使boy的回答符合要求\n注意前缀不可太长\n\n如果无需前缀,请输入\"无\"或\"无前缀\"\n如果需要前缀,请直接输入前缀内容\n输入'算了'或'取消'可以结束当前操作",
+            matcher,
+            bot,
+            event,
+        )
+    )
+
+
+@new_bot.got("prefix")
+async def new_bot______(
+    matcher: Matcher,
+    state: T_State,
+    bot: Bot,
+    event: MessageEvent,
+    args: str = ArgStr("prefix"),
+):
+    await if_close(event, matcher, bot, state["replys"])
+    prefix = str(args)
+    if prefix in ["无", "无前缀"]:
+        prefix = ""
+
     common_userinfo = state["common_userinfo"]
+    bot_nickname = state["bot_nickname"]
+
+    prompt_nickname = state["prompt_nickname"]
+    prompt = state["prompt"]
+
     botinfo = BotInfo(nickname=bot_nickname, onwer=common_userinfo)
     try:
         temp_bots.add_new_bot(
@@ -201,6 +234,7 @@ async def new_bot____(
                 nickname=bot_nickname,
                 prompt_nickname=prompt_nickname,
                 prompt=prompt,
+                prefix=prefix,
                 source=state["able_source_dict"][state["source_index"]],
             ),
         )

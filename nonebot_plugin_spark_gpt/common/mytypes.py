@@ -33,10 +33,10 @@ class BotData(BaseModel):
     """slack Claude"""
     msg_ts: Optional[str]
     thread_ts: Optional[str]
-    session_id: Optional[str]
     """spark desk"""
     chatid: Optional[str]
     """通用"""
+    prefix: Optional[str]
     nickname: Optional[str]
     owner: Optional[str]
     is_waiting: Optional[bool]

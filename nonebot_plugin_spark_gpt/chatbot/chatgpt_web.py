@@ -54,7 +54,7 @@ class ChatGPT_web_Bot:
     ):
         self.nickname = bot_info.nickname
         self.common_userinfo = common_userinfo
-        self.bot_data: BotData = bot_data
+        self.botdata: BotData = bot_data
         self.timeout = 30
         self.authorization = ""
         self.lock = asyncio.Lock()
@@ -67,31 +67,21 @@ class ChatGPT_web_Bot:
         return hash((self.nickname, self.common_userinfo.user_id))
 
     async def refresh(self):
-        self.bot_data.conversation_id = None
-        self.bot_data.parent_id = str(uuid.uuid4())
-
-        try:
-            (
-                _,
-                self.bot_data.parent_id,
-                self.bot_data.conversation_id,
-            ) = await self.send_query(self.bot_data.prompt)
-        except Exception as e:
-            raise e
-
-        common_users.save_userdata(common_userinfo=self.common_userinfo)
+        self.botdata.conversation_id = None
+        self.botdata.parent_id = str(uuid.uuid4())
+        if self.botdata.prompt:
+            try:
+                await self.send_query(self.botdata.prompt)
+            except Exception as e:
+                raise e
 
     async def ask(self, question: str):
-        if not self.bot_data.conversation_id:
+        if not self.botdata.conversation_id:
             await self.refresh()
-
+        if self.botdata.prefix:
+            question = self.botdata.prefix + "\n\n" + question
         try:
-            (
-                answer,
-                self.bot_data.parent_id,
-                self.bot_data.conversation_id,
-            ) = await self.send_query(question=question)
-            common_users.save_userdata(common_userinfo=self.common_userinfo)
+            answer = await self.send_query(question=question)
 
             return answer
         except Exception as e:
@@ -136,8 +126,8 @@ class ChatGPT_web_Bot:
                                     },
                                 }
                             ],
-                            "conversation_id": self.bot_data.conversation_id,
-                            "parent_message_id": self.bot_data.parent_id,
+                            "conversation_id": self.botdata.conversation_id,
+                            "parent_message_id": self.botdata.parent_id,
                             "model": "",
                             "timezone_offset_min": -480,
                         },
@@ -185,9 +175,11 @@ class ChatGPT_web_Bot:
                             idx -= 1
                         answer_json = data_list[idx]
                         answer_text = answer_json["message"]["content"]["parts"][0]
-                        parent_id = answer_json["message"]["id"]
-                        conversation_id = answer_json["conversation_id"]
-                        return answer_text, parent_id, conversation_id
+                        self.botdata.parent_id = answer_json["message"]["id"]
+                        self.botdata.conversation_id = answer_json["conversation_id"]
+                        common_users.save_userdata(common_userinfo=self.common_userinfo)
+
+                        return answer_text
             except Exception as e:
                 logger.error(f"ChatGPT web在发送请求时出错:{str(e)}")
                 retry -= 1

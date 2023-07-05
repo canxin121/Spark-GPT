@@ -47,6 +47,7 @@ class Newbing_bot:
         self.chatbot: Chatbot = None
         self.chatstyle: ConversationStyle = ConversationStyle.creative
         self.lock = asyncio.Lock()
+        self.botdata = bot_data
 
     def __hash__(self) -> int:
         return hash((self.nickname, self.common_userinfo.user_id))
@@ -70,9 +71,14 @@ class Newbing_bot:
         raise Exception(error)
 
     async def ask(self, question):
+        if question in ["creative", "创造", "balanced", "均衡", "precise", "精确"]:
+            self.change_style(question)
         if not self.chatbot:
             await self.refresh()
-        # 使用EdgeGPT进行ask询问
+        if question in ["1", "2", "3"] and self.botdata.last_suggests:
+            question = self.botdata.last_suggests[int(question) - 1]
+        if self.botdata.prefix:
+            question = self.botdata.prefix + "\n\n" + question
         retry = 3
         detail_error = "未知错误"
         while retry >= 0:
@@ -92,6 +98,7 @@ class Newbing_bot:
                     "",
                     raw_json["suggestions"],
                 )
+                self.botdata.last_suggests = suggests
                 if raw_json["sources_text"][:4] != raw_json["text"][:4]:
                     source_text = raw_json["sources_text"] + "\n"
                 suggest_str = "\n".join([f"{i+1}:{s}" for i, s in enumerate(suggests)])
@@ -144,11 +151,12 @@ class Newbing_bot:
         logger.error(error)
         raise Exception(error)
 
-    def change_style(self, chat_style_index: Literal["1", "2", "3"]):
-        if chat_style_index == "1":
+    def change_style(self, chat_style_str: str):
+        if chat_style_str in ["creative", "创造"]:
             self.chatstyle = ConversationStyle.creative
-        elif chat_style_index == "2":
+        elif chat_style_str in ["balanced", "均衡"]:
             self.chatstyle = ConversationStyle.balanced
-        else:
+        elif chat_style_str in ["precise", "精确"]:
             self.chatstyle == ConversationStyle.precise
+        common_users.save_userdata(common_userinfo=self.common_userinfo)
         return
