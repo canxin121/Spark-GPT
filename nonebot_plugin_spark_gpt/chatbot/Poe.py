@@ -162,7 +162,7 @@ class Poe_bot:
                 else:
                     CLIENT.create_bot(
                         self.botdata.handle,
-                        "一个说中文的语言模型Chatgpt",
+                        "一个说中文的语言模型ai助手",
                         base_model=self.base_model,
                     )
                 common_users.save_userdata(common_userinfo=self.common_userinfo)
