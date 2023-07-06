@@ -39,7 +39,11 @@ class SydneyBing_bot:
                 detail_error = str(e)
                 logger.error(f"Sydneybing刷新时error:{detail_error}")
                 retry -= 1
-        if self.botdata.prompt:
+        if retry <= 0:
+            error = f"Sydneybing刷新报错次数超过上限:{detail_error}"
+            logger.error(error)
+            raise Exception(error)
+        if self.botdata.prompt and self.chatbot:
             if retry <= 0:
                 error = f"Sydneybing刷新时报错次数超过上限{detail_error}"
                 logger.error(error)
@@ -88,7 +92,7 @@ class SydneyBing_bot:
 
         if self.botdata.prefix:
             question = self.botdata.prefix + "\n" + question
-        
+
         retry = 3
         detail_error = "未知错误"
         while retry >= 0:

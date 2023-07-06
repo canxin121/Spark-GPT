@@ -246,7 +246,7 @@ class Fastapp:
                 "prompt.html",
                 {
                     "request": request,
-                    "prompts": prompts.prefixs,
+                    "prompts": prompts.prompts,
                     "prompt_name": prompt_name,
                     "saved": True,
                 },
@@ -261,7 +261,7 @@ class Fastapp:
                 "prompt.html",
                 {
                     "request": request,
-                    "prompts": prompts.prefixs,
+                    "prompts": prompts.prompts,
                     "prompt_name": prompt_name,
                 },
             )
@@ -274,7 +274,7 @@ class Fastapp:
                 "prompt.html",
                 {
                     "request": request,
-                    "prompts": prompts.prefixs,
+                    "prompts": prompts.prompts,
                     "prompt_name": prompt_name,
                 },
             )
@@ -289,7 +289,7 @@ class Fastapp:
                 "prompt.html",
                 {
                     "request": request,
-                    "prompts": prompts.prefixs,
+                    "prompts": prompts.prompts,
                     "prompt_name": prompt_name,
                 },
             )
@@ -298,7 +298,7 @@ class Fastapp:
                 "prompt.html",
                 {
                     "request": request,
-                    "prompts": prompts.prefixs,
+                    "prompts": prompts.prompts,
                     "prompt_name": prompt_name,
                 },
             )
