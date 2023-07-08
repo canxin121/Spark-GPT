@@ -4,7 +4,7 @@ from bidict import bidict
 from pydantic import BaseModel, Field
 
 from .nonebot.utils import OB11_BOT, Bot, MessageEvent, TGBot, KOOKBot
-from ..chatbot.Poe import Poe_bot
+from ..chatbot.poe import Poe_bot
 from ..chatbot.bard import Bard_Bot
 from ..chatbot.chatgpt_web import ChatGPT_web_Bot
 from ..chatbot.newbing import Newbing_bot

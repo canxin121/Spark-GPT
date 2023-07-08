@@ -21,7 +21,7 @@ def load_config():
     try:
         PROXY = config.get_config(source="Bard配置", config_name="proxy")
     except Exception as e:
-        logger.warning(f"加载Bard配置时warn:{str(e)},如果你已经配置了分流或全局代理,请无视此warn")
+        logger.info(f"加载Bard配置时warn:{str(e)},如果你已经配置了分流或全局代理,请无视此warn")
 
     try:
         Secure1PSID = config.get_config(source="Bard配置", config_name="__Secure-1PSID")

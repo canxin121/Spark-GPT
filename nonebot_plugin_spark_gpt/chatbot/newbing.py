@@ -20,19 +20,19 @@ def load_config():
     try:
         PROXY = config.get_config(source="Newbing配置", config_name="proxy")
     except Exception as e:
-        logger.warning(f"加载Newbing配置时warn:{str(e)},如果你已经配置了分流或全局代理,请无视此warn")
+        logger.info(f"加载Newbing和Sydneybing配置时warn:{str(e)},如果你已经配置了分流或全局代理,请无视此warn")
 
     try:
         cookie_str = config.get_config(source="Newbing配置", config_name="cookie")
         COOKIES = json.loads(cookie_str)
     except Exception as e:
-        logger.warning(f"加载Newbing配置时warn:{str(e)},没有填写Newbing的Cookie的情况下只能连续对话5次")
+        logger.warning(f"加载Newbing和Sydneybing配置时warn:{str(e)},没有填写Newbing的Cookie的情况下只能连续对话10次")
 
     try:
         WSS_LINK = config.get_config(source="Newbing配置", config_name="wss_link")
     except Exception as e:
         ABLE = False
-        logger.warning(f"加载Newbing配置时warn:{str(e)}")
+        logger.warning(f"加载Newbing和Sydneybing配置时warn:{str(e)},无法使用Newbing")
 
 
 load_config()

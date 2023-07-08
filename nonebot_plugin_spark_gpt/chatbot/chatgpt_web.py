@@ -32,17 +32,17 @@ def load_config():
         MODEL = config.get_config("Chat GPT web配置", "model")
     except Exception as e:
         ABLE = False
-        logger.warning(f"加载ChatGPT web的配置时warn:{str(e)}")
+        logger.warning(f"加载ChatGPT web的配置时warn:{str(e)},无法使用ChatGPTWeb")
 
     try:
         API_URL = config.get_config("Chat GPT web配置", "api_url")
     except Exception as e:
         ABLE = False
-        logger.warning(f"加载ChatGPT web的配置时warn:{str(e)}")
+        logger.warning(f"加载ChatGPT web的配置时warn:{str(e)},无法使用ChatGPTWeb")
     try:
         PROXIES = config.get_config("Chat GPT web配置", "proxy")
     except Exception as e:
-        logger.warning(f"加载ChatGPT web的配置时warn:{str(e)},如果你已经配置了分流或全局代理,请无视此warn")
+        logger.info(f"加载ChatGPT web的配置时warn:{str(e)},如果你已经配置了分流或全局代理,请无视此warn")
 
 
 load_config()

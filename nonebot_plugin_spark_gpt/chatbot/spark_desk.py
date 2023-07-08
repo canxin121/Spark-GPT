@@ -24,24 +24,24 @@ def load_config():
         COOKIE = config.get_config("Spark Desk配置", "cookie")
     except Exception as e:
         ABLE = False
-        logger.warning(f"加载Spark Desk配置时warn: {str(e)}")
+        logger.warning(f"加载Spark Desk配置时warn: {str(e)},无法使用SparkDesk讯飞星火")
 
     try:
         FD = config.get_config("Spark Desk配置", "fd")
     except Exception as e:
         ABLE = False
-        logger.warning(f"加载Spark Desk配置时warn: {str(e)}")
+        logger.warning(f"加载Spark Desk配置时warn: {str(e)},无法使用SparkDesk讯飞星火")
 
     try:
         GTTOKEN = config.get_config("Spark Desk配置", "GtToken")
     except Exception as e:
-        logger.warning(f"加载Spark Desk配置时warn: {str(e)}")
+        logger.warning(f"加载Spark Desk配置时warn: {str(e)},无法使用SparkDesk讯飞星火")
 
     try:
         SID = config.get_config("Spark Desk配置", "sid")
     except Exception as e:
         ABLE = False
-        logger.warning(f"加载Spark Desk配置时warn: {str(e)}")
+        logger.warning(f"加载Spark Desk配置时warn: {str(e)},无法使用SparkDesk讯飞星火")
     ASK_HEADER = {
         "Accept": "text/event-stream",
         "Accept-Encoding": "gzip, deflate, br",

@@ -20,7 +20,7 @@ def load_config():
     try:
         PROXY = config.get_config(source="Poe配置", config_name="proxy")
     except Exception as e:
-        logger.warning(f"加载Poe配置时warn:{str(e)},如果你已经配置了分流或全局代理,请无视此warn")
+        logger.info(f"加载Poe配置时warn:{str(e)},如果你已经配置了分流或全局代理,请无视此warn")
 
     try:
         COOKIE = config.get_config(source="Poe配置", config_name="cookie")

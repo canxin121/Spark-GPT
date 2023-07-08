@@ -1,4 +1,4 @@
-from .Poe import load_config as load_poe_config
+from .poe import load_config as load_poe_config
 from .bard import load_config as load_bard_config
 from .chatgpt_web import load_config as load_chat_gpt_web_config
 from .newbing import load_config as load_newbing_config
@@ -12,7 +12,7 @@ from ..common.load_config import load_command_config
 def get_able_source():
     from .chatgpt_web import ABLE as CHATGPTWEB_ABLE
     from .newbing import ABLE as NEWBING_ABLE
-    from .Poe import ABLE as POE_ABLE
+    from .poe import ABLE as POE_ABLE
     from .slack_claude import ABLE as SLACKCLAUDE_ABLE
     from .bard import ABLE as BARD_ABLE
     from .spark_desk import ABLE as SPARKDESK_ABLE

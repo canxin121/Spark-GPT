@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "nonebot_plugin_spark_gpt"
-version = "1.1.0"
-description = "Spark-GPT,将多种来源的gpt接入qq,TG及更多平台,提供webui进行实时配置热更新,效率高超,使用便捷,管理完善,功能强大"
+version = "1.1.1"
+description = "Spark-GPT,将多种来源的gpt接入qq,TG,Kook及更多平台,提供webui进行实时配置热更新,效率高超,使用便捷,管理完善,功能强大"
 authors = ["canxin121 <1969730106@qq.com>"]
 readme = "README.md"
 packages = [{ include = "nonebot_plugin_spark_gpt" }]
@@ -23,7 +23,7 @@ poe-api = "^0.4.8"
 pydantic = "^1.10.9"
 slack-sdk = "^3.21.3"
 uvicorn = "^0.22.0"
-bardapi = "^0.1.18"
+bardapi = "^0.1.24"
 python-multipart = "^0.0.6"
 python_markdown_math = "^0.8"
 charset_normalizer = "^3.1.0"

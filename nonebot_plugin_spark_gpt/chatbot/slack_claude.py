@@ -22,17 +22,17 @@ def load_config():
         SLACK_USER_TOKEN = config.get_config("Claude Slack配置", "slack_user_token")
     except Exception as e:
         ABLE = False
-        logger.warning(str(e))
+        logger.warning(f"加载Cluade Slack配置时warn:{str(e)},无法使用Cluade Slack")
     try:
         CHANNEL_ID = config.get_config("Claude Slack配置", "channel_id")
     except Exception as e:
         ABLE = False
-        logger.warning(str(e))
+        logger.warning(f"加载Cluade Slack配置时warn:{str(e)},无法使用Cluade Slack")
     try:
         CLAUDE_ID = config.get_config("Claude Slack配置", "claude_id")
     except Exception as e:
         ABLE = False
-        logger.warning(str(e))
+        logger.warning(f"加载Cluade Slack配置时warn:{str(e)},无法使用Cluade Slack")
 
 
 load_config()

@@ -59,6 +59,7 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
                 msg = "刷新对话成功"
             except Exception as e:
                 msg = str(e)
+
     else:
         if len(question) >= 1:
             async with chatbot.lock:
@@ -100,7 +101,9 @@ async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_Sta
     else:
         state["pre_command"] = PRIVATE_COMMAND
         state["common_userinfo"] = set_common_userinfo(event, bot)
+
     state["able_source_dict"], able_source_str = get_able_source()
+
     state["replys"] = []
     path = await txt_to_pic(
         f"请输入要创建的bot的来源的序号\n可选项有:\n{able_source_str}输入'算了'或'取消'可以结束当前操作",
@@ -119,6 +122,7 @@ async def new_bot__(
     args: str = ArgStr("source_index"),
 ):
     await if_close(event, matcher, bot, state["replys"])
+    
     state["source_index"] = str(args).replace("\n", "")
     if state["source_index"] not in [
         str(i) for i in range(1, len(state["able_source_dict"]) + 1)
@@ -126,6 +130,7 @@ async def new_bot__(
         await send_message("没有这个索引数字,请从头开始", matcher, bot, event)
         await delete_messages(bot, event, state["replys"])
         await matcher.finish()
+        
     state["replys"].append(
         await send_message(
             "请为这个新bot设置一个独一无二的昵称\n只允许使用中文,英文,数字组成\n输入'算了'或'取消'可以结束当前操作",
@@ -147,13 +152,16 @@ async def new_bot___(
     from ...common.load_config import SPECIALPIC_WIDTH
 
     await if_close(event, matcher, bot, state["replys"])
+    
     bot_nickname = str(args).replace("\n", "").replace("\r", "").replace(" ", "")
+    
     if not is_valid_string(bot_nickname):
         await send_message("bot的名称不能包含特殊字符,只允许中文英文和数字,请重新开始", matcher, bot, event)
         await delete_messages(bot, event, state["replys"])
         await matcher.finish()
     else:
         state["bot_nickname"] = bot_nickname
+        
     if not (
         state["able_source_dict"][state["source_index"]] == "bing"
         or state["able_source_dict"][state["source_index"]] == "bard"
