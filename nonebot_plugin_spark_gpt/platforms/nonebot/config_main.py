@@ -1,7 +1,7 @@
 import asyncio
 from pathlib import Path
 from typing import Annotated
-from nonebot.plugin import on_command, on_message
+from nonebot.plugin import on_command
 from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
 from nonebot.matcher import Matcher
@@ -11,7 +11,6 @@ from .utils import (
     set_common_userinfo,
     set_userinfo,
     delete_messages,
-    set_public_common_userinfo,
     if_super_user,
     if_close,
     send_message,

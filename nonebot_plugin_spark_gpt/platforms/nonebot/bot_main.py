@@ -42,16 +42,18 @@ chat = on_message(priority=1, block=False)
 @chat.handle()
 async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
     question, chatbot, common_userinfo = await get_question_chatbot(event, bot, matcher)
-
+    reply_msgs = []
     if chatbot.lock.locked():
-        await send_message("这个bot已经有一个请求在执行中了,请等待结束后在询问它", matcher, bot, event)
-        await matcher.finish()
+        reply_msgs.append(
+            await send_message("这个bot还有其他请求在处理,你的回复稍后就来", matcher, bot, event)
+        )
 
     if len(question) < 7:
         question = question.replace(" ", "").replace("\n", "")
     if question in REFRESH_KEYWORDS:
-        wait_msg = await reply_message(bot, matcher, event, "正在刷新，请稍等")
         async with chatbot.lock:
+            reply_msgs.append(await reply_message(bot, matcher, event, "正在刷新，请稍等"))
+
             try:
                 await chatbot.refresh()
                 msg = "刷新对话成功"
@@ -60,7 +62,7 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
     else:
         if len(question) >= 1:
             async with chatbot.lock:
-                wait_msg = await reply_message(bot, matcher, event, "正在思考，请稍等")
+                reply_msgs.append(await reply_message(bot, matcher, event, "正在思考，请稍等"))
 
                 try:
                     msg = await chatbot.ask(question=question)
@@ -70,7 +72,7 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
             msg = "你没有输入任何问题,请重新询问并在命令后加上问题"
 
     try:
-        await delete_messages(bot, event, [wait_msg])
+        await delete_messages(bot, event, reply_msgs)
     except:
         # logger.error("撤回消息失败")
         pass
@@ -202,7 +204,7 @@ async def new_bot____(
 
     state["prompt_nickname"] = prompt_nickname
     state["prompt"] = prompt
-    
+
     try:
         state["prefix_nickname"]
     except:
