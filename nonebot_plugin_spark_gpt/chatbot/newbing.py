@@ -26,7 +26,9 @@ def load_config():
         cookie_str = config.get_config(source="Newbing配置", config_name="cookie")
         COOKIES = json.loads(cookie_str)
     except Exception as e:
-        logger.warning(f"加载Newbing和Sydneybing配置时warn:{str(e)},没有填写Newbing的Cookie的情况下只能连续对话10次")
+        logger.warning(
+            f"加载Newbing和Sydneybing配置时warn:{str(e)},没有填写Newbing的Cookie的情况下只能连续对话10次"
+        )
 
     try:
         WSS_LINK = config.get_config(source="Newbing配置", config_name="wss_link")
@@ -130,6 +132,8 @@ class Newbing_bot:
                                 "",
                                 raw_json["suggestions"],
                             )
+                            self.botdata.last_suggests = suggests
+
                             if raw_json["sources_text"][:4] != raw_json["text"][:4]:
                                 source_text = raw_json["sources_text"] + "\n"
                             suggest_str = "\n".join(

@@ -57,10 +57,7 @@ class Poe_bot:
         if self.botdata.prefix:
             question += self.botdata.prefix + "\n" + question
         if not self.botdata.handle:
-            try:
-                await self.new_bot()
-            except Exception as e:
-                raise e
+            await self.refresh()
         try:
             answer = await self.chat(question)
 
@@ -72,11 +69,13 @@ class Poe_bot:
         if not self.botdata.handle:
             try:
                 await self.new_bot()
+                await self.chat(self.botdata.prompt)
             except Exception as e:
                 raise e
         else:
             try:
                 await self.chat_break()
+                await self.chat(self.botdata.prompt)
             except Exception as e:
                 raise e
 
@@ -137,10 +136,6 @@ class Poe_bot:
 
     @run_sync
     def new_bot(self):
-        if len(self.botdata.prompt) > 848:
-            error = "Poe在创建新的bot时报错:预设过长,长度不得长于848字符,请修改预设或删除bot后新建"
-            logger.error(error)
-            raise Exception(error)
         if not CLIENT:
             try:
                 self.new_client()
@@ -153,18 +148,11 @@ class Poe_bot:
         detail_error = "未知错误"
         while retry > 0:
             try:
-                if self.botdata.prompt:
-                    CLIENT.create_bot(
-                        self.botdata.handle,
-                        self.botdata.prompt,
-                        base_model=self.base_model,
-                    )
-                else:
-                    CLIENT.create_bot(
-                        self.botdata.handle,
-                        "一个说中文的语言模型ai助手",
-                        base_model=self.base_model,
-                    )
+                CLIENT.create_bot(
+                    self.botdata.handle,
+                    "在吗",
+                    base_model=self.base_model,
+                )
                 common_users.save_userdata(common_userinfo=self.common_userinfo)
                 return
             except Exception as e:

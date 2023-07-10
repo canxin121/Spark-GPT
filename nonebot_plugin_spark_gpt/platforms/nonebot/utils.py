@@ -10,6 +10,9 @@ from nonebot.adapters.kaiheila.bot import Bot as KOOKBot
 from nonebot.adapters.kaiheila.event import (
     ChannelMessageEvent as KOOKChannelMessageEvent,
 )
+from nonebot.adapters.kaiheila.event import (
+    PrivateMessageEvent as KOOKPrivateMessageEvent,
+)
 from nonebot.adapters.kaiheila.event import MessageEvent as KOOKMessageEvent
 from nonebot.adapters.onebot.v11 import Bot as OB11_BOT
 from nonebot.adapters.onebot.v11 import Message as OB11_Message
@@ -87,7 +90,12 @@ async def get_question_chatbot(event: MessageEvent, bot: Bot, matcher: Matcher):
         kookmsg = await bot.call_api(api="message_view", msg_id=event.msg_id)
         if kookmsg.quote:
             kook_reply_msgid = kookmsg.quote.id_
-
+    if isinstance(event, KOOKPrivateMessageEvent):
+        kookmsg = await bot.call_api(
+            api="directMessage_view", chat_code=event.event.code, msg_id=event.msg_id
+        )
+        if kookmsg.quote:
+            kook_reply_msgid = kookmsg.quote.id_
     if not (
         raw_text.startswith((PRIVATE_COMMAND, PUBLIC_COMMAND))
         or (hasattr(event, "reply") or hasattr(event, "reply_to_message"))
@@ -104,7 +112,16 @@ async def get_question_chatbot(event: MessageEvent, bot: Bot, matcher: Matcher):
                 hasattr(event, "reply_to_message")
                 and str(event.reply_to_message.from_.id) == bot.self_id
             )
-            or (kook_reply_msgid and event.event.mention[0] == bot.self_id)
+            or (
+                kook_reply_msgid
+                and event.event.mention
+                and event.event.mention[0] == bot.self_id
+            )
+            or (
+                kook_reply_msgid
+                and hasattr(event, "target_id")
+                and event.target_id == bot.self_id
+            )
         ):
             question = raw_text
             try:

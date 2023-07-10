@@ -6,12 +6,13 @@ Generated_Help_Msg_Pic = False
 PICABLE = "Auto"
 NUMLIMIT = 850
 URLABLE = "True"
+WAIT_MSG_ABLE = "True"
 PIC_WIDTH = 1800
 SPECIALPIC_WIDTH = 600
 
 
 def load_command_config():
-    global PRIVATE_COMMAND, PUBLIC_COMMAND, Generated_Help_Msg_Pic, PICABLE, NUMLIMIT, URLABLE, PIC_WIDTH, SPECIALPIC_WIDTH
+    global PRIVATE_COMMAND, PUBLIC_COMMAND, Generated_Help_Msg_Pic, PICABLE, NUMLIMIT, URLABLE, PIC_WIDTH, SPECIALPIC_WIDTH, WAIT_MSG_ABLE
 
     try:
         PRIVATE_COMMAND = config.get_config("总控配置", "private_command")
@@ -33,6 +34,10 @@ def load_command_config():
         SPECIALPIC_WIDTH = int(config.get_config("总控配置", "specialpic_width"))
     except:
         SPECIALPIC_WIDTH = 600
+    try:
+        WAIT_MSG_ABLE = config.get_config("总控配置", "wait_msg_able")
+    except:
+        WAIT_MSG_ABLE = "True"
     if PICABLE == "Auto":
         try:
             NUMLIMIT = int(config.get_config("总控配置", "num_limit"))

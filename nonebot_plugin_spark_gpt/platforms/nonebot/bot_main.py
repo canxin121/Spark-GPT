@@ -41,6 +41,8 @@ chat = on_message(priority=1, block=False)
 
 @chat.handle()
 async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
+    from ...common.load_config import WAIT_MSG_ABLE
+
     question, chatbot, common_userinfo = await get_question_chatbot(event, bot, matcher)
     reply_msgs = []
     if chatbot.lock.locked():
@@ -50,9 +52,11 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
 
     if len(question) < 7:
         question = question.replace(" ", "").replace("\n", "")
+
     if question in REFRESH_KEYWORDS:
         async with chatbot.lock:
-            reply_msgs.append(await reply_message(bot, matcher, event, "正在刷新，请稍等"))
+            if WAIT_MSG_ABLE == "True":
+                reply_msgs.append(await reply_message(bot, matcher, event, "正在刷新，请稍等"))
 
             try:
                 await chatbot.refresh()
@@ -63,14 +67,17 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
     else:
         if len(question) >= 1:
             async with chatbot.lock:
-                reply_msgs.append(await reply_message(bot, matcher, event, "正在思考，请稍等"))
+                if WAIT_MSG_ABLE == "True":
+                    reply_msgs.append(
+                        await reply_message(bot, matcher, event, "正在思考，请稍等")
+                    )
 
                 try:
                     msg = await chatbot.ask(question=question)
                 except Exception as e:
                     msg = str(e)
         else:
-            msg = "你没有输入任何问题,请重新询问并在命令后加上问题"
+            msg = "你没有输入任何问题,请重新询问并在命令后或回复中加上问题"
 
     try:
         await delete_messages(bot, event, reply_msgs)
@@ -122,7 +129,7 @@ async def new_bot__(
     args: str = ArgStr("source_index"),
 ):
     await if_close(event, matcher, bot, state["replys"])
-    
+
     state["source_index"] = str(args).replace("\n", "")
     if state["source_index"] not in [
         str(i) for i in range(1, len(state["able_source_dict"]) + 1)
@@ -130,7 +137,7 @@ async def new_bot__(
         await send_message("没有这个索引数字,请从头开始", matcher, bot, event)
         await delete_messages(bot, event, state["replys"])
         await matcher.finish()
-        
+
     state["replys"].append(
         await send_message(
             "请为这个新bot设置一个独一无二的昵称\n只允许使用中文,英文,数字组成\n输入'算了'或'取消'可以结束当前操作",
@@ -152,16 +159,16 @@ async def new_bot___(
     from ...common.load_config import SPECIALPIC_WIDTH
 
     await if_close(event, matcher, bot, state["replys"])
-    
+
     bot_nickname = str(args).replace("\n", "").replace("\r", "").replace(" ", "")
-    
+
     if not is_valid_string(bot_nickname):
         await send_message("bot的名称不能包含特殊字符,只允许中文英文和数字,请重新开始", matcher, bot, event)
         await delete_messages(bot, event, state["replys"])
         await matcher.finish()
     else:
         state["bot_nickname"] = bot_nickname
-        
+
     if not (
         state["able_source_dict"][state["source_index"]] == "bing"
         or state["able_source_dict"][state["source_index"]] == "bard"

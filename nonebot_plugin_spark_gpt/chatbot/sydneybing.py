@@ -112,6 +112,8 @@ class SydneyBing_bot:
                     "",
                     raw_json["suggestions"],
                 )
+                self.botdata.last_suggests = suggests
+
                 if raw_json["sources_text"][:4] != raw_json["text"][:4]:
                     source_text = raw_json["sources_text"] + "\n"
                 suggest_str = "\n".join([f"{i+1}:{s}" for i, s in enumerate(suggests)])
@@ -144,6 +146,7 @@ class SydneyBing_bot:
                                 "",
                                 raw_json["suggestions"],
                             )
+                            self.botdata.last_suggests = suggests
                             if raw_json["sources_text"][:4] != raw_json["text"][:4]:
                                 source_text = raw_json["sources_text"] + "\n"
                             suggest_str = "\n".join(

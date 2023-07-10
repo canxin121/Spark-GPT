@@ -46,6 +46,7 @@ CONFIG_NAMES = (
         "pic_width",
         "public_command",
         "private_command",
+        "wait_msg_able",
     ],
 )
 
@@ -63,6 +64,7 @@ class Config(BaseModel):
                 "superusers": "[]",
                 "pic_able": "Auto",
                 "url_able": "True",
+                "wait_msg_able": "True",
                 "num_limit": "500",
                 "pic_width": "1800",
                 "specialpic_width": "400",
@@ -191,5 +193,3 @@ class Config(BaseModel):
 
 
 config = Config()
-
-

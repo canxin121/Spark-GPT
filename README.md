@@ -152,7 +152,7 @@ brew install --cask wkhtmltopdf
 配置示例,如下填写到nonebot项目文件夹的.env文件后，就可以打开http://127.0.0.1:8666/来访问webui控制面板
 ```
 spark_host = 127.0.0.1
-spark_port = 6666
+spark_port = 8666
 ```
 
 ### 4.配置好不同平台的对接,以在对应平台使用本插件

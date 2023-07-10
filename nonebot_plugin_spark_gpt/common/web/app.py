@@ -31,6 +31,7 @@ COMMENTS = (
             "superusers": "填写你的用户名组成的列表,格式示例['1234567890','2876391827'],注意是通过使用命令 /用户信息来获取的通用用户名,而不是qq或tg用户名",
             "pic_able": PICABLE,
             "url_able": URLABLE,
+            "wait_msg_able": '是否发送"正在思考\刷新,请稍等",默认Ture为发送,False为不发送',
             "num_limit": NUM_LIMIT,
             "private_command": "私人的bot的控制和使用前缀,默认‘/’",
             "public_command": "公用的bot的控制和使用前缀,默认‘.’",

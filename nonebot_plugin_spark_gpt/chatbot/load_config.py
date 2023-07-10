@@ -19,8 +19,14 @@ def get_able_source():
     from .tongyiqianwen import ABLE as TongYiQianWen_ABLE
 
     able_dict = {
-        "poe chatgpt": {"able": POE_ABLE, "des": "poe网站的chatgpt,支持预设最长约830字,支持前缀但字数不宜过多"},
-        "poe claude": {"able": POE_ABLE, "des": "poe网站的claude,支持预设最长约830字,支持前缀但字数不宜过多"},
+        "poe chatgpt": {
+            "able": POE_ABLE,
+            "des": "poe网站的chatgpt,支持预设最长约2000字,支持前缀但字数不宜过多",
+        },
+        "poe claude": {
+            "able": POE_ABLE,
+            "des": "poe网站的claude,支持预设最长约2000字,支持前缀但字数不宜过多",
+        },
         "chatgpt web": {
             "able": CHATGPTWEB_ABLE,
             "des": "openai官网的chatgpt网页版,支持预设最长约5400字,支持前缀但字数不宜过多",
@@ -50,7 +56,7 @@ def get_able_source():
             "des": "谷歌的Bard,不支持预设",
         },
     }
-    
+
     source_dict = {}
     source_dict_str = "\n\n| 序号 | 来源名称 | 来源介绍 |\n| --- | --- | --- |\n"
     i = 0
