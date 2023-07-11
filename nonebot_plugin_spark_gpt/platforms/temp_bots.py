@@ -3,7 +3,7 @@ from typing import Any, Dict, Union
 from bidict import bidict
 from pydantic import BaseModel, Field
 
-from .nonebot.utils import OB11_BOT, Bot, MessageEvent, TGBot, KOOKBot
+from .nonebot.utils import OB11_BOT, Bot, MessageEvent, TGBot, KOOKBot,DISCORD_Bot
 from ..chatbot.poe import Poe_bot
 from ..chatbot.bard import Bard_Bot
 from ..chatbot.chatgpt_web import ChatGPT_web_Bot
@@ -59,6 +59,8 @@ class Temp_Bots(BaseModel):
                 return str(reply.message_id + event.from_.id)
             elif isinstance(bot, KOOKBot):
                 return str(reply.msg_id)
+            elif isinstance(bot, DISCORD_Bot):
+                return str(reply.id)
         except:
             pass
 
@@ -69,6 +71,8 @@ class Temp_Bots(BaseModel):
             return str(event.reply_to_message.message_id + event.from_.id)
         elif isinstance(bot, KOOKBot):
             return str(event.msg_id)
+        elif isinstance(bot,DISCORD_Bot):
+            return str(event.reply.id)
 
     def set_bot_msgid(
         self,
@@ -85,14 +89,6 @@ class Temp_Bots(BaseModel):
             )
         else:
             raise Exception("没有这个bot")
-
-    # def del_bot_by_msgid(self, common_userinfo: CommonUserInfo, bot: Bot, reply: any):
-    #     botlinks: Bot_Links = self.get_bot_links(common_userinfo=common_userinfo)
-    #     message_id = self.get_message_id(bot, reply)
-    #     if message_id in botlinks.msg_bot_dict.keys():
-    #         del botlinks.msg_bot_dict[message_id]
-    #     else:
-    #         raise Exception("没有这个messageid对应的bot")
 
     def get_bot_by_msgid(
         self,
