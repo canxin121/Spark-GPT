@@ -17,7 +17,7 @@ template_html = ""
 
 @run_sync
 def string_to_pic(
-        string: str, output_path: str, width: int = 2200, zoom: int = 2, quality: int = 94
+    string: str, output_path: str, width: int = 2200, zoom: int = 2, quality: int = 94
 ):
     return imgkit.from_string(
         string,
@@ -40,11 +40,11 @@ def string_to_pic(
 
 @run_sync
 def file_to_pic(
-        file_path: str,
-        output_path: str,
-        width: int = 2200,
-        zoom: int = 2,
-        quality: int = 94,
+    file_path: str,
+    output_path: str,
+    width: int = 2200,
+    zoom: int = 2,
+    quality: int = 94,
 ):
     return imgkit.from_file(
         file_path,
@@ -68,7 +68,7 @@ def file_to_pic(
 
 @run_sync
 def url_to_pic(
-        url: str, output_path: str, width: int = 2200, zoom: int = 2, quality: int = 94
+    url: str, output_path: str, width: int = 2200, zoom: int = 2, quality: int = 94
 ):
     return imgkit.from_url(
         url,
@@ -134,11 +134,11 @@ def text_to_html(text: str) -> str:
 
 
 async def txt_to_pic(
-        text: str,
-        output_path: Path = TEMP_PATH,
-        width: int = 2200,
-        zoom: int = 2,
-        quality: int = 100,
+    text: str,
+    output_path: Path = TEMP_PATH,
+    width: int = 2200,
+    zoom: int = 2,
+    quality: int = 100,
 ):
     html = await text_to_html(text)
     if not output_path.exists():

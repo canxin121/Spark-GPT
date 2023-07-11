@@ -3,7 +3,7 @@ from typing import Any, Dict, Union
 from bidict import bidict
 from pydantic import BaseModel, Field
 
-from .nonebot.utils import OB11_BOT, Bot, MessageEvent, TGBot, KOOKBot,DISCORD_Bot
+from .nonebot.utils import OB11_BOT, Bot, MessageEvent, TGBot, KOOKBot, DISCORD_Bot
 from ..chatbot.poe import Poe_bot
 from ..chatbot.bard import Bard_Bot
 from ..chatbot.chatgpt_web import ChatGPT_web_Bot
@@ -71,7 +71,7 @@ class Temp_Bots(BaseModel):
             return str(event.reply_to_message.message_id + event.from_.id)
         elif isinstance(bot, KOOKBot):
             return str(event.msg_id)
-        elif isinstance(bot,DISCORD_Bot):
+        elif isinstance(bot, DISCORD_Bot):
             return str(event.reply.id)
 
     def set_bot_msgid(

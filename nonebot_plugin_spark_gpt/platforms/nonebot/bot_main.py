@@ -99,7 +99,7 @@ async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_Sta
 
     raw_message = event.get_plaintext()
     if not raw_message.startswith(
-            (f"{PRIVATE_COMMAND}创建bot", f"{PUBLIC_COMMAND}创建bot")
+        (f"{PRIVATE_COMMAND}创建bot", f"{PUBLIC_COMMAND}创建bot")
     ):
         await matcher.finish()
     if raw_message.startswith(PUBLIC_COMMAND):
@@ -123,11 +123,11 @@ async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_Sta
 
 @new_bot.got("source_index")
 async def new_bot__(
-        matcher: Matcher,
-        event: MessageEvent,
-        state: T_State,
-        bot: Bot,
-        args: str = ArgStr("source_index"),
+    matcher: Matcher,
+    event: MessageEvent,
+    state: T_State,
+    bot: Bot,
+    args: str = ArgStr("source_index"),
 ):
     await if_close(event, matcher, bot, state["replys"])
 
@@ -151,11 +151,11 @@ async def new_bot__(
 
 @new_bot.got("bot_nickname")
 async def new_bot___(
-        matcher: Matcher,
-        event: MessageEvent,
-        state: T_State,
-        bot: Bot,
-        args: str = ArgStr("bot_nickname"),
+    matcher: Matcher,
+    event: MessageEvent,
+    state: T_State,
+    bot: Bot,
+    args: str = ArgStr("bot_nickname"),
 ):
     from ...common.load_config import SPECIALPIC_WIDTH
 
@@ -171,9 +171,9 @@ async def new_bot___(
         state["bot_nickname"] = bot_nickname
 
     if not (
-            state["able_source_dict"][state["source_index"]] == "bing"
-            or state["able_source_dict"][state["source_index"]] == "bard"
-            or state["able_source_dict"][state["source_index"]] == "通义千问"
+        state["able_source_dict"][state["source_index"]] == "bing"
+        or state["able_source_dict"][state["source_index"]] == "bard"
+        or state["able_source_dict"][state["source_index"]] == "通义千问"
     ):
         prompts_str = prompts.show_list()
         path = await txt_to_pic(
@@ -191,11 +191,11 @@ async def new_bot___(
 
 @new_bot.got("prompt")
 async def new_bot____(
-        matcher: Matcher,
-        state: T_State,
-        bot: Bot,
-        event: MessageEvent,
-        args: str = ArgStr("prompt"),
+    matcher: Matcher,
+    state: T_State,
+    bot: Bot,
+    event: MessageEvent,
+    args: str = ArgStr("prompt"),
 ):
     from ...common.load_config import SPECIALPIC_WIDTH
 
@@ -235,11 +235,11 @@ async def new_bot____(
 
 @new_bot.got("prefix")
 async def new_bot______(
-        matcher: Matcher,
-        state: T_State,
-        bot: Bot,
-        event: MessageEvent,
-        args: str = ArgStr("prefix"),
+    matcher: Matcher,
+    state: T_State,
+    bot: Bot,
+    event: MessageEvent,
+    args: str = ArgStr("prefix"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     prefix_nickname = "自定义前缀"
@@ -301,13 +301,15 @@ async def delete_bot_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_
     from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
 
     if not event.get_plaintext().startswith(
-            (f"{PRIVATE_COMMAND}删除bot", f"{PUBLIC_COMMAND}删除bot")
+        (f"{PRIVATE_COMMAND}删除bot", f"{PUBLIC_COMMAND}删除bot")
     ):
         await matcher.finish()
     if event.get_plaintext().startswith(PRIVATE_COMMAND):
         state["common_userinfo"] = set_common_userinfo(event, bot)
         plain_message = (
-            event.get_plaintext().replace(f"{PRIVATE_COMMAND}删除bot", "").replace(" ", "")
+            event.get_plaintext()
+            .replace(f"{PRIVATE_COMMAND}删除bot", "")
+            .replace(" ", "")
         )
     else:
         await if_super_user(event, bot, matcher)
@@ -329,11 +331,11 @@ async def delete_bot_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_
 
 @delete_bot.got("bot")
 async def delete_bot__(
-        matcher: Matcher,
-        state: T_State,
-        bot: Bot,
-        event: MessageEvent,
-        args: str = ArgStr("bot"),
+    matcher: Matcher,
+    state: T_State,
+    bot: Bot,
+    event: MessageEvent,
+    args: str = ArgStr("bot"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     bot_name = str(args).replace("\n", "")
@@ -361,7 +363,7 @@ async def rename_bot_(matcher: Matcher, bot: Bot, event: MessageEvent, state: T_
     from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
 
     if not event.get_plaintext().startswith(
-            (f"{PUBLIC_COMMAND}改名bot", f"{PRIVATE_COMMAND}改名bot")
+        (f"{PUBLIC_COMMAND}改名bot", f"{PRIVATE_COMMAND}改名bot")
     ):
         await matcher.finish()
 
@@ -378,11 +380,11 @@ async def rename_bot_(matcher: Matcher, bot: Bot, event: MessageEvent, state: T_
 
 @rename_bot.got("bot_name")
 async def rename_bot__(
-        matcher: Matcher,
-        state: T_State,
-        bot: Bot,
-        event: MessageEvent,
-        args: str = ArgStr("bot_name"),
+    matcher: Matcher,
+    state: T_State,
+    bot: Bot,
+    event: MessageEvent,
+    args: str = ArgStr("bot_name"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     state["bot_name"] = str(args)
@@ -398,11 +400,11 @@ async def rename_bot__(
 
 @rename_bot.got("new_bot_name")
 async def rename_bot___(
-        matcher: Matcher,
-        state: T_State,
-        bot: Bot,
-        event: MessageEvent,
-        args: str = ArgStr("new_bot_name"),
+    matcher: Matcher,
+    state: T_State,
+    bot: Bot,
+    event: MessageEvent,
+    args: str = ArgStr("new_bot_name"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     new_botname = str(args).replace("\n", "").replace("\r", "").replace(" ", "")
@@ -433,7 +435,7 @@ async def all_bots_(matcher: Matcher, bot: Bot, event: MessageEvent):
     from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND, SPECIALPIC_WIDTH
 
     if not event.get_plaintext().startswith(
-            (f"{PRIVATE_COMMAND}所有bot", f"{PUBLIC_COMMAND}所有bot")
+        (f"{PRIVATE_COMMAND}所有bot", f"{PUBLIC_COMMAND}所有bot")
     ):
         await matcher.finish()
 

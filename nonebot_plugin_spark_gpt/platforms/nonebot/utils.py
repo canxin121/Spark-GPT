@@ -44,22 +44,36 @@ from ...utils.text_render import txt_to_pic
 from ...utils.utils import get_url
 
 Message_Segment = Union[
-    OB11_MessageSegment, TGMessageSegment, QQGUILDMessageSegment, KOOKMessageSegment, DISCORD_MessageSegment
+    OB11_MessageSegment,
+    TGMessageSegment,
+    QQGUILDMessageSegment,
+    KOOKMessageSegment,
+    DISCORD_MessageSegment,
 ]
 Message = Union[
-    Message_Segment, str, TGMessage, OB11_Message, QQGUILDMessage, KOOKMessage, DISCORD_Message
+    Message_Segment,
+    str,
+    TGMessage,
+    OB11_Message,
+    QQGUILDMessage,
+    KOOKMessage,
+    DISCORD_Message,
 ]
 MessageEvent = Union[
-    OB11_MessageEvent, TGMessageEvent, QQGUILDMassageEvent, KOOKMessageEvent, DISCORD_MessageEvent
+    OB11_MessageEvent,
+    TGMessageEvent,
+    QQGUILDMassageEvent,
+    KOOKMessageEvent,
+    DISCORD_MessageEvent,
 ]
 Bot = Union[OB11_BOT, TGBot, QQGUILDBot, KOOKBot, DISCORD_Bot]
 
 
 async def if_close(
-        event: MessageEvent,
-        matcher: Matcher,
-        bot: Bot,
-        msg_dict: list,
+    event: MessageEvent,
+    matcher: Matcher,
+    bot: Bot,
+    msg_dict: list,
 ):
     """是否提前结束会话"""
     if event.get_plaintext().replace("/n", "") in ["算了", "取消"]:
@@ -102,29 +116,30 @@ async def get_question_chatbot(event: MessageEvent, bot: Bot, matcher: Matcher):
             kook_reply_msgid = kookmsg.quote.id_
 
     if bool(hasattr(event, "reply") and bool(event.reply)) or bool(
-            bool(hasattr(event, "reply_to_message") and event.reply_to_message)
-            or kook_reply_msgid
+        bool(hasattr(event, "reply_to_message") and event.reply_to_message)
+        or kook_reply_msgid
     ):
         if (
-                (hasattr(event, "reply") and hasattr(event.reply, "user_id") and str(
-                    event.reply.sender.user_id) == bot.self_id)
-                or (
+            (
+                hasattr(event, "reply")
+                and hasattr(event.reply, "user_id")
+                and str(event.reply.sender.user_id) == bot.self_id
+            )
+            or (
                 hasattr(event, "reply_to_message")
                 and str(event.reply_to_message.from_.id) == bot.self_id
-        )
-                or (
-                hasattr(event, "reply") and str(event.mentions[0].id) == bot.self_id
-        )
-                or (
+            )
+            or (hasattr(event, "reply") and str(event.mentions[0].id) == bot.self_id)
+            or (
                 kook_reply_msgid
                 and event.event.mention
                 and event.event.mention[0] == bot.self_id
-        )
-                or (
+            )
+            or (
                 kook_reply_msgid
                 and hasattr(event, "target_id")
                 and event.target_id == bot.self_id
-        )
+            )
         ):
             question = raw_text
             try:
@@ -160,7 +175,7 @@ async def get_question_chatbot(event: MessageEvent, bot: Bot, matcher: Matcher):
 
 
 async def send_TGMessageText_with_retry(
-        content: str, bot: Bot, event: MessageEvent, **kwargs
+    content: str, bot: Bot, event: MessageEvent, **kwargs
 ):
     retry = 10
     while retry > 0:
@@ -175,7 +190,7 @@ async def send_TGMessageText_with_retry(
 
 
 async def send_TGMessagePhoto_with_retry(
-        path: Union[str, Path], text: str, bot: Bot, event: MessageEvent, **kwargs
+    path: Union[str, Path], text: str, bot: Bot, event: MessageEvent, **kwargs
 ):
     retry = 10
     while retry > 0:
@@ -193,11 +208,11 @@ async def send_TGMessagePhoto_with_retry(
 
 
 async def reply_message(
-        bot: Bot,
-        matcher: Matcher,
-        event: MessageEvent,
-        content: str,
-        plain: bool = True,
+    bot: Bot,
+    matcher: Matcher,
+    event: MessageEvent,
+    content: str,
+    plain: bool = True,
 ):
     from ...common.load_config import PICABLE, NUMLIMIT, URLABLE, PIC_WIDTH
 
@@ -384,7 +399,10 @@ async def reply_message(
     elif isinstance(event, DISCORD_MessageEvent):
         if plain:
             return await bot.send(
-                event, DISCORD_MessageSegment.text(content), reply_message=True, mention_sender=True
+                event,
+                DISCORD_MessageSegment.text(content),
+                reply_message=True,
+                mention_sender=True,
             )
         else:
             if PICABLE == "Auto":
@@ -395,54 +413,78 @@ async def reply_message(
                             str(content), width=PIC_WIDTH, quality=100
                         )
                         with open(path, "rb") as f:
-                            any = await bot.send(event, DISCORD_MessageSegment.attachment(file="temp.jpeg",
-                                                                                          content=f.read()) + DISCORD_MessageSegment.text(
-                                url), reply_message=True, mention_sender=True)
+                            any = await bot.send(
+                                event,
+                                DISCORD_MessageSegment.attachment(
+                                    file="temp.jpeg", content=f.read()
+                                )
+                                + DISCORD_MessageSegment.text(url),
+                                reply_message=True,
+                                mention_sender=True,
+                            )
                         return any
                     else:
                         path = await txt_to_pic(
                             str(content), width=PIC_WIDTH, quality=100
                         )
                         with open(path, "rb") as f:
-                            any = await bot.send(event, DISCORD_MessageSegment.attachment(file="temp.jpeg",
-                                                                                          content=f.read()),
-                                                 reply_message=True, mention_sender=True)
+                            any = await bot.send(
+                                event,
+                                DISCORD_MessageSegment.attachment(
+                                    file="temp.jpeg", content=f.read()
+                                ),
+                                reply_message=True,
+                                mention_sender=True,
+                            )
                         return any
                 else:
                     return await bot.send(
-                        event, DISCORD_MessageSegment.text(content), reply_message=True, mention_sender=True
+                        event,
+                        DISCORD_MessageSegment.text(content),
+                        reply_message=True,
+                        mention_sender=True,
                     )
             elif PICABLE == "True":
                 if URLABLE == "True":
                     url = await get_url(content)
-                    path = await txt_to_pic(
-                        str(content), width=PIC_WIDTH, quality=100
-                    )
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
                     with open(path, "rb") as f:
-                        any = await bot.send(event, DISCORD_MessageSegment.attachment(file="temp.jpeg",
-                                                                                      content=f.read()) + DISCORD_MessageSegment.text(
-                            url), reply_message=True, mention_sender=True)
+                        any = await bot.send(
+                            event,
+                            DISCORD_MessageSegment.attachment(
+                                file="temp.jpeg", content=f.read()
+                            )
+                            + DISCORD_MessageSegment.text(url),
+                            reply_message=True,
+                            mention_sender=True,
+                        )
                     return any
                 else:
-                    path = await txt_to_pic(
-                        str(content), width=PIC_WIDTH, quality=100
-                    )
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
                     with open(path, "rb") as f:
-                        any = await bot.send(event, DISCORD_MessageSegment.attachment(file="temp.jpeg",
-                                                                                      content=f.read()),
-                                             reply_message=True, mention_sender=True)
+                        any = await bot.send(
+                            event,
+                            DISCORD_MessageSegment.attachment(
+                                file="temp.jpeg", content=f.read()
+                            ),
+                            reply_message=True,
+                            mention_sender=True,
+                        )
                     return any
             else:
                 return await bot.send(
-                    event, DISCORD_MessageSegment.text(content), reply_message=True, mention_sender=True
+                    event,
+                    DISCORD_MessageSegment.text(content),
+                    reply_message=True,
+                    mention_sender=True,
                 )
 
 
 async def send_img(
-        path: Union[str, Path],
-        matcher: Matcher,
-        bot: Bot,
-        event: MessageEvent,
+    path: Union[str, Path],
+    matcher: Matcher,
+    bot: Bot,
+    event: MessageEvent,
 ):
     if isinstance(event, TGMessageEvent):
         any = await send_TGMessagePhoto_with_retry(path, "", bot, event)
@@ -456,18 +498,20 @@ async def send_img(
         return any
     elif isinstance(event, DISCORD_MessageEvent):
         with open(path, "rb") as f:
-            any = await bot.send(event, DISCORD_MessageSegment.attachment(file="temp.jpeg",
-                                                                          content=f.read()))
+            any = await bot.send(
+                event,
+                DISCORD_MessageSegment.attachment(file="temp.jpeg", content=f.read()),
+            )
         return any
 
 
 async def send_message(
-        content: str,
-        matcher: Matcher,
-        bot: Bot,
-        event: MessageEvent,
-        plain: bool = True,
-        force_pic=False,
+    content: str,
+    matcher: Matcher,
+    bot: Bot,
+    event: MessageEvent,
+    plain: bool = True,
+    force_pic=False,
 ):
     from ...common.load_config import PIC_WIDTH, NUMLIMIT, PICABLE, URLABLE
 
@@ -604,16 +648,19 @@ async def send_message(
                 return await bot.send(event, KOOKMessageSegment.text(content))
     elif isinstance(event, DISCORD_MessageEvent):
         if force_pic:
-            path = await txt_to_pic(
-                str(content), width=PIC_WIDTH, quality=100
-            )
+            path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
             with open(path, "rb") as f:
-                any = await bot.send(event, DISCORD_MessageSegment.attachment(file="temp.jpeg",
-                                                                              content=f.read()))
+                any = await bot.send(
+                    event,
+                    DISCORD_MessageSegment.attachment(
+                        file="temp.jpeg", content=f.read()
+                    ),
+                )
             return any
         if plain:
             return await bot.send(
-                event, DISCORD_MessageSegment.text(content),
+                event,
+                DISCORD_MessageSegment.text(content),
             )
         else:
             if PICABLE == "Auto":
@@ -624,44 +671,58 @@ async def send_message(
                             str(content), width=PIC_WIDTH, quality=100
                         )
                         with open(path, "rb") as f:
-                            any = await bot.send(event, DISCORD_MessageSegment.attachment(file="temp.jpeg",
-                                                                                          content=f.read()) + DISCORD_MessageSegment.text(
-                                url))
+                            any = await bot.send(
+                                event,
+                                DISCORD_MessageSegment.attachment(
+                                    file="temp.jpeg", content=f.read()
+                                )
+                                + DISCORD_MessageSegment.text(url),
+                            )
                         return any
                     else:
                         path = await txt_to_pic(
                             str(content), width=PIC_WIDTH, quality=100
                         )
                         with open(path, "rb") as f:
-                            any = await bot.send(event, DISCORD_MessageSegment.attachment(file="temp.jpeg",
-                                                                                          content=f.read()))
+                            any = await bot.send(
+                                event,
+                                DISCORD_MessageSegment.attachment(
+                                    file="temp.jpeg", content=f.read()
+                                ),
+                            )
                         return any
                 else:
                     return await bot.send(
-                        event, DISCORD_MessageSegment.text(content),
+                        event,
+                        DISCORD_MessageSegment.text(content),
                     )
             elif PICABLE == "True":
                 if URLABLE == "True":
                     url = await get_url(content)
-                    path = await txt_to_pic(
-                        str(content), width=PIC_WIDTH, quality=100
-                    )
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
                     with open(path, "rb") as f:
-                        any = await bot.send(event, DISCORD_MessageSegment.attachment(file="temp.jpeg",
-                                                                                      content=f.read()) + DISCORD_MessageSegment.text(
-                            url))
+                        any = await bot.send(
+                            event,
+                            DISCORD_MessageSegment.attachment(
+                                file="temp.jpeg", content=f.read()
+                            )
+                            + DISCORD_MessageSegment.text(url),
+                        )
                     return any
                 else:
-                    path = await txt_to_pic(
-                        str(content), width=PIC_WIDTH, quality=100
-                    )
+                    path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
                     with open(path, "rb") as f:
-                        any = await bot.send(event, DISCORD_MessageSegment.attachment(file="temp.jpeg",
-                                                                                      content=f.read()))
+                        any = await bot.send(
+                            event,
+                            DISCORD_MessageSegment.attachment(
+                                file="temp.jpeg", content=f.read()
+                            ),
+                        )
                     return any
             else:
                 return await bot.send(
-                    event, DISCORD_MessageSegment.text(content),
+                    event,
+                    DISCORD_MessageSegment.text(content),
                 )
 
 
@@ -700,7 +761,11 @@ async def delete_messages(bot: Bot, event: MessageEvent, dict_list: list):
             retry = 3
             while retry > 0:
                 try:
-                    await bot.call_api("delete_message", channel_id=eachmsg.channel_id, message_id=eachmsg.id)
+                    await bot.call_api(
+                        "delete_message",
+                        channel_id=eachmsg.channel_id,
+                        message_id=eachmsg.id,
+                    )
                     break
                 except:
                     retry -= 1
