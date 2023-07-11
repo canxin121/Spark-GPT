@@ -10,7 +10,6 @@ packages = [{ include = "nonebot_plugin_spark_gpt" }]
 nonebot-adapter-onebot = "^2.2.1"
 nonebot-adapter-telegram = "^0.1.0b6"
 nonebot-adapter-kaiheila = "^0.2.7"
-nonebot-adapter-qqguild = "^0.2.3"
 nonebot-adapter-discord = {git = "https://github.com/CMHopeSunshine/adapter-discord.git", rev = "dev"}
 python = "^3.10"
 aiohttp = "^3.8.4"

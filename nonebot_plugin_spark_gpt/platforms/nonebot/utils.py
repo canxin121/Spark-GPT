@@ -122,7 +122,7 @@ async def get_question_chatbot(event: MessageEvent, bot: Bot, matcher: Matcher):
         if (
             (
                 hasattr(event, "reply")
-                and hasattr(event.reply, "user_id")
+                and hasattr(event.reply, "sender")
                 and str(event.reply.sender.user_id) == bot.self_id
             )
             or (
