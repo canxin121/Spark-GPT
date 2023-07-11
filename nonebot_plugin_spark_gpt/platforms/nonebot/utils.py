@@ -23,10 +23,6 @@ from nonebot.adapters.onebot.v11 import Message as OB11_Message
 from nonebot.adapters.onebot.v11 import MessageEvent as OB11_MessageEvent
 from nonebot.adapters.onebot.v11 import MessageSegment as OB11_MessageSegment
 from nonebot.adapters.onebot.v11.exception import ActionFailed as OB11_ActionFailed
-from nonebot.adapters.qqguild import Message as QQGUILDMessage
-from nonebot.adapters.qqguild import MessageSegment as QQGUILDMessageSegment
-from nonebot.adapters.qqguild.bot import Bot as QQGUILDBot
-from nonebot.adapters.qqguild.event import MessageEvent as QQGUILDMassageEvent
 from nonebot.adapters.telegram import Message as TGMessage
 from nonebot.adapters.telegram import MessageSegment as TGMessageSegment
 from nonebot.adapters.telegram.bot import Bot as TGBot
@@ -46,7 +42,6 @@ from ...utils.utils import get_url
 Message_Segment = Union[
     OB11_MessageSegment,
     TGMessageSegment,
-    QQGUILDMessageSegment,
     KOOKMessageSegment,
     DISCORD_MessageSegment,
 ]
@@ -55,18 +50,16 @@ Message = Union[
     str,
     TGMessage,
     OB11_Message,
-    QQGUILDMessage,
     KOOKMessage,
     DISCORD_Message,
 ]
 MessageEvent = Union[
     OB11_MessageEvent,
     TGMessageEvent,
-    QQGUILDMassageEvent,
     KOOKMessageEvent,
     DISCORD_MessageEvent,
 ]
-Bot = Union[OB11_BOT, TGBot, QQGUILDBot, KOOKBot, DISCORD_Bot]
+Bot = Union[OB11_BOT, TGBot, KOOKBot, DISCORD_Bot]
 
 
 async def if_close(
