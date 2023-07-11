@@ -129,7 +129,7 @@ async def get_question_chatbot(event: MessageEvent, bot: Bot, matcher: Matcher):
                 hasattr(event, "reply_to_message")
                 and str(event.reply_to_message.from_.id) == bot.self_id
             )
-            or (hasattr(event, "reply") and str(event.mentions[0].id) == bot.self_id)
+            or (hasattr(event, "mentions") and str(event.mentions[0].id) == bot.self_id)
             or (
                 kook_reply_msgid
                 and event.event.mention
@@ -398,8 +398,9 @@ async def reply_message(
                 )
     elif isinstance(event, DISCORD_MessageEvent):
         if plain:
-            return await bot.send(
+            return await send_DISCORDMessage_with_retry(
                 event,
+                bot,
                 DISCORD_MessageSegment.text(content),
                 reply_message=True,
                 mention_sender=True,
@@ -413,8 +414,9 @@ async def reply_message(
                             str(content), width=PIC_WIDTH, quality=100
                         )
                         with open(path, "rb") as f:
-                            any = await bot.send(
+                            any = await send_DISCORDMessage_with_retry(
                                 event,
+                                bot,
                                 DISCORD_MessageSegment.attachment(
                                     file="temp.jpeg", content=f.read()
                                 )
@@ -428,8 +430,9 @@ async def reply_message(
                             str(content), width=PIC_WIDTH, quality=100
                         )
                         with open(path, "rb") as f:
-                            any = await bot.send(
+                            any = await send_DISCORDMessage_with_retry(
                                 event,
+                                bot,
                                 DISCORD_MessageSegment.attachment(
                                     file="temp.jpeg", content=f.read()
                                 ),
@@ -438,8 +441,9 @@ async def reply_message(
                             )
                         return any
                 else:
-                    return await bot.send(
+                    return await send_DISCORDMessage_with_retry(
                         event,
+                        bot,
                         DISCORD_MessageSegment.text(content),
                         reply_message=True,
                         mention_sender=True,
@@ -449,8 +453,9 @@ async def reply_message(
                     url = await get_url(content)
                     path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
                     with open(path, "rb") as f:
-                        any = await bot.send(
+                        any = await send_DISCORDMessage_with_retry(
                             event,
+                            bot,
                             DISCORD_MessageSegment.attachment(
                                 file="temp.jpeg", content=f.read()
                             )
@@ -462,8 +467,9 @@ async def reply_message(
                 else:
                     path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
                     with open(path, "rb") as f:
-                        any = await bot.send(
+                        any = await send_DISCORDMessage_with_retry(
                             event,
+                            bot,
                             DISCORD_MessageSegment.attachment(
                                 file="temp.jpeg", content=f.read()
                             ),
@@ -472,8 +478,9 @@ async def reply_message(
                         )
                     return any
             else:
-                return await bot.send(
+                return await send_DISCORDMessage_with_retry(
                     event,
+                    bot,
                     DISCORD_MessageSegment.text(content),
                     reply_message=True,
                     mention_sender=True,
@@ -503,6 +510,18 @@ async def send_img(
                 DISCORD_MessageSegment.attachment(file="temp.jpeg", content=f.read()),
             )
         return any
+
+
+async def send_DISCORDMessage_with_retry(
+    event: DISCORD_MessageEvent, bot: DISCORD_Bot, msg, **kargs
+):
+    retry = 5
+    while retry > 0:
+        try:
+            any = await bot.send(event, msg, **kargs)
+            return any
+        except:
+            retry -= 1
 
 
 async def send_message(
@@ -650,16 +669,18 @@ async def send_message(
         if force_pic:
             path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
             with open(path, "rb") as f:
-                any = await bot.send(
+                any = await send_DISCORDMessage_with_retry(
                     event,
+                    bot,
                     DISCORD_MessageSegment.attachment(
                         file="temp.jpeg", content=f.read()
                     ),
                 )
             return any
         if plain:
-            return await bot.send(
+            return await send_DISCORDMessage_with_retry(
                 event,
+                bot,
                 DISCORD_MessageSegment.text(content),
             )
         else:
@@ -671,8 +692,9 @@ async def send_message(
                             str(content), width=PIC_WIDTH, quality=100
                         )
                         with open(path, "rb") as f:
-                            any = await bot.send(
+                            any = await send_DISCORDMessage_with_retry(
                                 event,
+                                bot,
                                 DISCORD_MessageSegment.attachment(
                                     file="temp.jpeg", content=f.read()
                                 )
@@ -684,16 +706,18 @@ async def send_message(
                             str(content), width=PIC_WIDTH, quality=100
                         )
                         with open(path, "rb") as f:
-                            any = await bot.send(
+                            any = await send_DISCORDMessage_with_retry(
                                 event,
+                                bot,
                                 DISCORD_MessageSegment.attachment(
                                     file="temp.jpeg", content=f.read()
                                 ),
                             )
                         return any
                 else:
-                    return await bot.send(
+                    return await send_DISCORDMessage_with_retry(
                         event,
+                        bot,
                         DISCORD_MessageSegment.text(content),
                     )
             elif PICABLE == "True":
@@ -701,8 +725,9 @@ async def send_message(
                     url = await get_url(content)
                     path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
                     with open(path, "rb") as f:
-                        any = await bot.send(
+                        any = await send_DISCORDMessage_with_retry(
                             event,
+                            bot,
                             DISCORD_MessageSegment.attachment(
                                 file="temp.jpeg", content=f.read()
                             )
@@ -712,16 +737,18 @@ async def send_message(
                 else:
                     path = await txt_to_pic(str(content), width=PIC_WIDTH, quality=100)
                     with open(path, "rb") as f:
-                        any = await bot.send(
+                        any = await send_DISCORDMessage_with_retry(
                             event,
+                            bot,
                             DISCORD_MessageSegment.attachment(
                                 file="temp.jpeg", content=f.read()
                             ),
                         )
                     return any
             else:
-                return await bot.send(
+                return await send_DISCORDMessage_with_retry(
                     event,
+                    bot,
                     DISCORD_MessageSegment.text(content),
                 )
 
