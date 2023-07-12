@@ -1,14 +1,14 @@
 import asyncio
-import httpx
-from urllib.parse import urljoin
-
-from nonebot.log import logger
 import json
 import uuid
-from ..common.config import config
-from ..common.user_data import common_users
-from ..common.mytypes import BotData, BotInfo, CommonUserInfo
+from urllib.parse import urljoin
 
+import httpx
+from nonebot.log import logger
+
+from ..common.config import config
+from ..common.mytypes import BotData, BotInfo, CommonUserInfo
+from ..common.user_data import common_users
 
 SESSION_TOKEN_KEY = "__Secure-next-auth.session-token"
 CF_CLEARANCE_KEY = "cf_clearance"
@@ -50,7 +50,7 @@ load_config()
 
 class ChatGPT_web_Bot:
     def __init__(
-        self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
+            self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
         self.nickname = bot_info.nickname
         self.common_userinfo = common_userinfo
@@ -101,37 +101,37 @@ class ChatGPT_web_Bot:
                     proxies = None
                 async with httpx.AsyncClient(proxies=proxies) as client:
                     async with client.stream(
-                        "POST",
-                        urljoin(API_URL, "backend-api/conversation"),
-                        headers={
-                            "Accept": "text/event-stream",
-                            "Authorization": f"Bearer {self.authorization}",
-                            "Content-Type": "application/json",
-                            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15",
-                            "X-Openai-Assistant-App-Id": "",
-                            "Connection": "close",
-                            "Accept-Language": "en-US,en;q=0.9",
-                            "Referer": "https://chat.openai.com/chat",
-                        },
-                        json={
-                            "action": "next",
-                            "messages": [
-                                {
-                                    "id": str(uuid.uuid4()),
-                                    "author": {"role": "user"},
-                                    "role": "user",
-                                    "content": {
-                                        "content_type": "text",
-                                        "parts": [question],
-                                    },
-                                }
-                            ],
-                            "conversation_id": self.botdata.conversation_id,
-                            "parent_message_id": self.botdata.parent_id,
-                            "model": "",
-                            "timezone_offset_min": -480,
-                        },
-                        timeout=self.timeout,
+                            "POST",
+                            urljoin(API_URL, "backend-api/conversation"),
+                            headers={
+                                "Accept": "text/event-stream",
+                                "Authorization": f"Bearer {self.authorization}",
+                                "Content-Type": "application/json",
+                                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15",
+                                "X-Openai-Assistant-App-Id": "",
+                                "Connection": "close",
+                                "Accept-Language": "en-US,en;q=0.9",
+                                "Referer": "https://chat.openai.com/chat",
+                            },
+                            json={
+                                "action": "next",
+                                "messages": [
+                                    {
+                                        "id": str(uuid.uuid4()),
+                                        "author": {"role": "user"},
+                                        "role": "user",
+                                        "content": {
+                                            "content_type": "text",
+                                            "parts": [question],
+                                        },
+                                    }
+                                ],
+                                "conversation_id": self.botdata.conversation_id,
+                                "parent_message_id": self.botdata.parent_id,
+                                "model": "",
+                                "timezone_offset_min": -480,
+                            },
+                            timeout=self.timeout,
                     ) as response:
                         if response.status_code == 429:
                             msg = ""
@@ -195,9 +195,9 @@ class ChatGPT_web_Bot:
         else:
             proxies = None
         async with httpx.AsyncClient(
-            cookies=cookies,
-            proxies=proxies,
-            timeout=self.timeout,
+                cookies=cookies,
+                proxies=proxies,
+                timeout=self.timeout,
         ) as client:
             response = await client.get(
                 urljoin(API_URL, "api/auth/session"),

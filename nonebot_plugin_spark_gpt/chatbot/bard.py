@@ -1,14 +1,12 @@
 import asyncio
-import httpx
-from urllib.parse import quote
-from nonebot.log import logger
-import json
-from nonebot.utils import run_sync
-from ..common.config import config
-from ..common.user_data import common_users
-from ..common.mytypes import BotData, BotInfo, CommonUserInfo
-from bardapi import Bard
+
 import requests
+from bardapi import Bard
+from nonebot.log import logger
+from nonebot.utils import run_sync
+
+from ..common.config import config
+from ..common.mytypes import BotData, BotInfo, CommonUserInfo
 
 PROXY = ""
 ABLE = True
@@ -44,7 +42,7 @@ HEADER = {
 
 class Bard_Bot:
     def __init__(
-        self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
+            self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
         global Secure1PSID
         self.lock = asyncio.Lock()
@@ -88,8 +86,8 @@ class Bard_Bot:
     def new_bard_client(self):
         global Secure1PSID
         retry = 3
+        detail_error = "未知错误"
         while retry > 0:
-            detail_error = "未知错误"
             try:
                 if not PROXY:
                     self.bard_client = Bard(token=Secure1PSID, session=self.session)
@@ -110,8 +108,8 @@ class Bard_Bot:
     def bard_talk(self, question: str):
         global Secure1PSID
         retry = 3
+        detail_error = "未知错误"
         while retry > 0:
-            detail_error = "未知错误"
             try:
                 answer = self.bard_client.get_answer(question)["content"]
                 return answer

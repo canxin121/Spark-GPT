@@ -23,11 +23,11 @@ p {
     font-size: 27px;
 }
 
-body>*:first-child {
+body > *:first-child {
     margin-top: 0 !important
 }
 
-body>*:last-child {
+body > *:last-child {
     margin-bottom: 0 !important
 }
 
@@ -111,7 +111,7 @@ h1 {
 
 h2 {
     font-size: 1.5rem;
-    border-bottom: 1px solid#DDE4E9;
+    border-bottom: 1px solid #DDE4E9;
     color: #2B3F52
 }
 
@@ -148,32 +148,32 @@ pre {
 }
 
 hr {
-    background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAECAYAAACtBE5DAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OENDRjNBN0E2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OENDRjNBN0I2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4Q0NGM0E3ODY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4Q0NGM0E3OTY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqqezsUAAAAfSURBVHjaYmRABcYwBiM2QSA4y4hNEKYDQxAEAAIMAHNGAzhkPOlYAAAAAElFTkSuQmCC)repeat-x 0 0;
+    background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAECAYAAACtBE5DAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OENDRjNBN0E2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OENDRjNBN0I2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4Q0NGM0E3ODY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4Q0NGM0E3OTY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqqezsUAAAAfSURBVHjaYmRABcYwBiM2QSA4y4hNEKYDQxAEAAIMAHNGAzhkPOlYAAAAAElFTkSuQmCC) repeat-x 0 0;
     border: 0 none;
     color: #cccccc;
     height: 4px;
     padding: 0
 }
 
-body>h2:first-child {
+body > h2:first-child {
     margin-top: 0;
     padding-top: 0
 }
 
-body>h1:first-child {
+body > h1:first-child {
     margin-top: 0;
     padding-top: 0
 }
 
-body>h1:first-child+h2 {
+body > h1:first-child + h2 {
     margin-top: 0;
     padding-top: 0
 }
 
-body>h3:first-child,
-body>h4:first-child,
-body>h5:first-child,
-body>h6:first-child {
+body > h3:first-child,
+body > h4:first-child,
+body > h5:first-child,
+body > h6:first-child {
     margin-top: 0;
     padding-top: 0
 }
@@ -231,11 +231,11 @@ dl dt:first-child {
     padding: 0
 }
 
-dl dt>:first-child {
+dl dt > :first-child {
     margin-top: 0
 }
 
-dl dt>:last-child {
+dl dt > :last-child {
     margin-bottom: 0
 }
 
@@ -244,26 +244,26 @@ dl dd {
     padding: 0 15px
 }
 
-dl dd>:first-child {
+dl dd > :first-child {
     margin-top: 0
 }
 
-dl dd>:last-child {
+dl dd > :last-child {
     margin-bottom: 0
 }
 
 blockquote {
-    border-left: 4px solid#ECF0F3;
+    border-left: 4px solid #ECF0F3;
     padding: 15px;
     background-color: #F7F9FA;
     color: #2B3F52
 }
 
-blockquote>:first-child {
+blockquote > :first-child {
     margin-top: 0
 }
 
-blockquote>:last-child {
+blockquote > :last-child {
     margin-bottom: 0
 }
 
@@ -273,7 +273,7 @@ table {
 }
 
 table tr {
-    border-top: 1px solid#cccccc;
+    border-top: 1px solid #cccccc;
     background-color: white;
     margin: 0;
     padding: 0
@@ -285,13 +285,13 @@ table tr:nth-child(2n) {
 
 table tr th {
     font-weight: bold;
-    border: 1px solid#cccccc;
+    border: 1px solid #cccccc;
     margin: 0;
     padding: 6px 13px
 }
 
 table tr td {
-    border: 1px solid#cccccc;
+    border: 1px solid #cccccc;
     margin: 0;
     padding: 3px 3px
 }
@@ -315,8 +315,8 @@ span.frame {
     overflow: hidden
 }
 
-span.frame>span {
-    border: 1px solid#dddddd;
+span.frame > span {
+    border: 1px solid #dddddd;
     display: block;
     float: left;
     overflow: hidden;
@@ -343,7 +343,7 @@ span.align-center {
     clear: both
 }
 
-span.align-center>span {
+span.align-center > span {
     display: block;
     overflow: hidden;
     margin: 13px auto 0;
@@ -361,7 +361,7 @@ span.align-right {
     clear: both
 }
 
-span.align-right>span {
+span.align-right > span {
     display: block;
     overflow: hidden;
     margin: 13px 0 0;
@@ -391,7 +391,7 @@ span.float-right {
     float: right
 }
 
-span.float-right>span {
+span.float-right > span {
     display: block;
     overflow: hidden;
     margin: 13px auto 0;
@@ -403,7 +403,7 @@ tt {
     margin: 0 2px;
     padding: 0 5px;
     white-space: nowrap;
-    border: 1px solid#eaeaea;
+    border: 1px solid #eaeaea;
     background-color: #f8f8f8;
     border-radius: 3px
 }
@@ -418,7 +418,7 @@ pre code {
 
 .highlight pre {
     background-color: #f8f8f8;
-    border: 1px solid#cccccc;
+    border: 1px solid #cccccc;
     font-size: 0.8125rem;
     line-height: 19px;
     overflow: auto;
@@ -428,7 +428,7 @@ pre code {
 
 pre {
     background-color: #f8f8f8;
-    border: 1px solid#e9e9e9;
+    border: 1px solid #e9e9e9;
     font-size: 0.8125rem;
     line-height: 19px;
     overflow: auto;
@@ -512,16 +512,16 @@ img {
     word-spacing: .05rem
 }
 
-#write>ul:first-child,
-#write>ol:first-child {
+#write > ul:first-child,
+#write > ol:first-child {
     margin-top: 30px
 }
 
-body>*:first-child {
+body > *:first-child {
     margin-top: 0 !important
 }
 
-body>*:last-child {
+body > *:last-child {
     margin-bottom: 0 !important
 }
 
@@ -641,8 +641,8 @@ table {
     margin: 0.8em 0
 }
 
-li>ol,
-li>ul {
+li > ol,
+li > ul {
     margin: 0 0
 }
 
@@ -656,25 +656,25 @@ hr {
     box-sizing: content-box
 }
 
-body>h2:first-child {
+body > h2:first-child {
     margin-top: 0;
     padding-top: 0
 }
 
-body>h1:first-child {
+body > h1:first-child {
     margin-top: 0;
     padding-top: 0
 }
 
-body>h1:first-child+h2 {
+body > h1:first-child + h2 {
     margin-top: 0;
     padding-top: 0
 }
 
-body>h3:first-child,
-body>h4:first-child,
-body>h5:first-child,
-body>h6:first-child {
+body > h3:first-child,
+body > h4:first-child,
+body > h5:first-child,
+body > h6:first-child {
     margin-top: 0;
     padding-top: 0
 }
@@ -701,7 +701,6 @@ h6 p {
 li p.first {
     display: inline-block
 }
-
 
 
 ul:first-child,
@@ -750,7 +749,7 @@ table {
 }
 
 table tr {
-    border-top: 1px solid#dfe2e5;
+    border-top: 1px solid #dfe2e5;
     margin: 0;
     padding: 0
 }
@@ -762,7 +761,7 @@ thead {
 
 table tr th {
     font-weight: bold;
-    border: 1px solid#dfe2e5;
+    border: 1px solid #dfe2e5;
     border-bottom: 0;
     text-align: left;
     margin: 0;
@@ -770,7 +769,7 @@ table tr th {
 }
 
 table tr td {
-    border: 1px solid#dfe2e5;
+    border: 1px solid #dfe2e5;
     text-align: left;
     margin: 0;
     padding: 6px 13px
@@ -838,7 +837,7 @@ tt {
     color: #22a2c9
 }
 
-.md-task-list-item>input {
+.md-task-list-item > input {
     margin-left: -1.3em
 }
 
@@ -865,31 +864,31 @@ tt {
     margin-top: 0 !important
 }
 
-.mathjax-block>.code-tooltip {
+.mathjax-block > .code-tooltip {
     bottom: .375rem
 }
 
-#write>h3.md-focus:before {
+#write > h3.md-focus:before {
     left: -1.5625rem;
     top: .375rem
 }
 
-#write>h4.md-focus:before {
+#write > h4.md-focus:before {
     left: -1.5625rem;
     top: .285714286rem
 }
 
-#write>h5.md-focus:before {
+#write > h5.md-focus:before {
     left: -1.5625rem;
     top: .285714286rem
 }
 
-#write>h6.md-focus:before {
+#write > h6.md-focus:before {
     left: -1.5625rem;
     top: .285714286rem
 }
 
-.md-image>.md-meta {
+.md-image > .md-meta {
     border-radius: 2px;
     font-family: initial;
     padding: 2px 0 0 4px;
@@ -910,7 +909,7 @@ tt {
 }
 
 #typora-quick-open {
-    border: 1px solid#ddd;
+    border: 1px solid #ddd;
     background-color: #f8f8f8
 }
 
@@ -1172,8 +1171,8 @@ div.code-tooltip-content {
     color: black
 }
 
-nav.app-nav.no-badge>ul>li {
-    border: 1px solid#e4e4e4;
+nav.app-nav.no-badge > ul > li {
+    border: 1px solid #e4e4e4;
     border-radius: 15px;
     padding: 5px 15px;
     margin-top: 30px
@@ -1191,7 +1190,7 @@ nav.app-nav.no-badge>ul>li {
 
 .markdown-section a,
 .markdown-section code,
-.sidebar ul li.active>a {
+.sidebar ul li.active > a {
     color: var(--drake-highlight)
 }
 
@@ -1226,7 +1225,7 @@ body {
     box-sizing: border-box;
 }
 
-#header>div {
+#header > div {
     border-bottom: 1px solid #b82857;
     display: inline-block;
     padding: 10px;
@@ -1238,7 +1237,7 @@ body {
     text-align: right;
 }
 
-#qrcode>canvas {
+#qrcode > canvas {
     border: 1px solid #cbcbcb;
     border-radius: 5px;
     padding: 5px;
@@ -1248,7 +1247,7 @@ body {
     height: 50px;
 }
 
-#footer>.qrc {
+#footer > .qrc {
     border-top: 1px solid #b82857;
     margin-top: 20px;
     padding-top: 10px;
@@ -1256,7 +1255,7 @@ body {
     float: right;
 }
 
-#footer>.qrc .md-download {
+#footer > .qrc .md-download {
     text-align: right;
 }
 

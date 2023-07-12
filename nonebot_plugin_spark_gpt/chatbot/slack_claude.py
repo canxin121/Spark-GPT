@@ -1,8 +1,8 @@
 import asyncio
-from slack_sdk.web.async_client import AsyncWebClient
-from slack_sdk.errors import SlackApiError
+
 from nonebot.log import logger
-import time
+from slack_sdk.web.async_client import AsyncWebClient
+
 from ..common.config import config
 from ..common.mytypes import BotData, BotInfo, CommonUserInfo
 from ..common.user_data import common_users
@@ -42,7 +42,7 @@ CLIENT = AsyncWebClient(token=SLACK_USER_TOKEN)
 
 class Slack_Claude_Bot:
     def __init__(
-        self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
+            self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
         self.lock = asyncio.Lock()
         self.nickname = bot_info.nickname
@@ -108,18 +108,18 @@ class Slack_Claude_Bot:
                 )
                 result = result.data
                 if (
-                    not result
-                    or len(result["messages"]) < 1
-                    or result["messages"][-1]["user"] != CLAUDE_ID
-                    or (
+                        not result
+                        or len(result["messages"]) < 1
+                        or result["messages"][-1]["user"] != CLAUDE_ID
+                        or (
                         result["messages"][-1]["text"] == "_Typing…_"
                         or (
-                            result["messages"][-1]["text"].startswith(
-                                "\n&gt; _*Please note:*"
-                            )
-                            and result["messages"][-2]["text"] == "_Typing…_"
+                                result["messages"][-1]["text"].startswith(
+                                    "\n&gt; _*Please note:*"
+                                )
+                                and result["messages"][-2]["text"] == "_Typing…_"
                         )
-                    )
+                )
                 ):
                     await asyncio.sleep(1)
                     raise Exception("slack的claude没有回复")
@@ -127,7 +127,7 @@ class Slack_Claude_Bot:
                     raise Exception(result["error"])
                 elif result["ok"]:
                     if result["messages"][-1]["text"].startswith(
-                        "\n&gt; _*Please note:*"
+                            "\n&gt; _*Please note:*"
                     ):
                         return result["messages"][-2]["text"]
                     else:

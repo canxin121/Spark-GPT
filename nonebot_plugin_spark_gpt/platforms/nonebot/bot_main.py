@@ -12,16 +12,13 @@ from .utils import (
     delete_messages,
     send_message,
     if_close,
-    reply_message,
     MessageEvent,
     Bot,
-    txt_to_pic,
-    send_img,
 )
 from ..temp_bots import temp_bots
 from ...chatbot.load_config import get_able_source
 from ...common.mytypes import BotInfo, BotData
-from ...common.prefix_data import prefixs
+from ...common.prefix_data import prefixes
 from ...common.prompt_data import prompts
 from ...common.user_data import common_users
 from ...utils.utils import is_valid_string
@@ -47,9 +44,8 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
     question, chatbot, common_userinfo = await get_question_chatbot(event, bot, matcher)
     reply_msgs = []
     if chatbot.lock.locked():
-        reply_msgs.append(
-            await send_message("这个bot还有其他请求在处理,你的回复稍后就来", matcher, bot, event)
-        )
+        msg = "这个bot还有其他请求在处理,你的回复稍后就来"
+        reply_msgs.append(await send_message(msg, matcher, bot, event, reply=True))
 
     if len(question) < 7:
         question = question.replace(" ", "").replace("\n", "")
@@ -57,8 +53,9 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
     if question in REFRESH_KEYWORDS:
         async with chatbot.lock:
             if WAIT_MSG_ABLE == "True":
-                reply_msgs.append(await reply_message(bot, matcher, event, "正在刷新，请稍等"))
-
+                reply_msgs.append(
+                    await send_message("正在刷新，请稍等", matcher, bot, event, reply=True)
+                )
             try:
                 await chatbot.refresh()
                 msg = "刷新对话成功"
@@ -70,7 +67,7 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
             async with chatbot.lock:
                 if WAIT_MSG_ABLE == "True":
                     reply_msgs.append(
-                        await reply_message(bot, matcher, event, "正在思考，请稍等")
+                        await send_message("正在思考，请稍等", matcher, bot, event, reply=True)
                     )
 
                 try:
@@ -82,10 +79,9 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
 
     try:
         await delete_messages(bot, event, reply_msgs)
-    except:
-        # logger.error("撤回消息失败")
+    except Exception:
         pass
-    reply = await reply_message(bot, matcher, event, msg, plain=False)
+    reply = await send_message(msg, matcher, bot, event, plain=False, reply=True)
     temp_bots.set_bot_msgid(common_userinfo, chatbot, bot, event, reply)
     await matcher.finish()
 
@@ -99,7 +95,7 @@ async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_Sta
 
     raw_message = event.get_plaintext()
     if not raw_message.startswith(
-        (f"{PRIVATE_COMMAND}创建bot", f"{PUBLIC_COMMAND}创建bot")
+            (f"{PRIVATE_COMMAND}创建bot", f"{PUBLIC_COMMAND}创建bot")
     ):
         await matcher.finish()
     if raw_message.startswith(PUBLIC_COMMAND):
@@ -113,21 +109,28 @@ async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_Sta
     state["able_source_dict"], able_source_str = get_able_source()
 
     state["replys"] = []
-    path = await txt_to_pic(
-        f"请输入要创建的bot的来源的序号\n可选项有:\n{able_source_str}输入'算了'或'取消'可以结束当前操作",
-        width=SPECIALPIC_WIDTH + 450,
-        quality=100,
+    msg = f"请输入要创建的bot的来源的序号\n可选项有:\n{able_source_str}输入'算了'或'取消'可以结束当前操作"
+
+    state["replys"].append(
+        await send_message(
+            msg,
+            matcher,
+            bot,
+            event,
+            plain=False,
+            forcepic=True,
+            width=SPECIALPIC_WIDTH + 450,
+        )
     )
-    state["replys"].append(await send_img(path, matcher, bot, event))
 
 
 @new_bot.got("source_index")
 async def new_bot__(
-    matcher: Matcher,
-    event: MessageEvent,
-    state: T_State,
-    bot: Bot,
-    args: str = ArgStr("source_index"),
+        matcher: Matcher,
+        event: MessageEvent,
+        state: T_State,
+        bot: Bot,
+        args: str = ArgStr("source_index"),
 ):
     await if_close(event, matcher, bot, state["replys"])
 
@@ -151,11 +154,11 @@ async def new_bot__(
 
 @new_bot.got("bot_nickname")
 async def new_bot___(
-    matcher: Matcher,
-    event: MessageEvent,
-    state: T_State,
-    bot: Bot,
-    args: str = ArgStr("bot_nickname"),
+        matcher: Matcher,
+        event: MessageEvent,
+        state: T_State,
+        bot: Bot,
+        args: str = ArgStr("bot_nickname"),
 ):
     from ...common.load_config import SPECIALPIC_WIDTH
 
@@ -164,24 +167,26 @@ async def new_bot___(
     bot_nickname = str(args).replace("\n", "").replace("\r", "").replace(" ", "")
 
     if not is_valid_string(bot_nickname):
-        await send_message("bot的名称不能包含特殊字符,只允许中文英文和数字,请重新开始", matcher, bot, event)
+        msg = "bot的名称不能包含特殊字符,只允许中文英文和数字,请重新开始"
+        await send_message(msg, matcher, bot, event)
         await delete_messages(bot, event, state["replys"])
         await matcher.finish()
     else:
         state["bot_nickname"] = bot_nickname
 
     if not (
-        state["able_source_dict"][state["source_index"]] == "bing"
-        or state["able_source_dict"][state["source_index"]] == "bard"
-        or state["able_source_dict"][state["source_index"]] == "通义千问"
+            state["able_source_dict"][state["source_index"]] == "bing"
+            or state["able_source_dict"][state["source_index"]] == "bard"
+            or state["able_source_dict"][state["source_index"]] == "通义千问"
     ):
         prompts_str = prompts.show_list()
-        path = await txt_to_pic(
-            f'请设置这个bot的预设\n如果不使用预设,请输入"无"或"无预设"\n如果使用本地预设,请在预设名前加".",如使用自己的预设直接发送即可\n当前可用的本地预设有\n{prompts_str}\n输入"算了"或"取消"可以结束当前操作',
-            width=SPECIALPIC_WIDTH + 300,
-            quality=100,
+        msg = f'请设置这个bot的预设\n如果不使用预设,请输入"无"或"无预设"\n如果使用本地预设,请在预设名前加".",如使用自己的预设直接发送即可\n当前可用的本地预设有\n{prompts_str}\n输入"算了"或"取消"可以结束当前操作'
+
+        state["replys"].append(
+            await send_message(
+                msg, matcher, bot, event, plain=False, forcepic=True, width=SPECIALPIC_WIDTH + 300
+            )
         )
-        state["replys"].append(await send_img(path, matcher, bot, event))
     else:
         state["prompt_nickname"] = "无预设"
         state["prefix_nickname"] = "无前缀"
@@ -191,11 +196,11 @@ async def new_bot___(
 
 @new_bot.got("prompt")
 async def new_bot____(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("prompt"),
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: str = ArgStr("prompt"),
 ):
     from ...common.load_config import SPECIALPIC_WIDTH
 
@@ -205,7 +210,7 @@ async def new_bot____(
 
     try:
         prompt_nickname = state["prompt_nickname"]
-    except:
+    except Exception:
         pass
     if prompt in ["无", "无预设"]:
         prompt = ""
@@ -214,7 +219,7 @@ async def new_bot____(
         try:
             prompt_nickname = prompt.replace(".", "")
             prompt = prompts.show_prompt(prompt_nickname)
-        except:
+        except Exception:
             await send_message("没有这个本地预设名", matcher, bot, event)
             await matcher.finish()
 
@@ -223,30 +228,31 @@ async def new_bot____(
 
     try:
         state["prefix_nickname"]
-    except:
-        prefixs_str = prefixs.show_list()
-        path = await txt_to_pic(
-            f'请设置这个bot的前缀\n前缀是指每次对话时都在你的问题前添加一些要求内容,来使boy的回答符合要求\n如果不使用前缀,请输入"无"或"无前缀"\n如果使用本地前缀,请在前缀名前加".",如使用自己的前缀直接发送即可\n当前可用的本地前缀有\n{prefixs_str}\n输入"算了"或"取消"可以结束当前操作',
-            width=SPECIALPIC_WIDTH + 300,
-            quality=100,
+    except Exception:
+        prefixes_str = prefixes.show_list()
+        msg = f'请设置这个bot的前缀\n前缀是指每次对话时都在你的问题前添加一些要求内容,来使boy的回答符合要求\n如果不使用前缀,请输入"无"或"无前缀"\n如果使用本地前缀,请在前缀名前加".",如使用自己的前缀直接发送即可\n当前可用的本地前缀有\n{prefixes_str}\n输入"算了"或"取消"可以结束当前操作'
+
+        state["replys"].append(
+            await send_message(
+                msg, matcher, bot, event, plain=False, forcepic=True, width=SPECIALPIC_WIDTH + 300
+            )
         )
-        state["replys"].append(await send_img(path, matcher, bot, event))
 
 
 @new_bot.got("prefix")
 async def new_bot______(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("prefix"),
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: str = ArgStr("prefix"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     prefix_nickname = "自定义前缀"
 
     try:
         prefix_nickname = state["prefix_nickname"]
-    except:
+    except Exception:
         pass
 
     prefix = str(args)
@@ -256,8 +262,8 @@ async def new_bot______(
     elif prefix.startswith("."):
         try:
             prefix_nickname = prefix.replace(".", "")
-            prefix = prefixs.show_prefix(prefix_nickname)
-        except:
+            prefix = prefixes.show_prefix(prefix_nickname)
+        except Exception:
             await send_message("没有这个本地前缀名", matcher, bot, event)
             await matcher.finish()
 
@@ -267,7 +273,7 @@ async def new_bot______(
     prompt_nickname = state["prompt_nickname"]
     prompt = state["prompt"]
 
-    botinfo = BotInfo(nickname=bot_nickname, onwer=common_userinfo)
+    botinfo = BotInfo(nickname=bot_nickname, owner=common_userinfo)
     try:
         temp_bots.add_new_bot(
             common_userinfo=common_userinfo,
@@ -301,7 +307,7 @@ async def delete_bot_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_
     from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
 
     if not event.get_plaintext().startswith(
-        (f"{PRIVATE_COMMAND}删除bot", f"{PUBLIC_COMMAND}删除bot")
+            (f"{PRIVATE_COMMAND}删除bot", f"{PUBLIC_COMMAND}删除bot")
     ):
         await matcher.finish()
     if event.get_plaintext().startswith(PRIVATE_COMMAND):
@@ -319,11 +325,8 @@ async def delete_bot_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_
         )
     state["replys"] = []
     if not plain_message:
-        state["replys"].append(
-            await send_message(
-                "请输入bot的昵称,区分大小写\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event
-            )
-        )
+        msg = "请输入bot的昵称,区分大小写\n输入'取消'或'算了'可以结束当前操作"
+        state["replys"].append(await send_message(msg, matcher, bot, event))
 
     else:
         matcher.set_arg("bot", plain_message)
@@ -331,11 +334,11 @@ async def delete_bot_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_
 
 @delete_bot.got("bot")
 async def delete_bot__(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("bot"),
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: str = ArgStr("bot"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     bot_name = str(args).replace("\n", "")
@@ -343,7 +346,7 @@ async def delete_bot__(
     try:
         common_users.delete_bot(
             common_userinfo=common_userinfo,
-            botinfo=BotInfo(nickname=bot_name, onwer=common_userinfo),
+            botinfo=BotInfo(nickname=bot_name, owner=common_userinfo),
         )
         await send_message("成功删除了该bot", matcher, bot, event)
         await matcher.finish()
@@ -363,7 +366,7 @@ async def rename_bot_(matcher: Matcher, bot: Bot, event: MessageEvent, state: T_
     from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
 
     if not event.get_plaintext().startswith(
-        (f"{PUBLIC_COMMAND}改名bot", f"{PRIVATE_COMMAND}改名bot")
+            (f"{PUBLIC_COMMAND}改名bot", f"{PRIVATE_COMMAND}改名bot")
     ):
         await matcher.finish()
 
@@ -372,19 +375,18 @@ async def rename_bot_(matcher: Matcher, bot: Bot, event: MessageEvent, state: T_
     else:
         await if_super_user(event, bot, matcher)
         state["common_userinfo"] = set_public_common_userinfo(bot)
+    msg = "请输入要更改的bot的名称\n输入'取消'或'算了'可以结束当前操作"
     state["replys"] = []
-    state["replys"].append(
-        await send_message("请输入要更改的bot的名称\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
-    )
+    state["replys"].append(await send_message(msg, matcher, bot, event))
 
 
 @rename_bot.got("bot_name")
 async def rename_bot__(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("bot_name"),
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: str = ArgStr("bot_name"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     state["bot_name"] = str(args)
@@ -400,16 +402,16 @@ async def rename_bot__(
 
 @rename_bot.got("new_bot_name")
 async def rename_bot___(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("new_bot_name"),
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: str = ArgStr("new_bot_name"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     new_botname = str(args).replace("\n", "").replace("\r", "").replace(" ", "")
     if not is_valid_string(new_botname):
-        await send_message("bot名称不能包含特殊字符,请重新开始")
+        await send_message("bot名称不能包含特殊字符,请重新开始", matcher, bot, event)
         await delete_messages(bot, event, state["replys"])
         await matcher.finish()
     try:
@@ -435,7 +437,7 @@ async def all_bots_(matcher: Matcher, bot: Bot, event: MessageEvent):
     from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND, SPECIALPIC_WIDTH
 
     if not event.get_plaintext().startswith(
-        (f"{PRIVATE_COMMAND}所有bot", f"{PUBLIC_COMMAND}所有bot")
+            (f"{PRIVATE_COMMAND}所有bot", f"{PUBLIC_COMMAND}所有bot")
     ):
         await matcher.finish()
 
@@ -445,9 +447,14 @@ async def all_bots_(matcher: Matcher, bot: Bot, event: MessageEvent):
     else:
         pre_command = PUBLIC_COMMAND
         common_userinfo = set_public_common_userinfo(bot)
-    path = await txt_to_pic(
+
+    await send_message(
         common_users.show_all_bots(common_userinfo, pre_command),
+        matcher,
+        bot,
+        event,
+        plain=False,
+        forcepic=True,
         width=SPECIALPIC_WIDTH + 350,
     )
-    await send_img(path, matcher, bot, event)
     await matcher.finish()

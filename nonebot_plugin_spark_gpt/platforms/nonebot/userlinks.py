@@ -1,7 +1,9 @@
-from typing import Dict
 import json
 from pathlib import Path
+from typing import Dict
+
 from pydantic import BaseModel, Field
+
 from ...common.mytypes import UserInfo, CommonUserInfo
 from ...common.user_data import common_users
 
@@ -24,10 +26,15 @@ class Users(BaseModel):
     def __init__(self, **data):
         super().__init__(**data)
         self.path: Path = (
-            data.get("path") or Path() / "data/spark_gpt/platforms/nonebot.json"
+                data.get("path") or Path() / "data/spark_gpt/platforms/nonebot.json"
         )
 
         self.user_links: Dict[UserInfo, CommonUserInfo] = data.get("user_links") or {}
+        try:
+            saved_data = self.load()
+            self.user_links.update(saved_data)
+        except Exception:
+            pass
 
     def link(self, userinfo: UserInfo, common_userinfo: CommonUserInfo):
         """将传入的Userinfo和CommonUserInfo相链接"""
@@ -55,15 +62,6 @@ class Users(BaseModel):
             for userinfo, user_id in data.items():
                 finaldata[UserInfo.load(userinfo)] = CommonUserInfo.load(user_id)
             return finaldata
-        except:
-            pass
-
-    def __init__(self, **data):
-        """从JSON文件中读取数据并创建CommonUsers对象"""
-        super().__init__(**data)
-        try:
-            saved_data = self.load()
-            self.user_links.update(saved_data)
         except:
             pass
 

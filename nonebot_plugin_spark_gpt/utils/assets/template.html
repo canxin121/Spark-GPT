@@ -2,11 +2,11 @@
 <html>
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" initial-scale="1" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width" initial-scale="1"/>
     <title>Parsed content</title>
 
-    <link href="{path_texttoimg}/css/default.css" rel="stylesheet" />
+    <link href="{path_texttoimg}/css/default.css" rel="stylesheet"/>
     <link href="{path_texttoimg}/css/github-md.css" rel="stylesheet">
     <link href="{path_texttoimg}/js/katex/katex.min.css" rel="stylesheet">
     <script src="{path_texttoimg}/js/highlight.js"></script>
@@ -41,7 +41,7 @@
         }
 
         #content::after {
-            content: "Spark GPT 1.1.2";
+            content: "Spark GPT 1.1.3";
             position: absolute;
             bottom: 0px;
             right: 26px;
@@ -52,44 +52,44 @@
 </head>
 
 <body>
-    <div id="content">{content}</div>
-    <script>
-        twemoji.parse(document.getElementById("content"), {
-            base: '{path_texttoimg}',
-            folder: '/emoji/png',
-            ext: '.png'
-        });
-        hljs.initHighlighting();
-        var codes = document.querySelectorAll('code')
-        for (var i = 0; i < codes.length; i++) {
-            var item = codes[i]
-            try {
-                var lang = item.classList[0].split('-')[1];
-                if (lang) {
-                    item.title = "[lang: " + lang + "]";
-                }
-            } catch (e) {
-
+<div id="content">{content}</div>
+<script>
+    twemoji.parse(document.getElementById("content"), {
+        base: '{path_texttoimg}',
+        folder: '/emoji/png',
+        ext: '.png'
+    });
+    hljs.initHighlighting();
+    var codes = document.querySelectorAll('code')
+    for (var i = 0; i < codes.length; i++) {
+        var item = codes[i]
+        try {
+            var lang = item.classList[0].split('-')[1];
+            if (lang) {
+                item.title = "[lang: " + lang + "]";
             }
+        } catch (e) {
+
         }
-        renderMathInElement(document.body, {
-            // customised options
-            // • auto-render specific keys, e.g.:
-            delimiters: [
-                { left: '$$', right: '$$', display: true },
-                { left: '$', right: '$', display: false },
-                { left: "\\(", right: "\\)", display: false },
-                { left: "\\begin{equation}", right: "\\end{equation}", display: true },
-                { left: "\\begin{align}", right: "\\end{align}", display: true },
-                { left: "\\begin{alignat}", right: "\\end{alignat}", display: true },
-                { left: "\\begin{gather}", right: "\\end{gather}", display: true },
-                { left: "\\begin{CD}", right: "\\end{CD}", display: true },
-                { left: "\\[", right: "\\]", display: true }
-            ],
-            // • rendering keys, e.g.:
-            throwOnError: true
-        });
-    </script>
+    }
+    renderMathInElement(document.body, {
+        // customised options
+        // • auto-render specific keys, e.g.:
+        delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false},
+            {left: "\\(", right: "\\)", display: false},
+            {left: "\\begin{equation}", right: "\\end{equation}", display: true},
+            {left: "\\begin{align}", right: "\\end{align}", display: true},
+            {left: "\\begin{alignat}", right: "\\end{alignat}", display: true},
+            {left: "\\begin{gather}", right: "\\end{gather}", display: true},
+            {left: "\\begin{CD}", right: "\\end{CD}", display: true},
+            {left: "\\[", right: "\\]", display: true}
+        ],
+        // • rendering keys, e.g.:
+        throwOnError: true
+    });
+</script>
 </body>
 
 </html>

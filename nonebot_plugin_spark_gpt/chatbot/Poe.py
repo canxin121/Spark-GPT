@@ -1,12 +1,13 @@
 import asyncio
+import uuid
+
 from nonebot.log import logger
 from nonebot.utils import run_sync
+
+import poe
 from ..common.config import config
 from ..common.mytypes import CommonUserInfo, BotData, BotInfo
 from ..common.user_data import common_users
-import poe
-import uuid
-
 
 COOKIE = ""
 PROXY = ""
@@ -32,17 +33,16 @@ def load_config():
 load_config()
 
 
-class Poe_bot:
+class Poe_Bot:
     def __init__(
-        self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
+            self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
         self.lock = asyncio.Lock()
         self.nickname = bot_info.nickname
         self.common_userinfo = common_userinfo
         self.botdata = bot_data
-        CLIENT = None
-
         self.source = bot_data.source
+
         if self.source == "poe claude":
             self.base_model = "a2"
         else:

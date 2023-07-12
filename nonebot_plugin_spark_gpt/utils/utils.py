@@ -1,5 +1,6 @@
-import uuid
 import re
+import uuid
+
 import aiohttp
 
 
@@ -20,7 +21,7 @@ async def get_url(text):
         while retries > 0:
             try:
                 async with session.post(
-                    "https://pastebin.mozilla.org/api/", data=payload
+                        "https://pastebin.mozilla.org/api/", data=payload
                 ) as resp:
                     resp.raise_for_status()
                     url = await resp.text()

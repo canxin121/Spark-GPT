@@ -1,10 +1,9 @@
-from typing import Dict, List, Optional
-from bidict import bidict
-from pathlib import Path
 import json
-from nonebot import logger
+from pathlib import Path
+from typing import Dict
+
 from pydantic import BaseModel, Field
-from ..utils.utils import generate_uuid
+
 from .mytypes import (
     BotInfo,
     BotData,
@@ -13,6 +12,7 @@ from .mytypes import (
     UserInfo,
     UsersInfo,
 )
+from ..utils.utils import generate_uuid
 
 
 class CommonUsers(BaseModel):
@@ -29,13 +29,13 @@ class CommonUsers(BaseModel):
     user_links: dict = Field(None, description="用户链接的字典")
 
     def __init__(
-        self,
-        **data,
+            self,
+            **data,
     ):
         super().__init__(**data)
         self.path = Path() / "data/spark_gpt/common"
         self.user_dict: Dict[CommonUserInfo, CommonUserData] = (
-            data.get("user_dict") or {}
+                data.get("user_dict") or {}
         )
         self.user_links: Dict[CommonUserInfo, UsersInfo] = data.get("user_links") or {}
         try:
@@ -69,7 +69,7 @@ class CommonUsers(BaseModel):
         bots = self.user_dict[common_userinfo].bots
         for bot, bot_data in bots.items():
             if text.startswith(
-                (f"{PRIVATE_COMMAND}{bot.nickname}", f"{PUBLIC_COMMAND}{bot.nickname}")
+                    (f"{PRIVATE_COMMAND}{bot.nickname}", f"{PUBLIC_COMMAND}{bot.nickname}")
             ):
                 return bot, bot_data
 
@@ -99,14 +99,14 @@ class CommonUsers(BaseModel):
         return msg
 
     def add_new_bot(
-        self, common_userinfo: CommonUserInfo, botinfo: BotInfo, botdata: BotData
+            self, common_userinfo: CommonUserInfo, botinfo: BotInfo, botdata: BotData
     ):
         """向对应commonuser_info的bots中添加一个新的botdata"""
         self.user_dict[common_userinfo].bots[botinfo] = botdata
         self.save_userdata(common_userinfo=common_userinfo)
 
     def get_bot_data(
-        self, common_userinfo: CommonUserInfo, botinfo: BotInfo
+            self, common_userinfo: CommonUserInfo, botinfo: BotInfo
     ) -> BotData:
         """拿到储存中的对应commonuser info的对应botinfo的botdata信息"""
         return self.user_dict[common_userinfo].bots[botinfo]
@@ -231,7 +231,7 @@ class CommonUsers(BaseModel):
                     usersinfo=usersinfo
                 )
                 with open(
-                    self.path / "common_users" / f"{common_userinfo}.json", "r"
+                        self.path / "common_users" / f"{common_userinfo}.json", "r"
                 ) as f:
                     data2 = json.load(f)
                 user_dict[

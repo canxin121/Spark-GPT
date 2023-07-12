@@ -1,11 +1,15 @@
 import asyncio
 from pathlib import Path
 from typing import Annotated
-from nonebot.plugin import on_command
-from nonebot.params import ArgStr, CommandArg
-from nonebot.typing import T_State
-from nonebot.matcher import Matcher
+
 from nonebot.exception import MatcherException
+from nonebot.matcher import Matcher
+from nonebot.params import ArgStr, CommandArg
+from nonebot.params import CommandStart
+from nonebot.plugin import on_command
+from nonebot.typing import T_State
+
+from .userlinks import users
 from .utils import (
     send_img,
     set_common_userinfo,
@@ -18,16 +22,13 @@ from .utils import (
     Message,
     Bot,
 )
-from ...common.web.app import start_web_ui, stop_web_ui, HOST, PORT
-from ...common.user_data import common_users
-from ...common.prompt_data import prompts
-from ...common.prefix_data import prefixs
-from .userlinks import users
-from ...common.mytypes import CommonUserInfo
-from ...utils.text_render import txt_to_pic
-from nonebot.params import CommandStart
 from ...common.load_config import get_help_pic
-
+from ...common.mytypes import CommonUserInfo
+from ...common.prefix_data import prefixes
+from ...common.prompt_data import prompts
+from ...common.user_data import common_users
+from ...common.web.app import start_web_ui, stop_web_ui, HOST, PORT
+from ...utils.text_render import text_to_pic
 
 Help_Msg_Path = Path(__file__).parent / "HelpMsg.jpeg"
 
@@ -36,7 +37,7 @@ help = on_command("shelp", aliases={"s帮助", "sparkhelp"}, priority=1, block=F
 
 @help.handle()
 async def help_(
-    matcher: Matcher, event: MessageEvent, bot: Bot, foo: Annotated[str, CommandStart()]
+        matcher: Matcher, event: MessageEvent, bot: Bot, foo: Annotated[str, CommandStart()]
 ):
     from ...common.load_config import (
         PRIVATE_COMMAND,
@@ -110,7 +111,7 @@ async def help_(
 | 关闭webui | 请在使用webui后关闭(管理员可用) | SparkGPT管理员可用 |
 """
     if not Generated_Help_Msg_Pic:
-        await txt_to_pic(help_msg, Help_Msg_Path, width=PIC_WIDTH, quality=100)
+        await text_to_pic(help_msg, Help_Msg_Path, width=PIC_WIDTH, quality=100)
         get_help_pic()
     await send_img(Help_Msg_Path, matcher, bot, event)
     await matcher.finish()
@@ -123,9 +124,8 @@ start_web_ui_ = on_command("开启webui", priority=1, block=False)
 async def start_web_ui__(matcher: Matcher, event: MessageEvent, bot: Bot):
     await if_super_user(event, bot, matcher)
     await start_web_ui()
-    await send_message(
-        f"成功开启webui,地址为http://{HOST}:{PORT},请在使用完成后关闭,以免他人修改内容", matcher, bot, event
-    )
+    msg = f"成功开启webui,地址为http://{HOST}:{PORT},请在使用完成后关闭,以免他人修改内容"
+    await send_message(msg, matcher, bot, event)
     await matcher.finish()
 
 
@@ -160,19 +160,16 @@ user_relink = on_command("更改绑定", priority=1, block=False)
 
 @user_relink.handle()
 async def user_relink_(
-    matcher: Matcher,
-    state: T_State,
-    event: MessageEvent,
-    bot: Bot,
-    args: Message = CommandArg(),
+        matcher: Matcher,
+        state: T_State,
+        event: MessageEvent,
+        bot: Bot,
+        args: Message = CommandArg(),
 ):
     reply_msgs = []
     if not args:
-        reply_msgs.append(
-            await send_message(
-                "请输入用户名和用户密钥,用空格分隔开\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event
-            )
-        )
+        msg = "请输入用户名和用户密钥,用空格分隔开\n输入'取消'或'算了'可以结束当前操作"
+        reply_msgs.append(await send_message(msg, matcher, bot, event))
 
     else:
         matcher.set_arg("infos", args)
@@ -181,11 +178,11 @@ async def user_relink_(
 
 @user_relink.got("infos")
 async def user_relink__(
-    matcher: Matcher,
-    event: MessageEvent,
-    state: T_State,
-    bot: Bot,
-    args: str = ArgStr("infos"),
+        matcher: Matcher,
+        event: MessageEvent,
+        state: T_State,
+        bot: Bot,
+        args: str = ArgStr("infos"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     reply_msgs = state["replys"]
@@ -194,13 +191,15 @@ async def user_relink__(
         common_user_id, common_user_key = infos
     else:
         await delete_messages(bot, event, reply_msgs)
-        await send_message("你输入的信息格式有误,请重新发送命令和信息", matcher, bot, event)
+        msg = "你输入的信息格式有误,请重新发送命令和信息"
+        await send_message(msg, matcher, bot, event)
         await matcher.finish()
     common_userinfo = CommonUserInfo(user_id=common_user_id)
     if common_userinfo in list(common_users.user_dict.keys()):
         if common_users.get_key(common_userinfo) != common_user_key:
             await delete_messages(bot, event, reply_msgs)
-            await send_message("你输入的密钥错误,请重新发送指令和信息", matcher, bot, event)
+            msg = "你输入的密钥错误,请重新发送指令和信息"
+            await send_message(msg, matcher, bot, event)
             await matcher.finish()
 
         else:
@@ -216,7 +215,8 @@ async def user_relink__(
 
     else:
         await delete_messages(bot, event, reply_msgs)
-        await send_message("你输入的用户名不存在,请重新发送指令和信息", matcher, bot, event)
+        msg = "你输入的用户名不存在,请重新发送指令和信息"
+        await send_message(msg, matcher, bot, event)
         await matcher.finish()
 
 
@@ -227,8 +227,9 @@ all_prompts = on_command("所有预设", priority=1, block=False)
 async def all_prompts_(bot: Bot, matcher: Matcher, event: MessageEvent):
     from ...common.load_config import SPECIALPIC_WIDTH
 
-    path = await txt_to_pic(prompts.show_list(), width=SPECIALPIC_WIDTH)
-    await send_img(path, matcher, bot, event)
+    await send_message(
+        prompts.show_list(), matcher, bot, event, plain=False, forcepic=True, width=SPECIALPIC_WIDTH
+    )
     await matcher.finish()
 
 
@@ -237,19 +238,16 @@ show_prompt = on_command("查询预设", priority=1, block=False)
 
 @show_prompt.handle()
 async def show_prompt_(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: Message = CommandArg(),
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: Message = CommandArg(),
 ):
     state["replys"] = []
     if not args:
-        state["replys"].append(
-            await send_message(
-                "请输入预设的名称,区分大小写\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event
-            )
-        )
+        msg = "请输入预设的名称,区分大小写\n输入'取消'或'算了'可以结束当前操作"
+        state["replys"].append(await send_message(msg, matcher, bot, event))
 
     else:
         matcher.set_arg("prompt", args)
@@ -257,11 +255,11 @@ async def show_prompt_(
 
 @show_prompt.got("prompt")
 async def show_prompt__(
-    matcher: Matcher,
-    state: T_State,
-    event: MessageEvent,
-    bot: Bot,
-    args: str = ArgStr("prompt"),
+        matcher: Matcher,
+        state: T_State,
+        event: MessageEvent,
+        bot: Bot,
+        args: str = ArgStr("prompt"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     try:
@@ -282,20 +280,17 @@ delete_prompt = on_command("删除预设", priority=1, block=False)
 
 @delete_prompt.handle()
 async def delete_prompt_(
-    matcher: Matcher,
-    state: T_State,
-    event: MessageEvent,
-    bot: Bot,
-    args: Message = CommandArg(),
+        matcher: Matcher,
+        state: T_State,
+        event: MessageEvent,
+        bot: Bot,
+        args: Message = CommandArg(),
 ):
     await if_super_user(event, bot, matcher)
     state["replys"] = []
     if not args:
-        state["replys"].append(
-            await send_message(
-                "请输入预设的名称,区分大小写\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event
-            )
-        )
+        msg = "请输入预设的名称,区分大小写\n输入'取消'或'算了'可以结束当前操作"
+        state["replys"].append(await send_message(msg, matcher, bot, event))
 
     else:
         matcher.set_arg("prompt", args)
@@ -303,11 +298,11 @@ async def delete_prompt_(
 
 @delete_prompt.got("prompt")
 async def delete_prompt__(
-    matcher: Matcher,
-    event: MessageEvent,
-    state: T_State,
-    bot: Bot,
-    args: str = ArgStr("prompt"),
+        matcher: Matcher,
+        event: MessageEvent,
+        state: T_State,
+        bot: Bot,
+        args: str = ArgStr("prompt"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     prompt_name = str(args).replace("\n", "")
@@ -330,34 +325,32 @@ add_prompt = on_command("添加预设", priority=1, block=False)
 @add_prompt.handle()
 async def add_prompt_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_State):
     await if_super_user(event, bot, matcher)
+    msg = "请输入预设的要设为的名称\n输入'取消'或'算了'可以结束当前操作"
     state["replys"] = []
-    state["replys"].append(
-        await send_message("请输入预设的要设为的名称\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
-    )
+    state["replys"].append(await send_message(msg, matcher, bot, event))
 
 
 @add_prompt.got("prompt_name")
 async def add_prompt__(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("prompt_name"),
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: str = ArgStr("prompt_name"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     state["prompt_name"] = str(args)
-    state["replys"].append(
-        await send_message("请输入预设的内容\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
-    )
+    msg = "请输入预设的内容\n输入'取消'或'算了'可以结束当前操作"
+    state["replys"].append(await send_message(msg, matcher, bot, event))
 
 
 @add_prompt.got("prompt")
 async def add_prompt___(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("prompt"),
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: str = ArgStr("prompt"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     try:
@@ -378,37 +371,35 @@ change_prompt_name = on_command("改名预设", priority=1, block=False)
 
 @change_prompt_name.handle()
 async def change_prompt_name_(
-    matcher: Matcher, bot: Bot, event: MessageEvent, state: T_State
+        matcher: Matcher, bot: Bot, event: MessageEvent, state: T_State
 ):
     await if_super_user(event, bot, matcher)
     state["replys"] = []
-    state["replys"].append(
-        await send_message("请输入要更改的预设的名称\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
-    )
+    msg = "请输入要更改的预设的名称\n输入'取消'或'算了'可以结束当前操作"
+    state["replys"].append(await send_message(msg, matcher, bot, event))
 
 
 @change_prompt_name.got("prompt_name")
 async def change_prompt_name__(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("prompt_name"),
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: str = ArgStr("prompt_name"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     state["prompt_name"] = str(args)
-    state["replys"].append(
-        await send_message("请输入预设要改为的名字\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
-    )
+    msg = "请输入预设要改为的名字\n输入'取消'或'算了'可以结束当前操作"
+    state["replys"].append(await send_message(msg, matcher, bot, event))
 
 
 @change_prompt_name.got("new_prompt_name")
 async def change_prompt_name___(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("new_prompt_name"),
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: str = ArgStr("new_prompt_name"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     try:
@@ -424,15 +415,16 @@ async def change_prompt_name___(
         await matcher.finish()
 
 
-all_prefixs = on_command("所有前缀", priority=1, block=False)
+all_prefixes = on_command("所有前缀", priority=1, block=False)
 
 
-@all_prefixs.handle()
-async def all_prefixs_(bot: Bot, matcher: Matcher, event: MessageEvent):
+@all_prefixes.handle()
+async def all_prefixes_(bot: Bot, matcher: Matcher, event: MessageEvent):
     from ...common.load_config import SPECIALPIC_WIDTH
 
-    path = await txt_to_pic(prefixs.show_list(), width=SPECIALPIC_WIDTH)
-    await send_img(path, matcher, bot, event)
+    await send_message(
+        prefixes.show_list(), matcher, bot, event, plain=False, forcepic=True, width=SPECIALPIC_WIDTH
+    )
     await matcher.finish()
 
 
@@ -441,19 +433,16 @@ show_prefix = on_command("查询前缀", priority=1, block=False)
 
 @show_prefix.handle()
 async def show_prefix_(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: Message = CommandArg(),
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: Message = CommandArg(),
 ):
     state["replys"] = []
     if not args:
-        state["replys"].append(
-            await send_message(
-                "请输入前缀的名称,区分大小写\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event
-            )
-        )
+        msg = "请输入前缀的名称,区分大小写\n输入'取消'或'算了'可以结束当前操作"
+        state["replys"].append(await send_message(msg, matcher, bot, event))
 
     else:
         matcher.set_arg("prefix", args)
@@ -461,15 +450,15 @@ async def show_prefix_(
 
 @show_prefix.got("prefix")
 async def show_prefix__(
-    matcher: Matcher,
-    state: T_State,
-    event: MessageEvent,
-    bot: Bot,
-    args: str = ArgStr("prefix"),
+        matcher: Matcher,
+        state: T_State,
+        event: MessageEvent,
+        bot: Bot,
+        args: str = ArgStr("prefix"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     try:
-        prefix = prefixs.show_prefix(str(args))
+        prefix = prefixes.show_prefix(str(args))
         await send_message(prefix, matcher, bot, event, plain=False)
         await matcher.finish()
 
@@ -486,20 +475,17 @@ delete_prefix = on_command("删除前缀", priority=1, block=False)
 
 @delete_prefix.handle()
 async def delete_prefix_(
-    matcher: Matcher,
-    state: T_State,
-    event: MessageEvent,
-    bot: Bot,
-    args: Message = CommandArg(),
+        matcher: Matcher,
+        state: T_State,
+        event: MessageEvent,
+        bot: Bot,
+        args: Message = CommandArg(),
 ):
     await if_super_user(event, bot, matcher)
     state["replys"] = []
     if not args:
-        state["replys"].append(
-            await send_message(
-                "请输入前缀的名称,区分大小写\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event
-            )
-        )
+        msg = "请输入前缀的名称,区分大小写\n输入'取消'或'算了'可以结束当前操作"
+        state["replys"].append(await send_message(msg, matcher, bot, event))
 
     else:
         matcher.set_arg("prefix", args)
@@ -507,16 +493,16 @@ async def delete_prefix_(
 
 @delete_prefix.got("prefix")
 async def delete_prefix__(
-    matcher: Matcher,
-    event: MessageEvent,
-    state: T_State,
-    bot: Bot,
-    args: str = ArgStr("prefix"),
+        matcher: Matcher,
+        event: MessageEvent,
+        state: T_State,
+        bot: Bot,
+        args: str = ArgStr("prefix"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     prefix_name = str(args).replace("\n", "")
     try:
-        prefixs.delete(prefix_name)
+        prefixes.delete(prefix_name)
         await send_message("成功删除了该前缀", matcher, bot, event)
         await matcher.finish()
 
@@ -535,37 +521,35 @@ add_prefix = on_command("添加前缀", priority=1, block=False)
 async def add_prefix_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_State):
     await if_super_user(event, bot, matcher)
     state["replys"] = []
-    state["replys"].append(
-        await send_message("请输入前缀的要设为的名称\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
-    )
+    msg = "请输入前缀的要设为的名称\n输入'取消'或'算了'可以结束当前操作"
+    state["replys"].append(await send_message(msg, matcher, bot, event))
 
 
 @add_prefix.got("prefix_name")
 async def add_prefix__(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("prefix_name"),
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: str = ArgStr("prefix_name"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     state["prefix_name"] = str(args)
-    state["replys"].append(
-        await send_message("请输入前缀的内容\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
-    )
+    msg = "请输入前缀的内容\n输入'取消'或'算了'可以结束当前操作"
+    state["replys"].append(await send_message(msg, matcher, bot, event))
 
 
 @add_prefix.got("prefix")
 async def add_prefix___(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("prefix"),
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: str = ArgStr("prefix"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     try:
-        prefixs.add(state["prefix_name"], str(args))
+        prefixes.add(state["prefix_name"], str(args))
         await send_message("成功添加了对应的前缀", matcher, bot, event)
         await matcher.finish()
 
@@ -582,41 +566,39 @@ change_prefix_name = on_command("改名前缀", priority=1, block=False)
 
 @change_prefix_name.handle()
 async def change_prefix_name_(
-    matcher: Matcher, bot: Bot, event: MessageEvent, state: T_State
+        matcher: Matcher, bot: Bot, event: MessageEvent, state: T_State
 ):
     await if_super_user(event, bot, matcher)
     state["replys"] = []
-    state["replys"].append(
-        await send_message("请输入要更改的前缀的名称\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
-    )
+    msg = "请输入要更改的前缀的名称\n输入'取消'或'算了'可以结束当前操作"
+    state["replys"].append(await send_message(msg, matcher, bot, event))
 
 
 @change_prefix_name.got("prefix_name")
 async def change_prefix_name__(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("prefix_name"),
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: str = ArgStr("prefix_name"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     state["prefix_name"] = str(args)
-    state["replys"].append(
-        await send_message("请输入前缀要改为的名字\n输入'取消'或'算了'可以结束当前操作", matcher, bot, event)
-    )
+    msg = "请输入前缀要改为的名字\n输入'取消'或'算了'可以结束当前操作"
+    state["replys"].append(await send_message(msg, matcher, bot, event))
 
 
 @change_prefix_name.got("new_prefix_name")
 async def change_prefix_name___(
-    matcher: Matcher,
-    state: T_State,
-    bot: Bot,
-    event: MessageEvent,
-    args: str = ArgStr("new_prefix_name"),
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: str = ArgStr("new_prefix_name"),
 ):
     await if_close(event, matcher, bot, state["replys"])
     try:
-        prefixs.rename(old_name=state["prefix_name"], new_name=str(args))
+        prefixes.rename(old_name=state["prefix_name"], new_name=str(args))
         await send_message("成功更改了对应的前缀的名称", matcher, bot, event)
         await matcher.finish()
 

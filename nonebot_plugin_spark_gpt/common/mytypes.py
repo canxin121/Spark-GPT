@@ -126,18 +126,18 @@ class BotInfo(BaseModel):
     """
 
     nickname: str
-    onwer: CommonUserInfo
+    owner: CommonUserInfo
 
     def __hash__(self):
         return hash(self.nickname)
 
     def save(self) -> str:
-        return f"{self.nickname}-{self.onwer.user_id}"
+        return f"{self.nickname}-{self.owner.user_id}"
 
     @classmethod
     def load(cls, arg: str) -> "BotInfo":
         args = arg.split("-", 1)
-        return cls(nickname=args[0], onwer=CommonUserInfo(user_id=args[1]))
+        return cls(nickname=args[0], owner=CommonUserInfo(user_id=args[1]))
 
 
 class CommonUserData(BaseModel):

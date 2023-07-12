@@ -2,266 +2,270 @@
 <html>
 
 <head>
-   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-   <style>
-      /* 设置.sidebar的样式 */
-      .sidebar {
-         position: absolute;
-         left: 0;
-         height: calc(100%);
-         width: 20vw;
-         background-color: #b3eff1;
-         border-radius: 10px;
-         padding: 20px;
-         overflow: auto;
-         min-width: 88px;
-      }
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        /* 设置.sidebar的样式 */
+        .sidebar {
+            position: absolute;
+            left: 0;
+            height: calc(100%);
+            width: 20vw;
+            background-color: #b3eff1;
+            border-radius: 10px;
+            padding: 20px;
+            overflow: auto;
+            min-width: 88px;
+        }
 
-      .sidebar ul li {
-         text-align: center;
-         border-bottom: 1px solid #dee2e6;
-         padding: 10px 0;
-         border-radius: 10px;
-         border: 1px solid #b3eff1;
-         margin-bottom: 10px;
-         display: block;
-         background-color: #fff;
-         box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-         word-wrap: break-word;
-         position: relative;
-      }
+        .sidebar ul li {
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px 0;
+            border-radius: 10px;
+            border: 1px solid #b3eff1;
+            margin-bottom: 10px;
+            display: block;
+            background-color: #fff;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            word-wrap: break-word;
+            position: relative;
+        }
 
-      .sidebar ul li:hover {
-         cursor: pointer;
-         background-color: #b3eff1;
-      }
+        .sidebar ul li:hover {
+            cursor: pointer;
+            background-color: #b3eff1;
+        }
 
-      /* 修改.main的样式 */
-      .main {
-         padding: 50px;
-         border: 1px solid rgb(93, 90, 90);
-         border-radius: 10px;
-         margin-right: 20px;
-         margin-left: max(21vw, 90px);
-      }
+        /* 修改.main的样式 */
+        .main {
+            padding: 50px;
+            border: 1px solid rgb(93, 90, 90);
+            border-radius: 10px;
+            margin-right: 20px;
+            margin-left: max(21vw, 90px);
+        }
 
-      .btn-primary {
-         margin-top: 20px;
-         margin-left: -4px;
-      }
+        .btn-primary {
+            margin-top: 20px;
+            margin-left: -4px;
+        }
 
-      /* 将body的高度设置为100vh */
-      body {
-         height: 100vh;
-         margin: 0;
-      }
+        /* 将body的高度设置为100vh */
+        body {
+            height: 100vh;
+            margin: 0;
+        }
 
-      /* 修改按钮样式 */
-      .my-btn {
-         margin-left: 10px;
-         margin-right: 10px;
-         z-index: 9999;
-         width: 70px;
-         /* 修改按钮宽度 */
-      }
+        /* 修改按钮样式 */
+        .my-btn {
+            margin-left: 10px;
+            margin-right: 10px;
+            z-index: 9999;
+            width: 70px;
+            /* 修改按钮宽度 */
+        }
 
-      .edit-btn {
-         font-size: 14px;
-         padding: 5px 10px;
-         background-color: #fff;
-         border: 1px solid #b3eff1;
-         border-radius: 10px;
-         margin-left: 5px;
-         margin-right: 5px;
-         cursor: pointer;
-         transition: background-color 0.3s ease-in-out;
-      }
+        .edit-btn {
+            font-size: 14px;
+            padding: 5px 10px;
+            background-color: #fff;
+            border: 1px solid #b3eff1;
+            border-radius: 10px;
+            margin-left: 5px;
+            margin-right: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
 
-      .edit-btn:hover {
-         background-color: #b3eff1;
-      }
+        .edit-btn:hover {
+            background-color: #b3eff1;
+        }
 
-      .new-btn {
-         width: 100px;
-         /* 修改按钮宽度 */
-         position: absolute;
-         right: 20px;
-         /* 控制按钮向右的距离 */
-      }
+        .new-btn {
+            width: 100px;
+            /* 修改按钮宽度 */
+            position: absolute;
+            right: 20px;
+            /* 控制按钮向右的距离 */
+        }
 
-      .delete-btn {
-         position: absolute;
-         top: 50%;
-         left: -10px;
-         transform: translateY(-50%);
-         width: 20px;
-         height: 20px;
-         background-color: #fff;
-         border: 1px solid #b3eff1;
-         border-radius: 50%;
-         padding: 0;
-         display: flex;
-         align-items: center;
-         justify-content: center;
-         cursor: pointer;
-         transition: background-color 0.3s ease-in-out;
-      }
+        .delete-btn {
+            position: absolute;
+            top: 50%;
+            left: -10px;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            background-color: #fff;
+            border: 1px solid #b3eff1;
+            border-radius: 50%;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+        }
 
-      .delete-btn:hover {
-         background-color: #b3eff1;
-         color: #fff;
-      }
+        .delete-btn:hover {
+            background-color: #b3eff1;
+            color: #fff;
+        }
 
-      /* 修改logo样式 */
-      .sidebar-logo {
-         position: relative;
-         display: inline-block;
-         margin-bottom: 10px;
-      }
+        /* 修改logo样式 */
+        .sidebar-logo {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
 
-      .sidebar-logo img {
-         width: 50px;
-         height: 50px;
-         border-radius: 50%;
-         object-fit: cover;
-      }
+        .sidebar-logo img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
 
-      /* 修改按钮容器样式 */
-      .sidebar-buttons {
-         display: flex;
-         justify-content: center;
-         margin-bottom: 20px;
-         flex-wrap: nowrap;
-      }
+        /* 修改按钮容器样式 */
+        .sidebar-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: nowrap;
+        }
 
-      /* 分隔线样式 */
-      .separator {
-         margin-top: 80px;
-         margin-bottom: 20px;
-         border-bottom: 1px solid #dee2e6;
-      }
-   </style>
+        /* 分隔线样式 */
+        .separator {
+            margin-top: 80px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #dee2e6;
+        }
+    </style>
 </head>
 
 <body>
-   <!-- 侧边栏 -->
-   <div class="sidebar" id="sidebar">
-      <div class="sidebar-logo">
-         <a href="https://canxin121.github.io/docs/docs/Spark_GPT.html">
+<!-- 侧边栏 -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+        <a href="https://canxin121.github.io/docs/docs/Spark_GPT.html">
             <img src="https://avatars.githubusercontent.com/u/69547456?s=96&v=4" alt="logo">
-         </a>
-      </div>
-      <div class="sidebar-buttons">
-         <div class="flex-wrap">
+        </a>
+    </div>
+    <div class="sidebar-buttons">
+        <div class="flex-wrap">
             <a href="/config" class="btn btn-primary my-btn">配置</a>
-         </div>
-         <div class="flex-wrap">
+        </div>
+        <div class="flex-wrap">
             <a href="/prompt" class="btn btn-primary my-btn">预设</a>
-         </div>
-         <div class="flex-wrap">
+        </div>
+        <div class="flex-wrap">
             <a href="/prefix" class="btn btn-primary my-btn">前缀</a>
-         </div>
-      </div>
-      <div class="separator"></div>
-      <ul class="list-unstyled">
-         {% for prefix_key in prefixs.keys() %}
-         <li>
-            <div style="position: relative;" onclick="window.location='/prefix/{{ prefix_key }}'">
-               <span id="prefix-{{ prefix_key }}">{{ prefix_key }}</span>
-               <button class="edit-btn"
-                  onclick="event.stopPropagation(); editprefix('{{ prefix_key }}', this.parentNode)">Edit</button>
-               <button class="delete-btn" onclick="event.stopPropagation(); deleteprefix('{{ prefix_key }}')">X</button>
-            </div>
-         </li>
-         {% endfor %}
-      </ul>
-      <button class="btn btn-primary my-btn new-btn" onclick="addNewprefix()">新建</button> <!-- 将"新建"按钮放在这里 -->
-   </div>
+        </div>
+    </div>
+    <div class="separator"></div>
+    <ul class="list-unstyled">
+        {% for prefix_key in prefixes.keys() %}
+            <li>
+                <div style="position: relative;" onclick="window.location='/prefix/{{ prefix_key }}'">
+                    <span id="prefix-{{ prefix_key }}">{{ prefix_key }}</span>
+                    <button class="edit-btn"
+                            onclick="event.stopPropagation(); editprefix('{{ prefix_key }}', this.parentNode)">Edit
+                    </button>
+                    <button class="delete-btn" onclick="event.stopPropagation(); deleteprefix('{{ prefix_key }}')">X
+                    </button>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+    <button class="btn btn-primary my-btn new-btn" onclick="addNewprefix()">新建</button> <!-- 将"新建"按钮放在这里 -->
+</div>
 
 
-   <!-- 主内容 -->
-   <div class="main" id="main" style="height: 100vh;">
-      <form method="POST" id="prefixForm">
-         <div class="form-group">
+<!-- 主内容 -->
+<div class="main" id="main" style="height: 100vh;">
+    <form method="POST" id="prefixForm">
+        <div class="form-group">
             <label for="prefix_value">前缀内容为:</label>
-            <textarea class="form-control" id="prefix_value" name="prefix_value" rows="5" {% if not prefixs[prefix_name]
-               %}disabled{% endif %}>{{ prefixs[prefix_name] }}</textarea>
-         </div>
-         {% if prefixs[prefix_name] %}
-         <input type="hidden" name="save" value="True"> <button type="submit" class="btn
-            btn-primary">保存</button>
-      </form> {% endif %}
-      </form>
-   </div>
+            <textarea class="form-control" id="prefix_value" name="prefix_value" rows="5"
+                      {% if not prefixes[prefix_name] %}disabled{% endif %}>{{ prefixes[prefix_name] }}</textarea>
+        </div>
+        {% if prefixes[prefix_name] %}
+            <input type="hidden" name="save" value="True">
+            <button type="submit" class="btn
+            btn-primary">保存
+            </button>
+            </form> {% endif %}
+    </form>
+</div>
 
-   <!-- 引入所需的JavaScript库 -->
-   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-   <!-- 使用JavaScript动态设置sidebar的高度 -->
-   <script>
+<!-- 引入所需的JavaScript库 -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<!-- 使用JavaScript动态设置sidebar的高度 -->
+<script>
 
-      function editprefix(key, parentDiv) {
-         parentDiv.onclick = null; // remove the click event on parent div
-         parentDiv.innerHTML = `<input id="edit-${key}" value="${key}">
+    function editprefix(key, parentDiv) {
+        parentDiv.onclick = null; // remove the click event on parent div
+        parentDiv.innerHTML = `<input id="edit-${key}" value="${key}">
             <button class="edit-btn" onclick="event.stopPropagation(); saveprefix('${key}')">Save</button>
             <button class="delete-btn" onclick="event.stopPropagation(); deleteprefix('${key}')">X</button>`;
-      }
+    }
 
-      function deleteprefix(key) {
-         // 创建一个FormData对象，用于将表单数据编码为键值对
-         var formData = new FormData();
-         formData.append("delete_key", "True");
+    function deleteprefix(key) {
+        // 创建一个FormData对象，用于将表单数据编码为键值对
+        var formData = new FormData();
+        formData.append("delete_key", "True");
 
-         // 创建一个XMLHttpRequest对象，并发送POST请求
-         var xhr = new XMLHttpRequest();
-         xhr.open("POST", `/prefix/${key}`);
-         xhr.onload = function () {
+        // 创建一个XMLHttpRequest对象，并发送POST请求
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", `/prefix/${key}`);
+        xhr.onload = function () {
             if (xhr.status === 200) {
-               location.reload();
-               console.log('删除成功！');
+                location.reload();
+                console.log('删除成功！');
             } else {
-               alert('删除失败！');
+                alert('删除失败！');
             }
-         };
-         xhr.send(formData);
-      }
+        };
+        xhr.send(formData);
+    }
 
-      function saveprefix(oldKey) {
-         var newKey = document.querySelector(`#edit-${oldKey}`).value;
-         // 创建一个FormData对象，用于将表单数据编码为键值对
-         var formData = new FormData();
-         formData.append("new_key", newKey);
-         formData.append("change_key", "True");
+    function saveprefix(oldKey) {
+        var newKey = document.querySelector(`#edit-${oldKey}`).value;
+        // 创建一个FormData对象，用于将表单数据编码为键值对
+        var formData = new FormData();
+        formData.append("new_key", newKey);
+        formData.append("change_key", "True");
 
-         // 创建一个XMLHttpRequest对象，并发送POST请求
-         var xhr = new XMLHttpRequest();
-         xhr.open("POST", `/prefix/${oldKey}`);
-         xhr.onload = function () {
+        // 创建一个XMLHttpRequest对象，并发送POST请求
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", `/prefix/${oldKey}`);
+        xhr.onload = function () {
             if (xhr.status === 200) {
-               location.reload();
+                location.reload();
             } else {
-               alert('保存失败！');
+                alert('保存失败！');
             }
-         };
-         xhr.send(formData);
-      }
+        };
+        xhr.send(formData);
+    }
 
-      function addNewprefix() {
-         var prefixList = document.querySelector('.list-unstyled');
-         var newprefixItem = document.createElement('li');
-         newprefixItem.innerHTML = `
+    function addNewprefix() {
+        var prefixList = document.querySelector('.list-unstyled');
+        var newprefixItem = document.createElement('li');
+        newprefixItem.innerHTML = `
    <input id="newprefixKey" value="">
    <button class="edit-btn" onclick="saveNewprefix()">Save</button>
    <button class="delete-btn" onclick="deleteprefix()">X</button>      
          `;
-         prefixList.appendChild(newprefixItem);
-         document.getElementById('newprefixKey').focus();
-      }
+        prefixList.appendChild(newprefixItem);
+        document.getElementById('newprefixKey').focus();
+    }
 
-      function saveNewprefix() {
-         var newprefixKey = document.getElementById('newprefixKey').value;
-         if (newprefixKey) {
+    function saveNewprefix() {
+        var newprefixKey = document.getElementById('newprefixKey').value;
+        if (newprefixKey) {
             var formData = new FormData();
             formData.append("add_key", "True");
             formData.append("new_key", newprefixKey);
@@ -269,36 +273,37 @@
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "/prefix");
             xhr.onload = function () {
-               if (xhr.status === 200) {
-                  location.reload();
-               } else {
-                  alert('新建失败！');
-               }
+                if (xhr.status === 200) {
+                    location.reload();
+                } else {
+                    alert('新建失败！');
+                }
             };
             xhr.send(formData);
-         } else {
+        } else {
             alert('prefix Key不能为空！');
-         }
-      }
+        }
+    }
 
-      function deleteNewprefix() {
-         var prefixList = document.querySelector('.list-unstyled');
-         prefixList.removeChild(prefixList.lastElementChild);
-      }
-      // 在页面加载完成后调用setTextareaHeight函数
-      document.addEventListener('DOMContentLoaded', setTextareaHeight);
+    function deleteNewprefix() {
+        var prefixList = document.querySelector('.list-unstyled');
+        prefixList.removeChild(prefixList.lastElementChild);
+    }
 
-      function setTextareaHeight() {
-         var sidebar = document.getElementById('sidebar');
-         var main = document.getElementById('main');
-         var sidebarHeight = sidebar.scrollHeight;
-         var textarea = document.getElementById('prefix_value');
-         var textareaHeight = sidebarHeight * 0.7; // 计算总高度的0.7倍
+    // 在页面加载完成后调用setTextareaHeight函数
+    document.addEventListener('DOMContentLoaded', setTextareaHeight);
 
-         textarea.style.height = textareaHeight + 'px';
-      }
+    function setTextareaHeight() {
+        var sidebar = document.getElementById('sidebar');
+        var main = document.getElementById('main');
+        var sidebarHeight = sidebar.scrollHeight;
+        var textarea = document.getElementById('prefix_value');
+        var textareaHeight = sidebarHeight * 0.7; // 计算总高度的0.7倍
 
-   </script>
+        textarea.style.height = textareaHeight + 'px';
+    }
+
+</script>
 </body>
 
 </html>

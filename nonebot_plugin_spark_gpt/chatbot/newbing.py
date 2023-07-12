@@ -1,12 +1,12 @@
 import asyncio
-from typing import Dict, Literal
-from nonebot.log import logger
-from pydantic import BaseModel
-from ..common.config import config
-from EdgeGPT.EdgeGPT import Chatbot, ConversationStyle
-from ..common.mytypes import CommonUserData, CommonUserInfo, BotData, BotInfo
-from ..common.user_data import common_users
 import json
+
+from EdgeGPT.EdgeGPT import Chatbot, ConversationStyle
+from nonebot.log import logger
+
+from ..common.config import config
+from ..common.mytypes import CommonUserInfo, BotData, BotInfo
+from ..common.user_data import common_users
 
 PROXY = ""
 COOKIES = ""
@@ -40,9 +40,9 @@ def load_config():
 load_config()
 
 
-class Newbing_bot:
+class Newbing_Bot:
     def __init__(
-        self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
+            self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
         self.nickname = bot_info.nickname
         self.common_userinfo = common_userinfo
@@ -103,7 +103,7 @@ class Newbing_bot:
                 self.botdata.last_suggests = suggests
                 if raw_json["sources_text"][:4] != raw_json["text"][:4]:
                     source_text = raw_json["sources_text"] + "\n"
-                suggest_str = "\n".join([f"{i+1}:{s}" for i, s in enumerate(suggests)])
+                suggest_str = "\n".join([f"{i + 1}:{s}" for i, s in enumerate(suggests)])
                 answer = f"{raw_json['text'].replace('[^', '[').replace('^]', ']').replace('**', '')}\n\n{source_text}建议回复:\n{suggest_str}\n\n剩余{left}条连续对话"
                 return answer
             except asyncio.TimeoutError:
@@ -137,7 +137,7 @@ class Newbing_bot:
                             if raw_json["sources_text"][:4] != raw_json["text"][:4]:
                                 source_text = raw_json["sources_text"] + "\n"
                             suggest_str = "\n".join(
-                                [f"{i+1}:{s}" for i, s in enumerate(suggests)]
+                                [f"{i + 1}:{s}" for i, s in enumerate(suggests)]
                             )
                             answer = f"{raw_json['text'].replace('[^', '[').replace('^]', ']').replace('**', '')}\n{source_text}建议回复:\n{suggest_str}\n剩余{left}条连续对话"
                             return answer

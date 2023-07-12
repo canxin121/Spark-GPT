@@ -1,16 +1,16 @@
 import asyncio
-import os
-from pathlib import Path
 import threading
+from pathlib import Path
+
 import nonebot
-from nonebot.utils import run_sync
+import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
+
 from ..config import config
+from ..prefix_data import prefixes
 from ..prompt_data import prompts
-from ..prefix_data import prefixs
 from ...chatbot.load_config import load_config
-import uvicorn
 
 get_config = nonebot.get_driver().config
 
@@ -165,14 +165,14 @@ class Fastapp:
         if "change_key" in form.keys() and form["change_key"] == "True":
             new_name = form["new_key"]
             try:
-                prefixs.rename(old_name=prefix_name, new_name=new_name)
+                prefixes.rename(old_name=prefix_name, new_name=new_name)
             except:
                 pass
             return TEMPLATES.TemplateResponse(
                 "prefix.html",
                 {
                     "request": request,
-                    "prefixs": prefixs.prefixs,
+                    "prefixes": prefixes.prefixes,
                     "prefix_name": prefix_name,
                     "saved": True,
                 },
@@ -180,27 +180,27 @@ class Fastapp:
         elif "save" in form.keys() and form["save"] == "True":
             new_prefix = form["prefix_value"]
             try:
-                prefixs.change(prefix_name=prefix_name, prefix=new_prefix)
-            except:
+                prefixes.change(prefix_name=prefix_name, prefix=new_prefix)
+            except :
                 pass
             return TEMPLATES.TemplateResponse(
                 "prefix.html",
                 {
                     "request": request,
-                    "prefixs": prefixs.prefixs,
+                    "prefixes": prefixes.prefixes,
                     "prefix_name": prefix_name,
                 },
             )
         elif "delete_key" in form.keys() and form["delete_key"] == "True":
             try:
-                prefixs.delete(prefix_name=prefix_name)
+                prefixes.delete(prefix_name=prefix_name)
             except:
                 pass
             return TEMPLATES.TemplateResponse(
                 "prefix.html",
                 {
                     "request": request,
-                    "prefixs": prefixs.prefixs,
+                    "prefixes": prefixes.prefixes,
                     "prefix_name": prefix_name,
                 },
             )
@@ -208,14 +208,14 @@ class Fastapp:
         elif "add_key" in form.keys() and form["add_key"] == "True":
             new_key = form["new_key"]
             try:
-                prefixs.add(prefix_name=new_key, prefix="请在这里输入要设置的预设内容")
+                prefixes.add(prefix_name=new_key, prefix="请在这里输入要设置的预设内容")
             except:
                 pass
             return TEMPLATES.TemplateResponse(
                 "prefix.html",
                 {
                     "request": request,
-                    "prefixs": prefixs.prefixs,
+                    "prefixes": prefixes.prefixes,
                     "prefix_name": prefix_name,
                 },
             )
@@ -224,7 +224,7 @@ class Fastapp:
                 "prefix.html",
                 {
                     "request": request,
-                    "prefixs": prefixs.prefixs,
+                    "prefixes": prefixes.prefixes,
                     "prefix_name": prefix_name,
                 },
             )

@@ -1,9 +1,6 @@
 import json
-from typing import Literal
-from nonebot import logger
 from pathlib import Path
-from pydantic import BaseModel
-import json
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -93,7 +90,6 @@ class Config(BaseModel):
                 "proxy": "",
                 "model": "text-davinci-002-render-sha",
                 "api_url": "https://chat.loli.vet/",
-                "model": "text-davinci-002-render-sha",
                 "pic_able": "",
                 "url_able": "",
                 "num_limit": "",
@@ -132,7 +128,7 @@ class Config(BaseModel):
         self.save()
 
     def change_config(
-        self, source: CONFIG_SOURCE, config_name: CONFIG_NAMES, config: str
+            self, source: CONFIG_SOURCE, config_name: CONFIG_NAMES, config: str
     ):
         """修改配置项"""
         if source in self.config.keys():
@@ -153,8 +149,8 @@ class Config(BaseModel):
         if source in self.config.keys():
             if config_name in self.config[source].keys():
                 if (
-                    config_name in self.config[source]
-                    and self.config[source][config_name]
+                        config_name in self.config[source]
+                        and self.config[source][config_name]
                 ):
                     return self.config[source][config_name]
                 elif config_name in self.config["总控配置"]:
@@ -187,7 +183,7 @@ class Config(BaseModel):
         try:
             with open(self.path / "config.json", "w", encoding="utf-8") as f:
                 json.dump(self.config, f, ensure_ascii=False)
-        except Exception as e:
+        except Exception:
             # logger.error(str(e))
             pass
 

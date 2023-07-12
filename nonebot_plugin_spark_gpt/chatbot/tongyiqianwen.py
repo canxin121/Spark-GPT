@@ -1,12 +1,13 @@
 import asyncio
+import json
+import random
 import uuid
+
 import aiohttp
 from nonebot import logger
-import random
-import aiohttp
-import json
-from ..common.mytypes import CommonUserInfo, BotInfo, BotData
+
 from ..common.config import config
+from ..common.mytypes import CommonUserInfo, BotInfo, BotData
 from ..common.user_data import common_users
 
 XSRF_TOKEN = ""
@@ -51,7 +52,7 @@ def load_config():
 async def heartbeat():
     async with aiohttp.ClientSession() as session:
         async with session.get(
-            "https://qianwen.aliyun.com/heartbeat?type=1&", headers=HEADER
+                "https://qianwen.aliyun.com/heartbeat?type=1&", headers=HEADER
         ) as response:
             await asyncio.sleep(5)
             # logger.info("通义千问心跳:" + str(response.status))
@@ -60,11 +61,9 @@ async def heartbeat():
 load_config()
 
 
-
-
-class TongYiQianWen:
+class TongYiQianWen_Bot:
     def __init__(
-        self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
+            self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
         self.common_userinfo = common_userinfo
         self.lock = asyncio.Lock()
@@ -121,9 +120,9 @@ class TongYiQianWen:
             try:
                 async with aiohttp.ClientSession() as session:
                     async with session.post(
-                        "https://qianwen.aliyun.com/conversation",
-                        headers=headers,
-                        data=payload,
+                            "https://qianwen.aliyun.com/conversation",
+                            headers=headers,
+                            data=payload,
                     ) as response:
                         async for line in response.content:
                             if line:
@@ -158,10 +157,10 @@ class TongYiQianWen:
             try:
                 async with aiohttp.ClientSession() as session:
                     async with session.post(
-                        "https://qianwen.aliyun.com/addSession",
-                        headers=HEADER,
-                        json=payload,
-                        raise_for_status=True,
+                            "https://qianwen.aliyun.com/addSession",
+                            headers=HEADER,
+                            json=payload,
+                            raise_for_status=True,
                     ) as response:
                         data = await response.json()
                         if data.get("success"):

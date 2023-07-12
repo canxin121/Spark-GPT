@@ -1,12 +1,12 @@
 import asyncio
-from nonebot.log import logger
-import aiohttp
 import base64
-import copy
-import json
+
+import aiohttp
+from nonebot.log import logger
+
 from ..common.config import config
-from ..common.user_data import common_users
 from ..common.mytypes import BotData, BotInfo, CommonUserInfo
+from ..common.user_data import common_users
 
 COOKIE = ""
 FD = ""
@@ -69,7 +69,7 @@ load_config()
 
 class SparkBot:
     def __init__(
-        self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
+            self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
         self.nickname = bot_info.nickname
         self.lock = asyncio.Lock()
@@ -185,15 +185,15 @@ class SparkBot:
             while retry_count > 0:
                 try:
                     async with session.post(
-                        url, data=payload, timeout=None
+                            url, data=payload, timeout=None
                     ) as response:
                         response_text = await response.text()
                         response_text = "".join(
-                            self.decode(line[len("data:") :].rstrip().lstrip().encode())
+                            self.decode(line[len("data:"):].rstrip().lstrip().encode())
                             for line in response_text.splitlines()
                             if line
                             and self.decode(
-                                line[len("data:") :].rstrip().lstrip().encode()
+                                line[len("data:"):].rstrip().lstrip().encode()
                             )
                             != "zw"
                         ).replace("\n\n", "\n")

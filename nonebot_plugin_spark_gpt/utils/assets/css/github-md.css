@@ -8,32 +8,32 @@
   Touched: 2021
 */
 pre code.hljs {
-  display: block;
-  overflow-x: auto;
-  padding: 1em
+    display: block;
+    overflow-x: auto;
+    padding: 1em
 }
 
 code.hljs {
-  padding: 3px 5px
+    padding: 3px 5px
 }
 
 .hljs {
-  background: #f3f3f3;
-  color: #444
+    background: #f3f3f3;
+    color: #444
 }
 
 .hljs-comment {
-  color: #697070
+    color: #697070
 }
 
 .hljs-punctuation,
 .hljs-tag {
-  color: #444a
+    color: #444a
 }
 
 .hljs-tag .hljs-attr,
 .hljs-tag .hljs-name {
-  color: #444
+    color: #444
 }
 
 .hljs-attribute,
@@ -42,7 +42,7 @@ code.hljs {
 .hljs-meta .hljs-keyword,
 .hljs-name,
 .hljs-selector-tag {
-  font-weight: 700
+    font-weight: 700
 }
 
 .hljs-deletion,
@@ -53,13 +53,13 @@ code.hljs {
 .hljs-string,
 .hljs-template-tag,
 .hljs-type {
-  color: #800
+    color: #800
 }
 
 .hljs-section,
 .hljs-title {
-  color: #800;
-  font-weight: 700
+    color: #800;
+    font-weight: 700
 }
 
 .hljs-link,
@@ -70,43 +70,43 @@ code.hljs {
 .hljs-symbol,
 .hljs-template-variable,
 .hljs-variable {
-  color: #ab5656
+    color: #ab5656
 }
 
 .hljs-literal {
-  color: #695
+    color: #695
 }
 
 .hljs-addition,
 .hljs-built_in,
 .hljs-bullet,
 .hljs-code {
-  color: #397300
+    color: #397300
 }
 
 .hljs-meta {
-  color: #1f7199
+    color: #1f7199
 }
 
 .hljs-meta .hljs-string {
-  color: #38a
+    color: #38a
 }
 
 .hljs-emphasis {
-  font-style: italic
+    font-style: italic
 }
 
 .hljs-strong {
-  font-weight: 700
+    font-weight: 700
 }
 
 
 code::before {
-  color: #0000ff;
-  content: attr(title);
-  display: contents;
+    color: #0000ff;
+    content: attr(title);
+    display: contents;
 }
 
 mjx-container[jax="CHTML"][display="true"] {
-  display: inline-block !important;
+    display: inline-block !important;
 }

@@ -1,4 +1,5 @@
 # [<img src="https://katex.org/img/katex-logo-black.svg" width="130" alt="KaTeX">](https://katex.org/)
+
 [![npm](https://img.shields.io/npm/v/katex.svg)](https://www.npmjs.com/package/katex)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 [![CI](https://github.com/KaTeX/KaTeX/workflows/CI/badge.svg?branch=main&event=push)](https://github.com/KaTeX/KaTeX/actions?query=workflow%3ACI)
@@ -11,14 +12,17 @@
 
 KaTeX is a fast, easy-to-use JavaScript library for TeX math rendering on the web.
 
- * **Fast:** KaTeX renders its math synchronously and doesn't need to reflow the page. See how it compares to a competitor in [this speed test](https://www.intmath.com/cg5/katex-mathjax-comparison.php).
- * **Print quality:** KaTeX's layout is based on Donald Knuth's TeX, the gold standard for math typesetting.
- * **Self contained:** KaTeX has no dependencies and can easily be bundled with your website resources.
- * **Server side rendering:** KaTeX produces the same output regardless of browser or environment, so you can pre-render expressions using Node.js and send them as plain HTML.
+* **Fast:** KaTeX renders its math synchronously and doesn't need to reflow the page. See how it compares to a
+  competitor in [this speed test](https://www.intmath.com/cg5/katex-mathjax-comparison.php).
+* **Print quality:** KaTeX's layout is based on Donald Knuth's TeX, the gold standard for math typesetting.
+* **Self contained:** KaTeX has no dependencies and can easily be bundled with your website resources.
+* **Server side rendering:** KaTeX produces the same output regardless of browser or environment, so you can pre-render
+  expressions using Node.js and send them as plain HTML.
 
 KaTeX is compatible with all major browsers, including Chrome, Safari, Firefox, Opera, Edge, and IE 11.
 
-KaTeX supports much (but not all) of LaTeX and many LaTeX packages. See the [list of supported functions](https://katex.org/docs/supported.html).
+KaTeX supports much (but not all) of LaTeX and many LaTeX packages. See
+the [list of supported functions](https://katex.org/docs/supported.html).
 
 Try out KaTeX [on the demo page](https://katex.org/#demo)!
 
@@ -46,7 +50,8 @@ Try out KaTeX [on the demo page](https://katex.org/#demo)!
 
 You can also [download KaTeX](https://github.com/KaTeX/KaTeX/releases) and host it yourself.
 
-For details on how to configure auto-render extension, refer to [the documentation](https://katex.org/docs/autorender.html).
+For details on how to configure auto-render extension, refer
+to [the documentation](https://katex.org/docs/autorender.html).
 
 ### API
 
@@ -60,7 +65,7 @@ katex.render("c = \\pm\\sqrt{a^2 + b^2}", element, {
 ```
 
 Call `katex.renderToString` to generate an HTML string of the rendered math,
-e.g., for server-side rendering.  For example:
+e.g., for server-side rendering. For example:
 
 ```js
 var html = katex.renderToString("c = \\pm\\sqrt{a^2 + b^2}", {
@@ -75,7 +80,7 @@ JavaScript on the client.
 
 The examples above use the `throwOnError: false` option, which renders invalid
 inputs as the TeX source code in red (by default), with the error message as
-hover text.  For other available options, see the
+hover text. For other available options, see the
 [API documentation](https://katex.org/docs/api.html),
 [options documentation](https://katex.org/docs/options.html), and
 [handling errors documentation](https://katex.org/docs/error.html).
@@ -88,7 +93,8 @@ Learn more about using KaTeX [on the website](https://katex.org)!
 
 ### Code Contributors
 
-This project exists thanks to all the people who contribute code. If you'd like to help, see [our guide to contributing code](CONTRIBUTING.md).
+This project exists thanks to all the people who contribute code. If you'd like to help,
+see [our guide to contributing code](CONTRIBUTING.md).
 <a href="https://github.com/KaTeX/KaTeX/graphs/contributors"><img src="https://contributors-svg.opencollective.com/katex/contributors.svg?width=890&button=false" alt="Code contributors" /></a>
 
 ### Financial Contributors
