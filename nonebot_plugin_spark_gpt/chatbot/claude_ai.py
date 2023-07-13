@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 import httpx
 import json
@@ -37,18 +38,23 @@ class Claude_Bot:
     def __init__(
         self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
+        self.lock = asyncio.Lock()
         self.botdata = bot_data
         self.common_userinfo = common_userinfo
 
     async def ask(self, question: str):
         if not ORGANIZATION_UUID:
             await self.get_organization_uuid()
+        if not self.botdata.conversation_uuid:
+            await self.refresh()
+        if self.botdata.prefix:
+            question = self.botdata.prefix + "\n" + question
         retry = 3
         detail_error = "未知错误"
         while retry > 0:
             try:
                 result = ""
-                for msg in self.stream_msg(question):
+                async for msg in self.stream_msg(question):
                     result += msg
                 return result
             except Exception as e:
@@ -60,13 +66,26 @@ class Claude_Bot:
     async def refresh(self):
         if not ORGANIZATION_UUID:
             await self.get_organization_uuid()
-
         retry = 3
         detail_error = "未知错误"
         while retry > 0:
             try:
                 await self.new_conversation_uuid()
                 common_users.save_userdata(self.common_userinfo)
+                if self.botdata.prompt:
+                    retry = 3
+                    detail_error = "未知错误"
+                    while retry > 0:
+                        try:
+                            result = ""
+                            async for msg in self.stream_msg(self.botdata.prompt):
+                                result += msg
+                            return result
+                        except Exception as e:
+                            detail_error = str(e)
+                            logger.error(f"Claude ai在初始化预设时报错:{detail_error}")
+                            retry -= 1
+                    raise Exception(f"Claude ai在初始化预设时报错次数超过上限:{detail_error}")
                 return
             except Exception as e:
                 detail_error = str(e)

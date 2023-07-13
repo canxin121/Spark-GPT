@@ -10,6 +10,7 @@ SOURCE = Literal[
     "poe claude",
     "chatgpt web",
     "slack claude",
+    "claude ai",
     "spark desk",
     "bing",
     "sydneybing",
@@ -35,7 +36,6 @@ class BotData(BaseModel):
     thread_ts: Optional[str]
     """Claude Ai"""
     conversation_uuid: Optional[str]
-    organization_uuid: Optional[str]
     """spark desk"""
     chatid: Optional[str]
     """通用"""
