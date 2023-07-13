@@ -5,6 +5,7 @@ from .poe import load_config as load_poe_config
 from .slack_claude import load_config as load_slack_claude_config
 from .spark_desk import load_config as load_spark_desk_config
 from .tongyiqianwen import load_config as load_tongyiqianwen_config
+from .claude_ai import load_config as load_claude_ai_config
 from ..common.config import CONFIG_SOURCE
 from ..common.load_config import load_command_config
 
@@ -14,40 +15,65 @@ def get_able_source():
     from .newbing import ABLE as NEWBING_ABLE
     from .poe import ABLE as POE_ABLE
     from .slack_claude import ABLE as SLACKCLAUDE_ABLE
+    from .claude_ai import ABLE as CLAUDE_AI_ABLE
     from .bard import ABLE as BARD_ABLE
     from .spark_desk import ABLE as SPARKDESK_ABLE
     from .tongyiqianwen import ABLE as TongYiQianWen_ABLE
 
-    # 用一个列表来存储所有的来源和介绍
-    sources = [
-        ("poe chatgpt", POE_ABLE, "poe网站的chatgpt,支持预设最长约2000字,支持前缀但字数不宜过多"),
-        ("poe claude", POE_ABLE, "poe网站的claude,支持预设最长约2000字,支持前缀但字数不宜过多"),
-        (
-            "chatgpt web",
-            CHATGPTWEB_ABLE,
-            "openai官网的chatgpt网页版,支持预设最长约5400字,支持前缀但字数不宜过多",
-        ),
-        ("slack claude", SLACKCLAUDE_ABLE, "slack网站的claude,支持非常长的预设,支持前缀但字数不宜过多"),
-        ("sydneybing", NEWBING_ABLE, "微软的Newbing越狱版,支持长度约4000的预设,支持前缀但字数不宜过多"),
-        ("spark desk", SPARKDESK_ABLE, "讯飞的讯飞星火语言模型,支持少数短预设和前缀"),
-        ("通义千问", TongYiQianWen_ABLE, "阿里的通义千问,不支持预设"),
-        ("bing", NEWBING_ABLE, "微软的Newbing,不支持预设"),
-        ("bard", BARD_ABLE, "谷歌的Bard,不支持预设"),
-    ]
-
-    # 用一个推导式来生成字典和表格
-    source_dict = {
-        str(i + 1): source for i, (source, able, des) in enumerate(sources) if able
+    able_dict = {
+        "poe chatgpt": {
+            "able": POE_ABLE,
+            "des": "poe网站的chatgpt,支持预设最长约2000字,支持前缀但字数不宜过多",
+        },
+        "poe claude": {
+            "able": POE_ABLE,
+            "des": "poe网站的claude,支持预设最长约2000字,支持前缀但字数不宜过多",
+        },
+        "chatgpt web": {
+            "able": CHATGPTWEB_ABLE,
+            "des": "openai官网的chatgpt网页版,支持预设最长约5400字,支持前缀但字数不宜过多",
+        },
+        "claude ai": {
+            "able": CLAUDE_AI_ABLE,
+            "des": "claude官网的claude网页版,支持超极长的预设,有内容安全审查,支持前缀字数也很长",
+        },
+        "slack claude": {
+            "able": SLACKCLAUDE_ABLE,
+            "des": "slack网站的claude,支持非常长的预设,支持前缀但字数不宜过多",
+        },
+        "sydneybing": {
+            "able": NEWBING_ABLE,
+            "des": "微软的Newbing越狱版,支持长度约4000的预设,支持前缀但字数不宜过多",
+        },
+        "spark desk": {
+            "able": SPARKDESK_ABLE,
+            "des": "讯飞的讯飞星火语言模型,支持少数短预设和前缀",
+        },
+        "通义千问": {
+            "able": TongYiQianWen_ABLE,
+            "des": "阿里的通义千问,不支持预设",
+        },
+        "bing": {
+            "able": NEWBING_ABLE,
+            "des": "微软的Newbing,不支持预设",
+        },
+        "bard": {
+            "able": BARD_ABLE,
+            "des": "谷歌的Bard,不支持预设",
+        },
     }
-    source_dict_str = (
-            "\n\n| 序号 | 来源名称 | 来源介绍 |\n| --- | --- | --- |\n"
-            + "\n".join(
-        f"| {i + 1} | {source} | {des} |"
-        for i, (source, able, des) in enumerate(sources)
-        if able
-    )
-            + "\n"
-    )
+
+    source_dict = {}
+    source_dict_str = "\n\n| 序号 | 来源名称 | 来源介绍 |\n| --- | --- | --- |\n"
+    i = 0
+    for source, dict in able_dict.items():
+        if dict["able"]:
+            i += 1
+            order = str(i)
+            des = dict["des"]
+            source_dict[order] = source
+            source_dict_str += f"| {order} | {source} | {des} |\n"
+    source_dict_str += "\n"
 
     return source_dict, source_dict_str
 
@@ -58,6 +84,7 @@ def load_all_config():
     load_newbing_config()
     load_poe_config()
     load_slack_claude_config()
+    load_claude_ai_config()
     load_chat_gpt_web_config()
     load_spark_desk_config()
     load_tongyiqianwen_config()
@@ -70,9 +97,10 @@ CONFIG_DICT = {
     "Spark Desk配置": load_spark_desk_config,
     "Chat GPT web配置": load_chat_gpt_web_config,
     "Claude Slack配置": load_slack_claude_config,
+    "Claude Ai配置": load_claude_ai_config,
     "Poe配置": load_poe_config,
     "Bard配置": load_bard_config,
-    "通义千问配置": load_tongyiqianwen_config
+    "通义千问配置": load_tongyiqianwen_config,
 }
 
 

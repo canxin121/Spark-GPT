@@ -85,15 +85,14 @@ class Newbing_Bot:
         detail_error = "未知错误"
         while retry >= 0:
             try:
-                raw_json = await asyncio.wait_for(
-                    self.chatbot.ask(
+                raw_json = (
+                    await self.chatbot.ask(
                         prompt=question,
                         conversation_style=ConversationStyle.creative,
                         simplify_response=True,
                         wss_link=WSS_LINK,
                         locale="en-us",
                     ),
-                    timeout=360,
                 )
                 left, source_text, suggests = (
                     str(raw_json["messages_left"]),
@@ -103,30 +102,26 @@ class Newbing_Bot:
                 self.botdata.last_suggests = suggests
                 if raw_json["sources_text"][:4] != raw_json["text"][:4]:
                     source_text = raw_json["sources_text"] + "\n"
-                suggest_str = "\n".join([f"{i + 1}:{s}" for i, s in enumerate(suggests)])
+                suggest_str = "\n".join(
+                    [f"{i + 1}:{s}" for i, s in enumerate(suggests)]
+                )
                 answer = f"{raw_json['text'].replace('[^', '[').replace('^]', ']').replace('**', '')}\n\n{source_text}建议回复:\n{suggest_str}\n\n剩余{left}条连续对话"
                 return answer
-            except asyncio.TimeoutError:
-                error = "Newbing在询问时超时无响应"
-                logger.error(error)
-                raise Exception(error)
             except Exception as e:
-                detail_error = str(e)
+                detail_error = str(e) if str(e) else str(e.__class__)
                 logger.warning(f"Newbing在询问时出错{detail_error}")
                 if str(e) == "Max messages reached" or str(e) == "No message found":
                     await self.refresh()
                     while retry > 0:
                         try:
-                            raw_json = await asyncio.wait_for(
-                                self.chatbot.ask(
-                                    prompt=question,
-                                    conversation_style=ConversationStyle.creative,
-                                    simplify_response=True,
-                                    wss_link=WSS_LINK,
-                                    locale="en-us",
-                                ),
-                                timeout=360,
+                            raw_json = await self.chatbot.ask(
+                                prompt=question,
+                                conversation_style=ConversationStyle.creative,
+                                simplify_response=True,
+                                wss_link=WSS_LINK,
+                                locale="en-us",
                             )
+
                             left, source_text, suggests = (
                                 str(raw_json["messages_left"]),
                                 "",
@@ -141,12 +136,8 @@ class Newbing_Bot:
                             )
                             answer = f"{raw_json['text'].replace('[^', '[').replace('^]', ']').replace('**', '')}\n{source_text}建议回复:\n{suggest_str}\n剩余{left}条连续对话"
                             return answer
-                        except asyncio.TimeoutError:
-                            error = "Newbing在询问时超时无响应"
-                            logger.error(error)
-                            raise Exception(error)
                         except Exception as e:
-                            detail_error = str(e)
+                            detail_error = str(e) if str(e) else str(e.__class__)
                             logger.error(f"newbing在询问时出错{detail_error}")
                             retry -= 1
                 else:

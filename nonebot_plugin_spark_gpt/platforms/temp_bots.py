@@ -12,6 +12,7 @@ from ..chatbot.slack_claude import Slack_Claude_Bot
 from ..chatbot.spark_desk import SparkBot
 from ..chatbot.sydneybing import SydneyBing_Bot
 from ..chatbot.tongyiqianwen import TongYiQianWen_Bot
+from ..chatbot.claude_ai import Claude_Bot
 from ..common.mytypes import CommonUserInfo, BotInfo, BotData
 from ..common.user_data import common_users
 
@@ -31,6 +32,7 @@ BOT_DICT = {
     "sydneybing": SydneyBing_Bot,
     "chatgpt web": ChatGPT_web_Bot,
     "slack claude": Slack_Claude_Bot,
+    "claude ai": Claude_Bot,
     "poe chatgpt": Poe_Bot,
     "poe claude": Poe_Bot,
     "bard": Bard_Bot,
@@ -69,9 +71,9 @@ def get_message_id_by_get(bot: Bot, event: MessageEvent) -> str:
 
 
 def get_message_id_by_send(
-        event: MessageEvent,
-        reply: any,
-        bot: Bot,
+    event: MessageEvent,
+    reply: any,
+    bot: Bot,
 ) -> str:
     handler = SEND_HANDLERS.get(type(bot))
     if handler is not None:
@@ -89,12 +91,12 @@ class Temp_Bots(BaseModel):
         self.users: Dict[CommonUserInfo, Bot_Links] = data.get("users") or {}
 
     def set_bot_msgid(
-            self,
-            common_userinfo: CommonUserInfo,
-            chatbot: CHATBOT,
-            bot: Bot,
-            event: MessageEvent,
-            reply: any,
+        self,
+        common_userinfo: CommonUserInfo,
+        chatbot: CHATBOT,
+        bot: Bot,
+        event: MessageEvent,
+        reply: any,
     ):
         botlinks: Bot_Links = self.get_bot_links(common_userinfo)
         if chatbot:
@@ -105,11 +107,11 @@ class Temp_Bots(BaseModel):
             raise Exception("没有这个bot")
 
     def get_bot_by_msgid(
-            self,
-            common_userinfo: CommonUserInfo,
-            bot: Bot,
-            event: MessageEvent,
-            kook_msgid: str = "",
+        self,
+        common_userinfo: CommonUserInfo,
+        bot: Bot,
+        event: MessageEvent,
+        kook_msgid: str = "",
     ):
         botlinks: Bot_Links = self.get_bot_links(common_userinfo)
         if kook_msgid:
@@ -122,7 +124,7 @@ class Temp_Bots(BaseModel):
             raise Exception("没有这个messageid对应的bot")
 
     def get_bot_by_text(
-            self, common_userinfo: CommonUserInfo, text: str
+        self, common_userinfo: CommonUserInfo, text: str
     ) -> tuple[str, CHATBOT]:
         """由原始的命令加bot名加问题得到问题和可调用的chatbot"""
         try:
@@ -148,7 +150,7 @@ class Temp_Bots(BaseModel):
         return question, bot
 
     def load_user_bot(
-            self, common_userinfo: CommonUserInfo, botinfo: BotInfo, botdata: BotData
+        self, common_userinfo: CommonUserInfo, botinfo: BotInfo, botdata: BotData
     ):
         """由本地bot数据load到tempbots中的可调用实例"""
         bot_links: Bot_Links = self.get_bot_links(common_userinfo=common_userinfo)
@@ -158,10 +160,10 @@ class Temp_Bots(BaseModel):
         )
 
     def add_new_bot(
-            self,
-            common_userinfo: CommonUserInfo,
-            botinfo: BotInfo,
-            botdata: BotData,
+        self,
+        common_userinfo: CommonUserInfo,
+        botinfo: BotInfo,
+        botdata: BotData,
     ):
         common_users.add_new_bot(
             common_userinfo=common_userinfo,

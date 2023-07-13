@@ -10,7 +10,7 @@ from ..common.user_data import common_users
 
 class SydneyBing_Bot:
     def __init__(
-            self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
+        self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
         self.nickname = bot_info.nickname
         self.common_userinfo = common_userinfo
@@ -35,7 +35,7 @@ class SydneyBing_Bot:
                     self.chatbot = await Chatbot.create(cookies=COOKIES)
                 break
             except Exception as e:
-                detail_error = str(e)
+                detail_error = str(e) if str(e) else str(e.__class__)
                 logger.error(f"Sydneybing刷新时error:{detail_error}")
                 retry -= 1
         if retry <= 0:
@@ -54,23 +54,16 @@ class SydneyBing_Bot:
                 detail_error = "未知错误"
                 while retry > 0:
                     try:
-                        _ = await asyncio.wait_for(
-                            self.chatbot.ask(
-                                prompt=self.botdata.prompt,
-                                conversation_style=ConversationStyle.creative,
-                                simplify_response=True,
-                                wss_link=WSS_LINK,
-                                locale="en-us",
-                            ),
-                            timeout=360,
+                        await self.chatbot.ask(
+                            prompt=self.botdata.prompt,
+                            conversation_style=ConversationStyle.creative,
+                            simplify_response=True,
+                            wss_link=WSS_LINK,
+                            locale="en-us",
                         )
                         return
-                    except asyncio.TimeoutError:
-                        error = "Sydneybing在初始化预设时超时无响应"
-                        logger.error(error)
-                        raise Exception(error)
                     except Exception as e:
-                        detail_error = str(e)
+                        detail_error = str(e) if str(e) else str(e.__class__)
                         logger.error(f"Sydneybing在初始化预设时error:{detail_error}")
                         retry -= 1
             error = f"Sydneybing在初始化预设时出错次数超过上限{detail_error}"
@@ -96,16 +89,16 @@ class SydneyBing_Bot:
         detail_error = "未知错误"
         while retry >= 0:
             try:
-                raw_json = await asyncio.wait_for(
-                    self.chatbot.ask(
+                raw_json = (
+                    await self.chatbot.ask(
                         prompt=question,
                         conversation_style=ConversationStyle.creative,
                         simplify_response=True,
                         wss_link=WSS_LINK,
                         locale="en-us",
                     ),
-                    timeout=360,
                 )
+
                 left, source_text, suggests = (
                     str(raw_json["messages_left"]),
                     "",
@@ -115,7 +108,9 @@ class SydneyBing_Bot:
 
                 if raw_json["sources_text"][:4] != raw_json["text"][:4]:
                     source_text = raw_json["sources_text"] + "\n"
-                suggest_str = "\n".join([f"{i + 1}:{s}" for i, s in enumerate(suggests)])
+                suggest_str = "\n".join(
+                    [f"{i + 1}:{s}" for i, s in enumerate(suggests)]
+                )
                 answer = f"{raw_json['text'].replace('[^', '[').replace('^]', ']').replace('**', '')}\n\n{source_text}建议回复:\n{suggest_str}\n\n剩余{left}条连续对话"
                 return answer
             except asyncio.TimeoutError:
@@ -129,15 +124,12 @@ class SydneyBing_Bot:
                     await self.refresh()
                     while retry > 0:
                         try:
-                            raw_json = await asyncio.wait_for(
-                                self.chatbot.ask(
-                                    prompt=question,
-                                    conversation_style=ConversationStyle.creative,
-                                    simplify_response=True,
-                                    wss_link=WSS_LINK,
-                                    locale="en-us",
-                                ),
-                                timeout=360,
+                            raw_json = await self.chatbot.ask(
+                                prompt=question,
+                                conversation_style=ConversationStyle.creative,
+                                simplify_response=True,
+                                wss_link=WSS_LINK,
+                                locale="en-us",
                             )
 
                             left, source_text, suggests = (
@@ -153,10 +145,6 @@ class SydneyBing_Bot:
                             )
                             answer = f"{raw_json['text'].replace('[^', '[').replace('^]', ']').replace('**', '')}\n{source_text}建议回复:\n{suggest_str}\n剩余{left}条连续对话"
                             return answer
-                        except asyncio.TimeoutError:
-                            error = "Sydneybing在询问时超时无响应"
-                            logger.error(error)
-                            raise Exception(error)
                         except Exception as e:
                             detail_error = str(e)
                             logger.error(f"SydenyBing在询问时出错:{detail_error}")

@@ -42,56 +42,39 @@ COMMENTS = (
             "cookie": "Newbing的cookie json,获取方法为登录微软账号并打开到bing聊天界面,使用浏览器扩展 cookie editor将cookie导出为json格式并粘贴到此处",
             "proxy": "EdgeGPT的代理地址,请按照协议://地址:端口的格式填写",
             "wss_link": "EdgeGPT的wss_link地址,如果你不知道这是什么,请不要修改",
-            "pic_able": PICABLE,
-            "url_able": URLABLE,
-            "num_limit": NUM_LIMIT,
         },
         "Spark Desk配置": {
             "cookie": "讯飞星火语言模型的cookie,获取方法为使用抓包工具如fiddler在与星火模型聊天时抓包,在包含chat关键字的连接的 请求头 中提取cookie",
             "fd": "讯飞星火语言模型的fd,获取方法为使用抓包工具如fiddler在与星火模型聊天时抓包,在包含chat关键字的连接的 请求体 中提取fd",
             "GtToken": "讯飞星火语言模型的GtToken,获取方法为使用抓包工具如fiddler在与星火模型聊天时抓包,在包含chat关键字的连接的 请求体 中提取Gttoken",
             "sid": "讯飞星火语言模型的sid,获取方法为使用抓包工具如fiddler在与星火模型聊天时抓包,在包含chat关键字的连接的 响应体末尾 中提取sid(格式示例是cht000d1737@dx1886666eb4ab894540)",
-            "pic_able": PICABLE,
-            "url_able": URLABLE,
-            "num_limit": NUM_LIMIT,
         },
         "Chat GPT web配置": {
             "session token": "ChatGPT网页版的session token,获取方法为在chatgpt网页版按F12调出开发者工具,在应用程序->cookie中的复制__Secure-next-auth.session-token项对应的值填写到此处",
             "model": "ChatGPT网页版的模型,默认text-davinci-002-render-sha为gpt3.5",
             "proxy": "访问ChatGPT网页版代理地址使用的代理",
             "api_url": "ChatGPT网页版使用的代理网址,如果默认网址失效可以更改为可用的代理网址",
-            "pic_able": PICABLE,
-            "url_able": URLABLE,
-            "num_limit": NUM_LIMIT,
         },
         "Claude Slack配置": {
             "slack_user_token": '首先参照 "https://ikechan8370.com/archives/chatgpt-plugin-for-yunzaipei-zhi-slack-claude"进行配置,获取到其中的(OAuth & Permissions中)User OAuth Token(xoxp-5258801~~,注意是xoxp不是xoxb)作为slack_user_token(必填)',
             "claude_id": 'claude_id获取:首先将claude加入到你的slack中来,参考"https://blog.csdn.net/Ping_lz/article/details/130329751",并点击应用中的claude,点击聊天界面上方的claude的头像,复制其中的成员id作为claude_id(必填),比如U057LPZPPSL。',
             "channel_id": "进入slack聊天界面,选择(创建)一个专用的频道,将claude拉进这个频道。此时记下这个频道的网址中的channel_id(必填)(比如在这个链接中 https://app.slack.com/client/T057LPK0SP2/C0579MZR3LH/thread/C0579MZR3LH-1683734208.221819 ,channel_id是C0579MZR3LH,及thread前面的两个/中的内容)",
-            "pic_able": PICABLE,
-            "url_able": URLABLE,
-            "num_limit": NUM_LIMIT,
+        },
+        "Claude Ai配置": {
+            "cookie": "获取方式为打开https://poe.com/,登录后F12打开开发者工具,在应用程序->cookie中复制p-b项的值,如l_recO0QgugqEyfgMbBc-g%3D%3D",
+            "proxy": "访问POE官网时使用的代理链接,请按照协议://地址:端口的格式填写",
         },
         "Poe配置": {
             "cookie": "获取方式为打开https://poe.com/,登录后F12打开开发者工具,在应用程序->cookie中复制p-b项的值,如l_recO0QgugqEyfgMbBc-g%3D%3D",
             "proxy": "访问POE官网时使用的代理链接,请按照协议://地址:端口的格式填写",
-            "pic_able": PICABLE,
-            "url_able": URLABLE,
-            "num_limit": NUM_LIMIT,
         },
         "Bard配置": {
             "__Secure-1PSID": "获取方式:打开Bard网页,打开开发者工具中的应用程序,选择其中的cookie,并且复制其中的__Secure-1PSID一项的值复制到这里",
             "proxy": "访问Bard官网时使用的代理链接,请按照协议://地址:端口的格式填写",
-            "pic_able": PICABLE,
-            "url_able": URLABLE,
-            "num_limit": NUM_LIMIT,
         },
         "通义千问配置": {
             "cookie": "获取方法为打开通义千问聊天界面,F12打开开发者工具的网络界面,提取其中的heartbeat请求的cookie的值",
             "XSRF_TOKEN": "获取方法为获取方法为打开通义千问聊天界面,F12打开开发者工具的应用程序界面,选择左侧cookie,提取其中的XSRF_TOKEN的值",
-            "pic_able": PICABLE,
-            "url_able": URLABLE,
-            "num_limit": NUM_LIMIT,
         },
     },
 )
@@ -101,7 +84,8 @@ DESCRIPTIONS = {
     "Spark Desk配置": "Spark Desk聊天机器人的配置(留空则默认从总控配置读取)",
     "Chat GPT web配置": "Chat GPT web聊天机器人的配置(留空则默认从总控配置读取)",
     "Claude Slack配置": "Claude Slack聊天机器人的配置(留空则默认从总控配置读取)",
-    "Poe配置": "Claude Slack聊天机器人的配置(留空则默认从总控配置读取)",
+    "Claude Ai配置": "Claude Slack聊天机器人的配置(留空则默认从总控配置读取)",
+    "Poe配置": "Poe聊天机器人的配置(留空则默认从总控配置读取)",
     "Bard配置": "Google Bard聊天机器人的配置(留空则默认从总控配置读取)",
     "通义千问配置": "通义千问聊天机器人的配置(留空则默认从总控配置读取)",
 }
@@ -181,7 +165,7 @@ class Fastapp:
             new_prefix = form["prefix_value"]
             try:
                 prefixes.change(prefix_name=prefix_name, prefix=new_prefix)
-            except :
+            except:
                 pass
             return TEMPLATES.TemplateResponse(
                 "prefix.html",

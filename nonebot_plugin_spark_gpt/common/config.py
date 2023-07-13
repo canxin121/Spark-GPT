@@ -14,6 +14,7 @@ CONFIG_SOURCE = (
         "Poe配置",
         "Bard配置",
         "通义千问配置",
+        "Claude Ai配置",
     ],
 )
 CONFIG_NAMES = (
@@ -71,9 +72,6 @@ class Config(BaseModel):
             "Newbing配置": {
                 "cookie": "",
                 "proxy": "",
-                "pic_able": "",
-                "url_able": "",
-                "num_limit": "",
                 "wss_link": "wss://sydney.bing.com/sydney/ChatHub",
             },
             "Spark Desk配置": {
@@ -81,54 +79,40 @@ class Config(BaseModel):
                 "fd": "",
                 "GtToken": "",
                 "sid": "",
-                "pic_able": "",
-                "url_able": "",
-                "num_limit": "",
             },
             "Chat GPT web配置": {
                 "session token": "",
                 "proxy": "",
                 "model": "text-davinci-002-render-sha",
                 "api_url": "https://chat.loli.vet/",
-                "pic_able": "",
-                "url_able": "",
-                "num_limit": "",
             },
             "Claude Slack配置": {
                 "slack_user_token": "",
                 "claude_id": "",
                 "channel_id": "",
-                "pic_able": "",
-                "url_able": "",
-                "num_limit": "",
             },
             "Poe配置": {
                 "cookie": "",
                 "proxy": "",
-                "pic_able": "",
-                "url_able": "",
-                "num_limit": "",
             },
             "Bard配置": {
                 "__Secure-1PSID": "",
                 "proxy": "",
-                "pic_able": "",
-                "url_able": "",
-                "num_limit": "",
             },
             "通义千问配置": {
                 "cookie": "",
                 "XSRF_TOKEN": "",
-                "pic_able": "",
-                "url_able": "",
-                "num_limit": "",
+            },
+            "Claude Ai配置": {
+                "cookie": "",
+                "proxy": "",
             },
         }
         self.load()
         self.save()
 
     def change_config(
-            self, source: CONFIG_SOURCE, config_name: CONFIG_NAMES, config: str
+        self, source: CONFIG_SOURCE, config_name: CONFIG_NAMES, config: str
     ):
         """修改配置项"""
         if source in self.config.keys():
@@ -149,8 +133,8 @@ class Config(BaseModel):
         if source in self.config.keys():
             if config_name in self.config[source].keys():
                 if (
-                        config_name in self.config[source]
-                        and self.config[source][config_name]
+                    config_name in self.config[source]
+                    and self.config[source][config_name]
                 ):
                     return self.config[source][config_name]
                 elif config_name in self.config["总控配置"]:
