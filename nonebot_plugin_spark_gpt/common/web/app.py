@@ -41,7 +41,7 @@ COMMENTS = (
         "Newbing配置": {
             "cookie": "Newbing的cookie json,获取方法为登录微软账号并打开到bing聊天界面,使用浏览器扩展 cookie editor将cookie导出为json格式并粘贴到此处",
             "proxy": "EdgeGPT的代理地址,请按照协议://地址:端口的格式填写",
-            "wss_link": "EdgeGPT的wss_link地址,如果你不知道这是什么,请不要修改",
+            "wss_link": "EdgeGPT的wss_link地址,如果无法使用,可以自建cf代理,详细教程https://canxin121.github.io/docs/docs/Spark_GPT.html#QA中的第一个",
         },
         "Spark Desk配置": {
             "cookie": "讯飞星火语言模型的cookie,获取方法为使用抓包工具如fiddler在与星火模型聊天时抓包,在包含chat关键字的连接的 请求头 中提取cookie",
