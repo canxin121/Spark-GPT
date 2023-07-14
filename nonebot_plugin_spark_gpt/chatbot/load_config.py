@@ -1,11 +1,11 @@
 from .bard import load_config as load_bard_config
 from .chatgpt_web import load_config as load_chat_gpt_web_config
+from .claude_ai import load_config as load_claude_ai_config
 from .newbing import load_config as load_newbing_config
 from .poe import load_config as load_poe_config
 from .slack_claude import load_config as load_slack_claude_config
 from .spark_desk import load_config as load_spark_desk_config
 from .tongyiqianwen import load_config as load_tongyiqianwen_config
-from .claude_ai import load_config as load_claude_ai_config
 from ..common.config import CONFIG_SOURCE
 from ..common.load_config import load_command_config
 

@@ -95,17 +95,17 @@ class Newbing_Bot:
                     ),
                 )
                 left, source_text, suggests = (
-                    str(raw_json["messages_left"]),
+                    str(raw_json[-1]["messages_left"]),
                     "",
-                    raw_json["suggestions"],
+                    raw_json[-1]["suggestions"],
                 )
                 self.botdata.last_suggests = suggests
-                if raw_json["sources_text"][:4] != raw_json["text"][:4]:
-                    source_text = raw_json["sources_text"] + "\n"
+                if raw_json[-1]["sources_text"][:4] != raw_json[-1]["text"][:4]:
+                    source_text = raw_json[-1]["sources_text"] + "\n"
                 suggest_str = "\n".join(
                     [f"{i + 1}:{s}" for i, s in enumerate(suggests)]
                 )
-                answer = f"{raw_json['text'].replace('[^', '[').replace('^]', ']').replace('**', '')}\n\n{source_text}建议回复:\n{suggest_str}\n\n剩余{left}条连续对话"
+                answer = f"{raw_json[-1]['text'].replace('[^', '[').replace('^]', ']').replace('**', '')}\n\n{source_text}建议回复:\n{suggest_str}\n\n剩余{left}条连续对话"
                 return answer
             except Exception as e:
                 detail_error = str(e) if str(e) else str(e.__class__)
@@ -123,18 +123,18 @@ class Newbing_Bot:
                             )
 
                             left, source_text, suggests = (
-                                str(raw_json["messages_left"]),
+                                str(raw_json[-1]["messages_left"]),
                                 "",
-                                raw_json["suggestions"],
+                                raw_json[-1]["suggestions"],
                             )
                             self.botdata.last_suggests = suggests
 
-                            if raw_json["sources_text"][:4] != raw_json["text"][:4]:
-                                source_text = raw_json["sources_text"] + "\n"
+                            if raw_json[-1]["sources_text"][:4] != raw_json[-1]["text"][:4]:
+                                source_text = raw_json[-1]["sources_text"] + "\n"
                             suggest_str = "\n".join(
                                 [f"{i + 1}:{s}" for i, s in enumerate(suggests)]
                             )
-                            answer = f"{raw_json['text'].replace('[^', '[').replace('^]', ']').replace('**', '')}\n{source_text}建议回复:\n{suggest_str}\n剩余{left}条连续对话"
+                            answer = f"{raw_json[-1]['text'].replace('[^', '[').replace('^]', ']').replace('**', '')}\n{source_text}建议回复:\n{suggest_str}\n剩余{left}条连续对话"
                             return answer
                         except Exception as e:
                             detail_error = str(e) if str(e) else str(e.__class__)

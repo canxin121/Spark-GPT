@@ -1,14 +1,14 @@
 import asyncio
-import uuid
-import httpx
 import json
 import re
+import uuid
+
+import httpx
 from nonebot.log import logger
 
 from ..common.config import config
 from ..common.mytypes import BotData, BotInfo, CommonUserInfo
 from ..common.user_data import common_users
-
 
 COOKIE = ""
 PROXY = ""
@@ -17,14 +17,17 @@ ORGANIZATION_UUID = ""
 
 
 def load_config():
-    global COOKIE, PROXY, ABLE
+    global COOKIE, PROXY, ORGANIZATION_UUID, ABLE
     ABLE = True
     try:
         COOKIE = config.get_config("Claude Ai配置", "cookie")
     except Exception as e:
         ABLE = False
         logger.warning(f"加载Claude Ai的配置时warn:{str(e)},无法使用Claude Ai")
-
+    try:
+        ORGANIZATION_UUID = config.get_config("Claude Ai配置", "organization_uuid")
+    except Exception as e:
+        logger.info(f"加载Claude Ai的配置时warn:{str(e)},若Claude Ai报错无法获取organization_uuid,请填写此项后重试")
     try:
         PROXY = config.get_config("Claude Ai配置", "proxy")
     except Exception as e:
@@ -36,7 +39,7 @@ load_config()
 
 class Claude_Bot:
     def __init__(
-        self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
+            self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
         self.lock = asyncio.Lock()
         self.botdata = bot_data
@@ -56,7 +59,8 @@ class Claude_Bot:
                 result = ""
                 async for msg in self.stream_msg(question):
                     result += msg
-                return result
+                return result.replace("\\n", "\n")
+
             except Exception as e:
                 detail_error = str(e)
                 logger.error(f"Claude ai在询问时报错:{detail_error}")
@@ -95,42 +99,42 @@ class Claude_Bot:
     async def stream_msg(self, question: str):
         async with httpx.AsyncClient(timeout=60) as client:
             async with client.stream(
-                "POST",
-                "https://claude.ai/api/append_message",
-                headers={
-                    "Accept": "text/event-stream, text/event-stream",
-                    "Accept-Encoding": "gzip, deflate, br",
-                    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
-                    "Content-Type": "application/json",
-                    "Cookie": COOKIE,
-                    "Origin": "https://claude.ai",
-                    "Referer": f"https://claude.ai/chat/{self.botdata.conversation_uuid}",
-                    "Sec-Ch-Ua": '"Microsoft Edge";v="117", "Not;A=Brand";v="8", "Chromium";v="117"',
-                    "Sec-Ch-Ua-Mobile": "?0",
-                    "Sec-Ch-Ua-Platform": '"Windows"',
-                    "Sec-Fetch-Dest": "empty",
-                    "Sec-Fetch-Mode": "cors",
-                    "Sec-Fetch-Site": "same-origin",
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.0.0",
-                },
-                json={
-                    "completion": {
-                        "prompt": question,
-                        "timezone": "Asia/Shanghai",
-                        "model": "claude-2",
+                    "POST",
+                    "https://claude.ai/api/append_message",
+                    headers={
+                        "Accept": "text/event-stream, text/event-stream",
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
+                        "Content-Type": "application/json",
+                        "Cookie": COOKIE,
+                        "Origin": "https://claude.ai",
+                        "Referer": f"https://claude.ai/chat/{self.botdata.conversation_uuid}",
+                        "Sec-Ch-Ua": '"Microsoft Edge";v="117", "Not;A=Brand";v="8", "Chromium";v="117"',
+                        "Sec-Ch-Ua-Mobile": "?0",
+                        "Sec-Ch-Ua-Platform": '"Windows"',
+                        "Sec-Fetch-Dest": "empty",
+                        "Sec-Fetch-Mode": "cors",
+                        "Sec-Fetch-Site": "same-origin",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36 Edg/117.0.0.0",
                     },
-                    "organization_uuid": ORGANIZATION_UUID,
-                    "conversation_uuid": self.botdata.conversation_uuid,
-                    "text": question,
-                    "attachments": [],
-                },
+                    json={
+                        "completion": {
+                            "prompt": question,
+                            "timezone": "Asia/Shanghai",
+                            "model": "claude-2",
+                        },
+                        "organization_uuid": ORGANIZATION_UUID,
+                        "conversation_uuid": self.botdata.conversation_uuid,
+                        "text": question,
+                        "attachments": [],
+                    },
             ) as response:
                 answer = ""
                 async for chunk in response.aiter_text():
                     match = re.search(r'"completion":"(.*?)",', chunk)
                     if match:
                         new_answer = match.group(1)
-                        add = new_answer[len(answer) :]
+                        add = new_answer[len(answer):]
                         answer = new_answer
                         yield add
 

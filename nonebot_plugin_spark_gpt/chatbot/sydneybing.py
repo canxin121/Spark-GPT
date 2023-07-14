@@ -10,7 +10,7 @@ from ..common.user_data import common_users
 
 class SydneyBing_Bot:
     def __init__(
-        self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
+            self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
     ):
         self.nickname = bot_info.nickname
         self.common_userinfo = common_userinfo
@@ -100,18 +100,18 @@ class SydneyBing_Bot:
                 )
 
                 left, source_text, suggests = (
-                    str(raw_json["messages_left"]),
+                    str(raw_json[-1]["messages_left"]),
                     "",
-                    raw_json["suggestions"],
+                    raw_json[-1]["suggestions"],
                 )
                 self.botdata.last_suggests = suggests
 
-                if raw_json["sources_text"][:4] != raw_json["text"][:4]:
-                    source_text = raw_json["sources_text"] + "\n"
+                if raw_json[-1]["sources_text"][:4] != raw_json[-1]["text"][:4]:
+                    source_text = raw_json[-1]["sources_text"] + "\n"
                 suggest_str = "\n".join(
                     [f"{i + 1}:{s}" for i, s in enumerate(suggests)]
                 )
-                answer = f"{raw_json['text'].replace('[^', '[').replace('^]', ']').replace('**', '')}\n\n{source_text}建议回复:\n{suggest_str}\n\n剩余{left}条连续对话"
+                answer = f"{raw_json[-1]['text'].replace('[^', '[').replace('^]', ']').replace('**', '')}\n\n{source_text}建议回复:\n{suggest_str}\n\n剩余{left}条连续对话"
                 return answer
             except asyncio.TimeoutError:
                 error = "Sydneybing在询问时超时无响应"
@@ -131,19 +131,18 @@ class SydneyBing_Bot:
                                 wss_link=WSS_LINK,
                                 locale="en-us",
                             )
-
                             left, source_text, suggests = (
-                                str(raw_json["messages_left"]),
+                                str(raw_json[-1]["messages_left"]),
                                 "",
-                                raw_json["suggestions"],
+                                raw_json[-1]["suggestions"],
                             )
                             self.botdata.last_suggests = suggests
-                            if raw_json["sources_text"][:4] != raw_json["text"][:4]:
-                                source_text = raw_json["sources_text"] + "\n"
+                            if raw_json[-1]["sources_text"][:4] != raw_json[-1]["text"][:4]:
+                                source_text = raw_json[-1]["sources_text"] + "\n"
                             suggest_str = "\n".join(
                                 [f"{i + 1}:{s}" for i, s in enumerate(suggests)]
                             )
-                            answer = f"{raw_json['text'].replace('[^', '[').replace('^]', ']').replace('**', '')}\n{source_text}建议回复:\n{suggest_str}\n剩余{left}条连续对话"
+                            answer = f"{raw_json[-1]['text'].replace('[^', '[').replace('^]', ']').replace('**', '')}\n{source_text}建议回复:\n{suggest_str}\n剩余{left}条连续对话"
                             return answer
                         except Exception as e:
                             detail_error = str(e)

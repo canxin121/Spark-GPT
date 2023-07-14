@@ -123,8 +123,10 @@
 <!-- 使用JavaScript动态设置sidebar的高度 -->
 <script> (function () {
     var sidebar = document.querySelector('.sidebar');
+    var sidebarHeight = sidebar.offsetHeight;
+
     var main = document.querySelector('.main');
-    sidebar.style.height = main.offsetHeight + 'px';
+    main.style.height = sidebarHeight + 'px';
 })(); </script>
 
 {% if saved %}

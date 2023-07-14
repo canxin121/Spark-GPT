@@ -61,7 +61,8 @@ COMMENTS = (
             "channel_id": "进入slack聊天界面,选择(创建)一个专用的频道,将claude拉进这个频道。此时记下这个频道的网址中的channel_id(必填)(比如在这个链接中 https://app.slack.com/client/T057LPK0SP2/C0579MZR3LH/thread/C0579MZR3LH-1683734208.221819 ,channel_id是C0579MZR3LH,及thread前面的两个/中的内容)",
         },
         "Claude Ai配置": {
-            "cookie": "获取方式为打开https://poe.com/,登录后F12打开开发者工具,在应用程序->cookie中复制p-b项的值,如l_recO0QgugqEyfgMbBc-g%3D%3D",
+            "cookie": "获取方式为打开https://claude.ai和开发者工具中的网络,和claude进行对话,并在append_message的请求中获取请求头中的cookie",
+            "organization_uuid": "获取方式为登陆后打开https://claude.ai/api/organizations,并复制uuid一项的值,填写在此处",
             "proxy": "访问POE官网时使用的代理链接,请按照协议://地址:端口的格式填写",
         },
         "Poe配置": {

@@ -90,6 +90,10 @@ class Config(BaseModel):
                 "slack_user_token": "",
                 "claude_id": "",
                 "channel_id": "",
+            }, "Claude Ai配置": {
+                "cookie": "",
+                "organization_uuid": "",
+                "proxy": "",
             },
             "Poe配置": {
                 "cookie": "",
@@ -103,16 +107,13 @@ class Config(BaseModel):
                 "cookie": "",
                 "XSRF_TOKEN": "",
             },
-            "Claude Ai配置": {
-                "cookie": "",
-                "proxy": "",
-            },
+
         }
         self.load()
         self.save()
 
     def change_config(
-        self, source: CONFIG_SOURCE, config_name: CONFIG_NAMES, config: str
+            self, source: CONFIG_SOURCE, config_name: CONFIG_NAMES, config: str
     ):
         """修改配置项"""
         if source in self.config.keys():
@@ -133,8 +134,8 @@ class Config(BaseModel):
         if source in self.config.keys():
             if config_name in self.config[source].keys():
                 if (
-                    config_name in self.config[source]
-                    and self.config[source][config_name]
+                        config_name in self.config[source]
+                        and self.config[source][config_name]
                 ):
                     return self.config[source][config_name]
                 elif config_name in self.config["总控配置"]:

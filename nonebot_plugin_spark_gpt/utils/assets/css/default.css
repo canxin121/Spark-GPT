@@ -1,5 +1,6 @@
 body {
-    font-family: "Custom Font", Helvetica, arial, sans-serif;
+    font-family: "Custom Font";
+
     font-size: 1rem;
     line-height: 1.6;
     background-color: white;
@@ -451,7 +452,7 @@ code {
     white-space: pre-wrap;
     word-break: break-all;
     display: inline-block;
-    font-family: "Roboto Light", "Ubuntu Light", "Ubuntu", "Courier New", monospace, monospace;
+    font-family: "Custom Font";
 }
 
 * {
@@ -718,8 +719,9 @@ blockquote {
     padding: 10px 16px;
     background-color: #e9e9e9;
     position: relative;
+    font-family: "Custom Font";
     border-left: unset;
-    font-family: "Courier New" !important
+
 }
 
 blockquote:before {
@@ -800,8 +802,8 @@ table tr td:last-child {
 #write.md-fences {
     font-size: 1rem;
     padding: 0.5rem !important;
+    font-family: "Custom Font";
     border-radius: 2px;
-    font-family: "Courier New" !important;
     word-wrap: normal;
     background-color: #f6f8fa;
     color: #24292e;
@@ -812,7 +814,7 @@ table tr td:last-child {
 tt {
     margin: 0 2px;
     border-radius: 2px;
-    font-family: initial !important;
+    font-family: "Custom Font";
     color: var(--drake-highlight)
 }
 
@@ -890,7 +892,8 @@ tt {
 
 .md-image > .md-meta {
     border-radius: 2px;
-    font-family: initial;
+    font-family: "Custom Font";
+
     padding: 2px 0 0 4px;
     color: inherit
 }
@@ -932,7 +935,8 @@ header,
 .context-menu,
 .megamenu-content,
 footer {
-    font-family: initial
+    font-family: "Custom Font";
+
 }
 
 .file-node-content:hover.file-node-icon,
@@ -959,7 +963,8 @@ footer {
 }
 
 .file-list-item-summary {
-    font-family: initial
+    font-family: "Custom Font";
+
 }
 
 #typora-quick-open-input {
@@ -1037,12 +1042,14 @@ span.md-def-name {
 
 .code-tooltip-content.md-plain {
     font-size: 0.9rem;
-    font-family: inherit
+    font-family: "Custom Font";
+
 }
 
 .code-tooltip-content code {
     padding: 0 2px;
-    font-family: inherit;
+    font-family: "Custom Font";
+
     color: #FFD760;
     background-color: inherit
 }
@@ -1185,7 +1192,8 @@ nav.app-nav.no-badge > ul > li {
 .markdown-section code,
 .markdown-section output:after,
 .markdown-section pre {
-    font-family: "Courier New" !important
+    font-family: "Custom Font";
+
 }
 
 .markdown-section a,
