@@ -1,7 +1,7 @@
 import asyncio
 import json
 
-from EdgeGPT.EdgeGPT import Chatbot, ConversationStyle
+from .utils.EdgeGPT.EdgeGPT import Chatbot, ConversationStyle
 from nonebot.log import logger
 
 from ..common.config import config

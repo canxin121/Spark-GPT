@@ -1,9 +1,9 @@
 import asyncio
 
-from EdgeGPT.EdgeGPT import ConversationStyle
-from SydneyGPT.SydneyGPT import Chatbot
 from nonebot.log import logger
 
+from .utils.EdgeGPT.EdgeGPT import ConversationStyle
+from .utils.SydneyGPT.SydneyGPT import Chatbot
 from ..common.mytypes import CommonUserInfo, BotData, BotInfo
 from ..common.user_data import common_users
 
