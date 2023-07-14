@@ -79,13 +79,14 @@ COMMENTS = (
         },
     },
 )
+
 DESCRIPTIONS = {
     "总控配置": "总的配置控制",
     "Newbing配置": "Newbing聊天机器人的配置(留空则默认从总控配置读取)",
     "Spark Desk配置": "Spark Desk聊天机器人的配置(留空则默认从总控配置读取)",
     "Chat GPT web配置": "Chat GPT web聊天机器人的配置(留空则默认从总控配置读取)",
     "Claude Slack配置": "Claude Slack聊天机器人的配置(留空则默认从总控配置读取)",
-    "Claude Ai配置": "Claude Slack聊天机器人的配置(留空则默认从总控配置读取)",
+    "Claude Ai配置": "Claude Ai聊天机器人的配置(留空则默认从总控配置读取)",
     "Poe配置": "Poe聊天机器人的配置(留空则默认从总控配置读取)",
     "Bard配置": "Google Bard聊天机器人的配置(留空则默认从总控配置读取)",
     "通义千问配置": "通义千问聊天机器人的配置(留空则默认从总控配置读取)",
