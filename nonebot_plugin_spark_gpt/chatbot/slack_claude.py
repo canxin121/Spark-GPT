@@ -95,7 +95,7 @@ class Slack_Claude_Bot:
             raise Exception(error)
 
     async def receive_message(self):
-        retry = 3
+        retry = 5
         detail_error = "未知错误"
         while retry > 0:
             await asyncio.sleep(1)
@@ -121,7 +121,7 @@ class Slack_Claude_Bot:
                         )
                 )
                 ):
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(2)
                     raise Exception("slack的claude没有回复")
                 elif "error" in result.keys():
                     raise Exception(result["error"])
@@ -141,21 +141,6 @@ class Slack_Claude_Bot:
                 retry -= 1
         raise Exception(detail_error)
 
-    async def update_message(self, text: str):
-        try:
-            # 使用Web客户端调用chat.update方法
-            result = await CLIENT.chat_update(
-                channel=CHANNEL_ID,
-                ts=self.botdata.msg_ts,
-                text=f"<@{CLAUDE_ID}>{PRE_MSG}{text}",
-            )
-            return result
-        except Exception as e:
-            error = f"在更新发向claude的消息时error: {e}"
-            logger.error(error)
-            raise Exception(error)
-
-    # 调用使用的api
     async def send_msg(self, msg: str):
         result = await CLIENT.chat_postMessage(
             channel=CHANNEL_ID,
@@ -183,7 +168,7 @@ class Slack_Claude_Bot:
                 except Exception as e:
                     detail_error = str(e)
                     if detail_error == "slack的claude没有回复":
-                        await self.update_message(question)
+                        await self.send_msg(question)
                     retry -= 1
             if retry <= 0:
                 raise Exception(detail_error)
