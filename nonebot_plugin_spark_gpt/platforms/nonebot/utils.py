@@ -1,6 +1,5 @@
 import ast
 import asyncio
-from pathlib import Path
 from typing import Optional, Union
 
 from nonebot import logger
@@ -36,7 +35,7 @@ from .userlinks import users
 from ...common.config import config
 from ...common.mytypes import UserInfo, CommonUserInfo
 from ...common.user_data import common_users
-from ...utils.text_render import text_to_pic
+from ...utils.render import md_to_pic
 from ...utils.utils import get_url
 
 Message_Segment = Union[
@@ -80,14 +79,18 @@ async def if_super_user(event: MessageEvent, bot: Bot, mathcer: Matcher):
     """判断是否为superuser在请求,否则结束处理"""
     common_userinfo = set_common_userinfo(event, bot)
     superusers = config.get_config(source="总控配置", config_name="superusers")
-    try:
-        superusers = ast.literal_eval(superusers)
-    except Exception:
-        superusers = []
     if common_userinfo.user_id not in superusers:
         await mathcer.finish()
     else:
         return
+
+
+def is_super_user(event: MessageEvent, bot: Bot) -> bool:
+    """判断是否为superuser在请求,返回bool"""
+    common_userinfo = set_common_userinfo(event, bot)
+    superusers = config.get_config(source="总控配置", config_name="superusers")
+    return common_userinfo.user_id in superusers
+
 
 
 async def get_question_chatbot(event: MessageEvent, bot: Bot, matcher: Matcher):
@@ -224,7 +227,7 @@ async def send_text(
 
 
 async def send_img(
-        path: Union[str, Path],
+        pic_bytes: bytes,
         matcher: Matcher,
         bot: Bot,
         event: MessageEvent,
@@ -235,44 +238,43 @@ async def send_img(
         return await send_TGMessage_with_retry(
             bot,
             event,
-            TGFile.photo(str(path)),
+            TGFile.photo(pic_bytes),
             reply_to_message_id=reply_to_message_id,
         )
     elif isinstance(event, OB11_MessageEvent):
         try:
             message = (
                 OB11_MessageSegment.reply(event.message_id)
-                + OB11_MessageSegment.image(path)
+                + OB11_MessageSegment.image(pic_bytes)
                 if reply
-                else OB11_MessageSegment.image(path)
+                else OB11_MessageSegment.image(pic_bytes)
             )
             return await matcher.send(message)
         except Exception:
-            return await matcher.send(OB11_MessageSegment.image(path))
+            return await matcher.send(OB11_MessageSegment.image(pic_bytes))
     elif isinstance(event, KOOKMessageEvent):
         return await bot.send(
             event,
             KOOKMessage(
-                KOOKMessage(KOOKMessageSegment.image(await bot.upload_file(path)))
+                KOOKMessage(KOOKMessageSegment.image(await bot.upload_file(pic_bytes)))
             ),
             reply_sender=reply,
         )
     elif isinstance(event, DISCORD_MessageEvent):
-        with open(path, "rb") as f:
-            return await send_DISCORDMessage_with_retry(
-                event,
-                bot,
-                DISCORD_MessageSegment.attachment(file="temp.jpeg", content=f.read()),
-                reply_message=reply,
-                mention_sender=reply,
-            )
+        return await send_DISCORDMessage_with_retry(
+            event,
+            bot,
+            DISCORD_MessageSegment.attachment(file="temp.jpeg", content=pic_bytes),
+            reply_message=reply,
+            mention_sender=reply,
+        )
 
 
 async def send_img_url(
         bot: Bot,
         matcher: Matcher,
         event: MessageEvent,
-        path: Union[str, Path],
+        pic_bytes: bytes,
         url: str,
         reply: bool = False,
 ):
@@ -281,44 +283,43 @@ async def send_img_url(
         return await send_TGMessage_with_retry(
             bot,
             event,
-            TGFile.photo(str(path)) + url,
+            TGFile.photo(pic_bytes) + url,
             reply_to_message_id=reply_to_message_id,
         )
     elif isinstance(event, OB11_MessageEvent):
         message = (
             (
                     OB11_MessageSegment.reply(event.message_id)
-                    + OB11_MessageSegment.image(path)
+                    + OB11_MessageSegment.image(pic_bytes)
                     + OB11_MessageSegment.text(url)
             )
             if reply
-            else OB11_MessageSegment.image(path) + OB11_MessageSegment.text(url)
+            else OB11_MessageSegment.image(pic_bytes) + OB11_MessageSegment.text(url)
         )
         try:
             return await matcher.send(message)
         except Exception:
             return await matcher.send(
-                OB11_MessageSegment.image(path) + OB11_MessageSegment.text(url)
+                OB11_MessageSegment.image(pic_bytes) + OB11_MessageSegment.text(url)
             )
     elif isinstance(event, KOOKMessageEvent):
         return await bot.send(
             event,
             KOOKMessage(
-                KOOKMessage(KOOKMessageSegment.image(await bot.upload_file(path)))
+                KOOKMessage(KOOKMessageSegment.image(await bot.upload_file(pic_bytes)))
                 + KOOKMessage(KOOKMessageSegment.text(url))
             ),
             reply_sender=reply,
         )
     elif isinstance(event, DISCORD_MessageEvent):
-        with open(path, "rb") as f:
-            return await send_DISCORDMessage_with_retry(
-                event,
-                bot,
-                DISCORD_MessageSegment.attachment(file="temp.jpeg", content=f.read())
-                + DISCORD_MessageSegment.text(url),
-                reply_message=reply,
-                mention_sender=reply,
-            )
+        return await send_DISCORDMessage_with_retry(
+            event,
+            bot,
+            DISCORD_MessageSegment.attachment(file="temp.jpeg", content=pic_bytes)
+            + DISCORD_MessageSegment.text(url),
+            reply_message=reply,
+            mention_sender=reply,
+        )
 
 
 async def send_message(
@@ -342,17 +343,17 @@ async def send_message(
     if plain:
         return await send_text(bot, matcher, event, content, reply)
     elif forcepic:
-        path = await text_to_pic(str(content), width=pic_width, quality=100)
-        return await send_img(path, matcher, bot, event, reply)
+        pic_bytes = await md_to_pic(str(content), width=pic_width)
+        return await send_img(pic_bytes, matcher, bot, event, reply)
     elif (PICABLE == "Auto" and len(str(content)) > NUMLIMIT) or PICABLE == "True":
-        if URLABLE == "Ture":
-            path, url = await asyncio.gather(
-                text_to_pic(content, width=pic_width, quality=100), get_url(content)
+        if URLABLE == "True":
+            pic_bytes, url = await asyncio.gather(
+                md_to_pic(content, width=pic_width), get_url(content)
             )
-            return await send_img_url(bot, matcher, event, path, url, reply)
+            return await send_img_url(bot, matcher, event, pic_bytes, url, reply)
         else:
-            path = await text_to_pic(str(content), width=pic_width, quality=100)
-            return await send_img(path, matcher, bot, event, reply)
+            pic_bytes = await md_to_pic(str(content), width=pic_width)
+            return await send_img(pic_bytes, matcher, bot, event, reply)
     else:
         return await send_text(bot, matcher, event, content, reply)
 

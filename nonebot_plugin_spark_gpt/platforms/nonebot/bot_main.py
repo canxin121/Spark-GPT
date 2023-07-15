@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from nonebot.exception import MatcherException
 from nonebot.matcher import Matcher
 from nonebot.params import ArgStr
@@ -10,7 +12,7 @@ from .utils import (
     set_common_userinfo,
     set_public_common_userinfo,
     delete_messages,
-    send_message,
+    send_message, send_img,
     if_close,
     MessageEvent,
     Bot,
@@ -21,6 +23,7 @@ from ...common.mytypes import BotInfo, BotData
 from ...common.prefix_data import prefixes
 from ...common.prompt_data import prompts
 from ...common.user_data import common_users
+from ...utils.render import menu_to_pic
 from ...utils.utils import is_valid_string
 
 REFRESH_KEYWORDS = [
@@ -87,11 +90,12 @@ async def chat_(matcher: Matcher, event: MessageEvent, bot: Bot):
 
 
 new_bot = on_message(priority=1, block=False)
-
+Source_Msg_Path = Path(__file__).parent / "SourceMsg.jpeg"
+Source_Msg_Path.touch()
 
 @new_bot.handle()
 async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_State):
-    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND, SPECIALPIC_WIDTH
+    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND, Generated_Source_Pic, get_source_pic
 
     raw_message = event.get_plaintext()
     if not raw_message.startswith(
@@ -106,10 +110,10 @@ async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_Sta
         state["pre_command"] = PRIVATE_COMMAND
         state["common_userinfo"] = set_common_userinfo(event, bot)
 
-    state["able_source_dict"], able_source_str = get_able_source()
+    state["able_source_dict"], source_des_dict = get_able_source()
 
     state["replys"] = []
-    msg = f"请输入要创建的bot的来源的序号\n可选项有:\n{able_source_str}输入'算了'或'取消'可以结束当前操作"
+    msg = f"请输入要创建的bot的来源的序号\n输入'算了'或'取消'可以结束当前操作\n可选项如下图:"
 
     state["replys"].append(
         await send_message(
@@ -117,9 +121,24 @@ async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_Sta
             matcher,
             bot,
             event,
-            plain=False,
-            forcepic=True,
-            width=SPECIALPIC_WIDTH + 450,
+        )
+    )
+    if not Generated_Source_Pic:
+        pic_bytes = await menu_to_pic(menu=source_des_dict, width=700, headline="来源列表", description="",
+                                      font_size=20)
+        get_source_pic()
+        with open(Source_Msg_Path, "wb") as f:
+            f.write(pic_bytes)
+    else:
+        with open(Source_Msg_Path, "rb") as f:
+            pic_bytes = f.read()
+
+    state["replys"].append(
+        await send_img(
+            pic_bytes,
+            matcher,
+            bot,
+            event,
         )
     )
 
@@ -152,6 +171,9 @@ async def new_bot__(
     )
 
 
+Prompt_Msg_Path = Path(__file__).parent / "PromptMsg.jpeg"
+Prompt_Msg_Path.touch()
+
 @new_bot.got("bot_nickname")
 async def new_bot___(
         matcher: Matcher,
@@ -160,8 +182,6 @@ async def new_bot___(
         bot: Bot,
         args: str = ArgStr("bot_nickname"),
 ):
-    from ...common.load_config import SPECIALPIC_WIDTH
-
     await if_close(event, matcher, bot, state["replys"])
 
     bot_nickname = str(args).replace("\n", "").replace("\r", "").replace(" ", "")
@@ -179,12 +199,27 @@ async def new_bot___(
             or state["able_source_dict"][state["source_index"]] == "bard"
             or state["able_source_dict"][state["source_index"]] == "通义千问"
     ):
-        prompts_str = prompts.show_list()
-        msg = f'请设置这个bot的预设\n如果不使用预设,请输入"无"或"无预设"\n如果使用本地预设,请在预设名前加".",如使用自己的预设直接发送即可\n当前可用的本地预设有\n{prompts_str}\n输入"算了"或"取消"可以结束当前操作'
-
+        prompts_dict = prompts.show_list()
+        msg = '请设置这个bot的预设\n预设是每次对话开始时向bot首先静默发送过去的内容\n如果不使用预设,请输入"无"或"无预设"\n如果使用本地预设,请输入预设前的数字索引,如使用自己的预设直接发送即可\n输入"算了"或"取消"可以结束当前操作'
         state["replys"].append(
             await send_message(
-                msg, matcher, bot, event, plain=False, forcepic=True, width=SPECIALPIC_WIDTH + 300
+                msg, matcher, bot, event,
+            )
+        )
+
+        if not prompts.Generated:
+            pic_bytes = await menu_to_pic(menu=prompts_dict, headline="预设列表", width=800,
+                                          description="下面只展示了前200个字符")
+            prompts.generate_pic()
+            with open(Prompt_Msg_Path, "wb") as f:
+                f.write(pic_bytes)
+        else:
+            with open(Prompt_Msg_Path, "rb") as f:
+                pic_bytes = f.read()
+
+        state["replys"].append(
+            await send_img(
+                pic_bytes, matcher, bot, event,
             )
         )
     else:
@@ -193,7 +228,8 @@ async def new_bot___(
         matcher.set_arg("prompt", "")
         matcher.set_arg("prefix", "")
 
-
+Prefix_Msg_Path = Path(__file__).parent / "PrefixMsg.jpeg"
+Prefix_Msg_Path.touch()
 @new_bot.got("prompt")
 async def new_bot____(
         matcher: Matcher,
@@ -202,8 +238,6 @@ async def new_bot____(
         event: MessageEvent,
         args: str = ArgStr("prompt"),
 ):
-    from ...common.load_config import SPECIALPIC_WIDTH
-
     await if_close(event, matcher, bot, state["replys"])
     prompt = str(args).replace("\n", "")
     prompt_nickname = "自定义预设"
@@ -215,12 +249,11 @@ async def new_bot____(
     if prompt in ["无", "无预设"]:
         prompt = ""
         prompt_nickname = "无预设"
-    elif prompt.startswith("."):
+    elif prompt.isdigit():
         try:
-            prompt_nickname = prompt.replace(".", "")
-            prompt = prompts.show_prompt(prompt_nickname)
+            prompt_nickname, prompt = prompts.get_prompt(prompt)
         except Exception:
-            await send_message("没有这个本地预设名", matcher, bot, event)
+            await send_message("没有这个本地预设数字索引", matcher, bot, event)
             await matcher.finish()
 
     state["prompt_nickname"] = prompt_nickname
@@ -229,12 +262,26 @@ async def new_bot____(
     try:
         state["prefix_nickname"]
     except Exception:
-        prefixes_str = prefixes.show_list()
-        msg = f'请设置这个bot的前缀\n前缀是指每次对话时都在你的问题前添加一些要求内容,来使boy的回答符合要求\n如果不使用前缀,请输入"无"或"无前缀"\n如果使用本地前缀,请在前缀名前加".",如使用自己的前缀直接发送即可\n当前可用的本地前缀有\n{prefixes_str}\n输入"算了"或"取消"可以结束当前操作'
+        prefixes_dict = prefixes.show_list()
+        msg = f'请设置这个bot的前缀\n前缀是指每次对话时都在你的问题前添加一些要求内容,来使boy的回答符合要求\n如果不使用前缀,请输入"无"或"无前缀"\n如果使用本地前缀,请发送前缀前的数字索引,如使用自己的前缀直接发送即可\n输入"算了"或"取消"可以结束当前操作'
 
         state["replys"].append(
             await send_message(
-                msg, matcher, bot, event, plain=False, forcepic=True, width=SPECIALPIC_WIDTH + 300
+                msg, matcher, bot, event
+            )
+        )
+        if not prefixes.Generated:
+            pic_bytes = await menu_to_pic(menu=prefixes_dict, headline="前缀列表", width=800,
+                                          description="下面只展示了前200个字符")
+            prefixes.generate_pic()
+            with open(Prefix_Msg_Path, "wb") as f:
+                f.write(pic_bytes)
+        else:
+            with open(Prefix_Msg_Path, "rb") as f:
+                pic_bytes = f.read()
+        state["replys"].append(
+            await send_img(
+                pic_bytes, matcher, bot, event
             )
         )
 
@@ -259,12 +306,11 @@ async def new_bot______(
     if prefix in ["无", "无前缀"]:
         prefix = ""
         prefix_nickname = "无前缀"
-    elif prefix.startswith("."):
+    elif prefix.isdigit():
         try:
-            prefix_nickname = prefix.replace(".", "")
-            prefix = prefixes.show_prefix(prefix_nickname)
+            prefix_nickname, prefix = prefixes.get_prefix(prefix)
         except Exception:
-            await send_message("没有这个本地前缀名", matcher, bot, event)
+            await send_message("没有这个本地前缀数字索引", matcher, bot, event)
             await matcher.finish()
 
     common_userinfo = state["common_userinfo"]
@@ -434,7 +480,7 @@ all_bots = on_message(priority=1, block=False)
 
 @all_bots.handle()
 async def all_bots_(matcher: Matcher, bot: Bot, event: MessageEvent):
-    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND, SPECIALPIC_WIDTH
+    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
 
     if not event.get_plaintext().startswith(
             (f"{PRIVATE_COMMAND}所有bot", f"{PUBLIC_COMMAND}所有bot")
@@ -455,6 +501,6 @@ async def all_bots_(matcher: Matcher, bot: Bot, event: MessageEvent):
         event,
         plain=False,
         forcepic=True,
-        width=SPECIALPIC_WIDTH + 350,
+        width=500,
     )
     await matcher.finish()

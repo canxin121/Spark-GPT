@@ -42,20 +42,18 @@ def load_config():
             "x-xsrf-token": XSRF_TOKEN,
             "cookie": COOKIE,
         }
-        if ABLE:
-            asyncio.run(heartbeat())
     except Exception as e:
         ABLE = False
         logger.warning(f"加载通义千问配置配置时warn: {str(e)},没有配置通义千问的cookie,无法使用通义千问")
 
 
 async def heartbeat():
-    async with aiohttp.ClientSession() as session:
-        async with session.get(
-                "https://qianwen.aliyun.com/heartbeat?type=1&", headers=HEADER
-        ) as response:
-            await asyncio.sleep(5)
-            # logger.info("通义千问心跳:" + str(response.status))
+    while ABLE:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                    "https://qianwen.aliyun.com/heartbeat?type=1&", headers=HEADER
+            ) as response:
+                logger.info("通义千问心跳:" + str(response.status))
 
 
 load_config()

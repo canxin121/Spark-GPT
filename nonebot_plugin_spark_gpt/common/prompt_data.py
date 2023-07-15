@@ -9,6 +9,7 @@ class Prompts(BaseModel):
     path: Path = Field(
         Path() / "data/spark_gpt/common/prompts.json", description="储存prompts.json的路径"
     )
+    Generated: bool = False
     prompts: dict = Field({}, description="储存所有预设")
 
     def __init__(self, **data):
@@ -31,6 +32,17 @@ class Prompts(BaseModel):
             # logger.error(str(e))
             pass
 
+    def generate_pic(self):
+        self.Generated = True
+
+    def get_prompt(self, prompt_index: str):
+        """获取指定prompt的预设内容"""
+        try:
+            prompt_nickname, prompt = list(self.prompts.items())[int(prompt_index) - 1]
+            return prompt_nickname, prompt
+        except KeyError:
+            raise Exception("没有这个预设索引")
+
     def show_prompt(self, prompt_name: str):
         """获取指定prompt的预设内容"""
         try:
@@ -41,13 +53,10 @@ class Prompts(BaseModel):
 
     def show_list(self):
         """获取所有的prompts的名称"""
-        prompt_list_str = "所有预设如下:\n\n| 预设名称 |\n| --- |\n"
-        for key in self.prompts.keys():
-            prompt_list_str += f"| {key} |\n"
-        prompt_list_str += "\n"
-        return prompt_list_str
+        return {k: v[:200] for k, v in self.prompts.items()}
 
     def change(self, prompt_name: str, prompt: str):
+        self.Generated = False
         if prompt_name in self.prompts.keys():
             self.prompts[prompt_name] = prompt
             self.save()
@@ -56,6 +65,7 @@ class Prompts(BaseModel):
 
     def rename(self, old_name: str, new_name: str):
         """将prompts中的原有名字修改成新名字"""
+        self.Generated = False
         if old_name not in self.prompts:
             raise Exception("没有这个预设名")
         elif new_name in self.prompts:
@@ -69,11 +79,13 @@ class Prompts(BaseModel):
 
     def add(self, prompt_name: str, prompt: str):
         """向prompts中添加预设"""
+        self.Generated = False
         self.prompts[prompt_name] = prompt
         self.save()
 
     def delete(self, prompt_name: str):
         """删除prompts中的预设"""
+        self.Generated = False
         try:
             del self.prompts[prompt_name]
         except KeyError:
@@ -86,6 +98,7 @@ class Prompts(BaseModel):
 
     def load(self):
         """从JSON文件中读取prompts"""
+        self.Generated = False
         self.path.parent.mkdir(parents=True, exist_ok=True)
         if not self.path.exists():
             self.path.touch()
@@ -97,6 +110,7 @@ class Prompts(BaseModel):
 
     def save(self):
         """将prompts保存为JSON文件"""
+        self.Generated = False
         self.path.parent.mkdir(parents=True, exist_ok=True)
         if not self.path.exists():
             self.path.touch()

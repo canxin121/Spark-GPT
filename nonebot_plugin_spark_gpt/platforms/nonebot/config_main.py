@@ -16,21 +16,24 @@ from .utils import (
     set_userinfo,
     delete_messages,
     if_super_user,
+    is_super_user,
     if_close,
     send_message,
     MessageEvent,
     Message,
     Bot,
 )
-from ...common.load_config import get_help_pic
 from ...common.mytypes import CommonUserInfo
 from ...common.prefix_data import prefixes
 from ...common.prompt_data import prompts
 from ...common.user_data import common_users
 from ...common.web.app import start_web_ui, stop_web_ui, HOST, PORT
-from ...utils.text_render import text_to_pic
+from ...utils.render import menu_to_pic
 
 Help_Msg_Path = Path(__file__).parent / "HelpMsg.jpeg"
+Help_Msg_Path.touch()
+Super_Msg_Path = Path(__file__).parent / "HelpMsg.jpeg"
+Super_Msg_Path.touch()
 
 help = on_command("shelp", aliases={"s帮助", "sparkhelp"}, priority=1, block=False)
 
@@ -42,79 +45,75 @@ async def help_(
     from ...common.load_config import (
         PRIVATE_COMMAND,
         PUBLIC_COMMAND,
+        Generated_Super_Msg_Pic,
+        get_super_pic,
         Generated_Help_Msg_Pic,
-        PIC_WIDTH,
+        get_help_pic
     )
-
     command_start = str(foo)
-    help_msg = f"""# 1.使用bot方式
-## (1).使用命令:先查询可用的bot或创建新的bot,然后使用“前缀+bot名称+你所询问的内容 或 刷新指令”,这里前缀 "{PRIVATE_COMMAND}" 使用自己的bot,前缀 "{PUBLIC_COMMAND}" 使用公用的bot.
-> 当询问内容为 刷新指令 也就是 "清除对话" 或 "清空对话" 或"刷新对话" 时,将清除和bot的聊天记录,即重新开始对话
-### 1).私有的bot使用示例为 “{PRIVATE_COMMAND}chat 在吗?” 这里的chat就是我自己的bot,是我创建的,并且可以通过 “{PRIVATE_COMMAND}所有bot” 查询
-### 2).公用的bot使用示例为 “{PUBLIC_COMMAND}chat 在吗?” 这里的chat是公用的bot,可以通过 “{PUBLIC_COMMAND}所有bot” 查询,但只有本插件管理员可以创建
-### 3).清除某个bot的聊天记录的示例为 “{PRIVATE_COMMAND}chat 刷新对话”
-## (2).无需命令:直接回复某个bot的最后一条消息来继续对话
-> 注意公用的bot可能也在和别人对话,所以最后一条消息不一定是发给你的最后一条
-
-# 2.以下是bot管理命令列表,这里有两种不同前缀代表不用含义
-## 使用**{PRIVATE_COMMAND}**前缀表示管理自己的bot
-
-## 使用**{PUBLIC_COMMAND}** 前缀表示管理公用用户的bot
-
-| 命令 | 命令含义 | 命令可用用户 |
-| --- | --- | --- |
-| 所有bot | 查询所有的可用的bot | 所有用户可用 |
-| 创建bot | 创建新的bot(可覆盖同名bot) | {PRIVATE_COMMAND}开头仅SparkGPT管理员可用,{PUBLIC_COMMAND}开头所有用户可用 |
-| 改名bot | 更改bot的名称(可覆盖同名bot) | {PRIVATE_COMMAND}开头仅SparkGPT管理员可用,{PUBLIC_COMMAND}开头所有用户可用 |
-| 删除bot | 删除指定bot | {PRIVATE_COMMAND}开头仅SparkGPT管理员可用,{PUBLIC_COMMAND}开头所有用户可用 |
-
-> 来源为bing和sydneybing的bot可以通过请求内容为"creative", "创造", "balanced", "均衡", "precise", "精确"来切换到对应模式
-> 来源为bing和sydneybing的bot可以通过使用索引数字来使用建议回复,比如直接回复1来使用建议回复1
-
-# 3.以下是用户信息命令列表,所有命令前需要加上前缀{command_start}才能触发。
-
-| 命令 | 命令含义 | 命令可用用户 |
-| --- | --- | --- |
-| 用户信息 | 查询当前用户的通用用户的用户名和密钥.建议私聊使用 | 所有用户可用 |
-| 更改绑定 | 将当前平台账户绑定到指定通用账户,实现跨平台数据互通 | 所有用户可用 |
-
-
-# 4.以下是预设管理命令列表,所有命令前需要加上前缀{command_start}才能触发。
-
-> 预设是指在创建某个bot时,第一条发向这个bot的人格设定,并且刷新时也会一并发送
-
-| 命令 | 命令含义 | 命令可用用户 |
-| --- | --- | --- |
-| 所有预设 | 给出所有预设的名称 | 所有用户可用 |
-| 查询预设 | 查询指定预设的内容 | 所有用户可用 |
-| 添加预设 | 添加新的预设(可覆盖同名预设) | SparkGPT管理员可用 |
-| 改名预设 | 修改预设的名字(可覆盖同名预设) | SparkGPT管理员可用 |
-| 删除预设 | 删除指定预设 | SparkGPT管理员可用 |
-
-# 5.以下是前缀管理命令列表,所有命令前需要加上前缀{command_start}才能触发。
-
-> 前缀是指创建的bot在每次对话时,都将在你的消息前面加上这个前缀,可以使bot的回复的格式和内容满足前缀要求
-
-| 命令 | 命令含义 | 命令可用用户 |
-| --- | --- | --- |
-| 所有前缀 | 给出所有前缀的名称 | 所有用户可用 |
-| 查询前缀 | 查询指定前缀的内容 | 所有用户可用 |
-| 添加前缀 | 添加新的前缀(可覆盖同名前缀) | SparkGPT管理员可用 |
-| 改名前缀 | 修改前缀的名字(可覆盖同名前缀) | SparkGPT管理员可用 |
-| 删除前缀 | 删除指定前缀 | SparkGPT管理员可用 |
-
-# 6.以下是webui管理命令列表,所有命令前需要加上前缀{command_start}才能触发
-
-| 命令 | 命令含义 | 命令可用用户 |
-| --- | --- | --- |
-| 开启webui | 默认开启,打开webui,并返回webui开启的端口(管理员可用) | SparkGPT管理员可用 |
-| 关闭webui | 请在使用webui后关闭(管理员可用) | SparkGPT管理员可用 |
-"""
-    if not Generated_Help_Msg_Pic:
-        await text_to_pic(help_msg, Help_Msg_Path, width=PIC_WIDTH, quality=100)
-        get_help_pic()
-    await send_img(Help_Msg_Path, matcher, bot, event)
-    await matcher.finish()
+    if is_super_user(event, bot):
+        help_dict = {
+            f"{PRIVATE_COMMAND}bot名称+询问的问题": "与指定属于自己的bot对话\n(可使用'回复'来连续对话)",
+            f"{PUBLIC_COMMAND}bot名称+询问的问题": "与指定属于公共的bot对话\n(可使用'回复'来连续对话)",
+            f"{PRIVATE_COMMAND}所有bot": "查询所有的可用的属于自己的bot",
+            f"{PUBLIC_COMMAND}所有bot": "查询所有的可用的公共的bot",
+            f"{PUBLIC_COMMAND}创建bot": "创建新的公用的bot",
+            f"{PUBLIC_COMMAND}改名bot": "更改公用的bot的名称",
+            f"{PUBLIC_COMMAND}删除bot": "删除指定公用的bot",
+            f"{PRIVATE_COMMAND}创建bot": "创建新的属于自己的bot",
+            f"{PRIVATE_COMMAND}改名bot": "更改自己的bot的名称",
+            f"{PRIVATE_COMMAND}删除bot": "删除指定自己的bot",
+            f"{command_start}所有预设": "给出所有预设的名称",
+            f"{command_start}查询预设": "查询指定预设的内容",
+            f"{command_start}添加预设": "添加新的预设(可覆盖同名预设)",
+            f"{command_start}改名预设": "修改预设的名字(可覆盖同名预设)",
+            f"{command_start}删除预设": "删除指定预设",
+            f"{command_start}所有前缀": "给出所有前缀的名称",
+            f"{command_start}查询前缀": "查询指定前缀的内容",
+            f"{command_start}添加前缀": "添加新的前缀(可覆盖同名前缀)",
+            f"{command_start}改名前缀": "修改前缀的名字(可覆盖同名前缀)",
+            f"{command_start}删除前缀": "删除指定前缀",
+            f"{command_start}用户信息": "查询当前用户的通用用户的用户名和密钥.建议私聊使用",
+            f"{command_start}更改绑定": "将当前平台账户绑定到指定通用账户,实现跨平台数据互通",
+            f"{command_start}开启webui": "默认开启,打开webui,并返回webui开启的端口(管理员可用)",
+            f"{command_start}关闭webui": "请在使用webui后关闭(管理员可用)",
+        }
+        if not Generated_Super_Msg_Pic:
+            pic_bytes = await menu_to_pic(help_dict, 800, font_size=30)
+            with open(Super_Msg_Path, "wb") as f:
+                f.write(pic_bytes)
+            get_super_pic()
+        else:
+            with open(Super_Msg_Path, "rb") as f:
+                pic_bytes = f.read()
+        await send_img(pic_bytes, matcher, bot, event)
+        await matcher.finish()
+    else:
+        help_dict = {
+            f"{PRIVATE_COMMAND}bot名称\n+询问的问题": "与指定属于自己的bot对话\n(可使用'回复'来连续对话)",
+            f"{PUBLIC_COMMAND}bot名称\n+询问的问题": "与指定属于公共的bot对话\n(可使用'回复'来连续对话)",
+            f"{PRIVATE_COMMAND}所有bot": "查询所有的可用的属于自己的bot",
+            f"{PUBLIC_COMMAND}所有bot": "查询所有的可用的公共的bot",
+            f"{PRIVATE_COMMAND}创建bot": "创建新的属于自己的bot",
+            f"{PRIVATE_COMMAND}改名bot": "更改自己的bot的名称",
+            f"{PRIVATE_COMMAND}删除bot": "删除指定自己的bot",
+            f"{command_start}所有预设": "给出所有预设的名称",
+            f"{command_start}查询预设": "查询指定预设的内容",
+            f"{command_start}所有前缀": "给出所有前缀的名称",
+            f"{command_start}查询前缀": "查询指定前缀的内容",
+            f"{command_start}用户信息": "查询当前平台账户的通用账户的用户名和密钥.(建议私聊使用)",
+            f"{command_start}更改绑定": "将当前平台账户绑定到指定通用账户,实现跨平台数据互通",
+        }
+        if not Generated_Help_Msg_Pic:
+            pic_bytes = await menu_to_pic(help_dict, 800, font_size=30)
+            with open(Help_Msg_Path, "wb") as f:
+                f.write(pic_bytes)
+            get_help_pic()
+        else:
+            with open(Help_Msg_Path, "rb") as f:
+                pic_bytes = f.read()
+        await send_img(pic_bytes, matcher, bot, event)
+        await matcher.finish()
 
 
 start_web_ui_ = on_command("开启webui", priority=1, block=False)
@@ -222,13 +221,24 @@ async def user_relink__(
 
 all_prompts = on_command("所有预设", priority=1, block=False)
 
+Prompt_Msg_Path = Path(__file__).parent / "PromptMsg.jpeg"
+Prompt_Msg_Path.touch()
+
 
 @all_prompts.handle()
 async def all_prompts_(bot: Bot, matcher: Matcher, event: MessageEvent):
-    from ...common.load_config import SPECIALPIC_WIDTH
-
-    await send_message(
-        prompts.show_list(), matcher, bot, event, plain=False, forcepic=True, width=SPECIALPIC_WIDTH
+    prompts_dict = prompts.show_list()
+    if not prompts.Generated:
+        pic_bytes = await menu_to_pic(menu=prompts_dict, headline="预设列表", width=800,
+                                      description="下面只展示了前200个字符")
+        prompts.generate_pic()
+        with open(Prompt_Msg_Path, "wb") as f:
+            f.write(pic_bytes)
+    else:
+        with open(Prompt_Msg_Path, "rb") as f:
+            pic_bytes = f.read()
+    await send_img(
+        pic_bytes, matcher, bot, event,
     )
     await matcher.finish()
 
@@ -417,13 +427,24 @@ async def change_prompt_name___(
 
 all_prefixes = on_command("所有前缀", priority=1, block=False)
 
+Prefix_Msg_Path = Path(__file__).parent / "PrefixMsg.jpeg"
+Prefix_Msg_Path.touch()
+
 
 @all_prefixes.handle()
 async def all_prefixes_(bot: Bot, matcher: Matcher, event: MessageEvent):
-    from ...common.load_config import SPECIALPIC_WIDTH
-
-    await send_message(
-        prefixes.show_list(), matcher, bot, event, plain=False, forcepic=True, width=SPECIALPIC_WIDTH
+    prefixes_dict = prefixes.show_list()
+    if not prefixes.Generated:
+        pic_bytes = await menu_to_pic(menu=prefixes_dict, headline="前缀列表", width=800,
+                                      description="下面只展示了前200个字符")
+        prefixes.generate_pic()
+        with open(Prefix_Msg_Path, "wb") as f:
+            f.write(pic_bytes)
+    else:
+        with open(Prefix_Msg_Path, "rb") as f:
+            pic_bytes = f.read()
+    await send_img(
+        pic_bytes, matcher, bot, event,
     )
     await matcher.finish()
 

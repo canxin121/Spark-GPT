@@ -64,18 +64,15 @@ def get_able_source():
     }
 
     source_dict = {}
-    source_dict_str = "\n\n| 序号 | 来源名称 | 来源介绍 |\n| --- | --- | --- |\n"
+    source_des_dict = {}
     i = 0
     for source, dict in able_dict.items():
         if dict["able"]:
             i += 1
-            order = str(i)
-            des = dict["des"]
-            source_dict[order] = source
-            source_dict_str += f"| {order} | {source} | {des} |\n"
-    source_dict_str += "\n"
+            source_dict[str(i)] = source
+            source_des_dict[source] = dict["des"]
 
-    return source_dict, source_dict_str
+    return source_dict, source_des_dict
 
 
 def load_all_config():
