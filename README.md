@@ -21,9 +21,7 @@
 </p>
 <div align="left">
 
-> 注意本插件使用了一个第三方程序进行文转图，所以不管你是否熟悉nonebot，请务必查看[(2).安装 wkhtmltopdf用以高效的文转图:](https://canxin121.github.io/docs/docs/Spark_GPT.html#_2-%E5%AE%89%E8%A3%85%E6%9C%AC%E6%8F%92%E4%BB%B6%E5%8F%8A%E4%BE%9D%E8%B5%96%E8%BD%AF%E4%BB%B6)
-
-## 最新版本号1.1.5
+## 最新版本号1.1.7
 # 详细教程-> [![残心文档库](source/doc.png)](https://canxin121.github.io/docs/docs/Spark_GPT.html)  
   
 ---
