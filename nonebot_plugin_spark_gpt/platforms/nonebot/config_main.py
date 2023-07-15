@@ -32,7 +32,7 @@ from ...utils.render import menu_to_pic
 
 Help_Msg_Path = Path(__file__).parent / "HelpMsg.jpeg"
 Help_Msg_Path.touch()
-Super_Msg_Path = Path(__file__).parent / "HelpMsg.jpeg"
+Super_Msg_Path = Path(__file__).parent / "SuperMsg.jpeg"
 Super_Msg_Path.touch()
 
 help = on_command("shelp", aliases={"s帮助", "sparkhelp"}, priority=1, block=False)
