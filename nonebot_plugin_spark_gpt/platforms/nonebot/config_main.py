@@ -28,7 +28,7 @@ from ...common.prefix_data import prefixes
 from ...common.prompt_data import prompts
 from ...common.user_data import common_users
 from ...common.web.app import start_web_ui, stop_web_ui, HOST, PORT
-from ...utils.render import menu_to_pic
+from ...utils.render import list_to_pic, menu_to_pic
 
 Help_Msg_Path = Path(__file__).parent / "HelpMsg.jpeg"
 Help_Msg_Path.touch()
@@ -52,34 +52,42 @@ async def help_(
     )
     command_start = str(foo)
     if is_super_user(event, bot):
-        help_dict = {
-            f"{PRIVATE_COMMAND}bot名称+询问的问题": "与指定属于自己的bot对话\n(可使用'回复'来连续对话)",
-            f"{PUBLIC_COMMAND}bot名称+询问的问题": "与指定属于公共的bot对话\n(可使用'回复'来连续对话)",
-            f"{PRIVATE_COMMAND}所有bot": "查询所有的可用的属于自己的bot",
-            f"{PUBLIC_COMMAND}所有bot": "查询所有的可用的公共的bot",
-            f"{PUBLIC_COMMAND}创建bot": "创建新的公用的bot",
-            f"{PUBLIC_COMMAND}改名bot": "更改公用的bot的名称",
-            f"{PUBLIC_COMMAND}删除bot": "删除指定公用的bot",
-            f"{PRIVATE_COMMAND}创建bot": "创建新的属于自己的bot",
-            f"{PRIVATE_COMMAND}改名bot": "更改自己的bot的名称",
-            f"{PRIVATE_COMMAND}删除bot": "删除指定自己的bot",
-            f"{command_start}所有预设": "给出所有预设的名称",
-            f"{command_start}查询预设": "查询指定预设的内容",
-            f"{command_start}添加预设": "添加新的预设(可覆盖同名预设)",
-            f"{command_start}改名预设": "修改预设的名字(可覆盖同名预设)",
-            f"{command_start}删除预设": "删除指定预设",
-            f"{command_start}所有前缀": "给出所有前缀的名称",
-            f"{command_start}查询前缀": "查询指定前缀的内容",
-            f"{command_start}添加前缀": "添加新的前缀(可覆盖同名前缀)",
-            f"{command_start}改名前缀": "修改前缀的名字(可覆盖同名前缀)",
-            f"{command_start}删除前缀": "删除指定前缀",
-            f"{command_start}用户信息": "查询当前用户的通用用户的用户名和密钥.建议私聊使用",
-            f"{command_start}更改绑定": "将当前平台账户绑定到指定通用账户,实现跨平台数据互通",
-            f"{command_start}开启webui": "默认开启,打开webui,并返回webui开启的端口(管理员可用)",
-            f"{command_start}关闭webui": "请在使用webui后关闭(管理员可用)",
-        }
         if not Generated_Super_Msg_Pic:
-            pic_bytes = await menu_to_pic(help_dict, 800, font_size=30)
+            help_dict = {
+                "私有bot": {"des": "使用和管理自己独有的bot的命令,私有bot只有主人可使用,其他人无法使用", "funcs": {
+                    f"{PRIVATE_COMMAND}bot名称+询问的问题": "与指定属于自己的bot对话\n(可使用'回复'某bot最后一个答案来连续和它对话)\n(可回复'清除历史','刷新对话'来清除bot的对话记忆)",
+                    f"{PRIVATE_COMMAND}所有bot": "查询所有的可用的私有的bot,以获取bot名称和相关信息",
+                    f"{PRIVATE_COMMAND}创建bot": "创建新的私有的bot",
+                    f"{PRIVATE_COMMAND}改名bot": "更改自己的bot的名称",
+                    f"{PRIVATE_COMMAND}删除bot": "删除指定自己的bot",
+                }},
+                "公有bot": {"des": "使用和管理公有的bot的命令", "funcs": {
+                    f"{PUBLIC_COMMAND}bot名称+询问的问题": "与指定属于公共的bot对话\n(可使用'回复'某bot最后一个答案来连续和它对话)\n(可回复'清除历史','刷新对话'来清除bot的对话记忆)",
+                    f"{PUBLIC_COMMAND}所有bot": "查询所有的可用的公共的bot,以获取bot名称和相关信息",
+                    f"{PUBLIC_COMMAND}创建bot": "创建新的公用的bot",
+                    f"{PUBLIC_COMMAND}改名bot": "更改公用的bot的名称",
+                    f"{PUBLIC_COMMAND}删除bot": "删除指定公用的bot",
+                }}, "预设": {"des": "查看和管理预设", "funcs": {
+                    f"{command_start}所有预设": "列出所有预设的名称和缩略的内容",
+                    f"{command_start}查询预设": "查询指定预设的具体详尽内容",
+                    f"{command_start}添加预设": "添加新的预设",
+                    f"{command_start}删除预设": "删除指定预设",
+                    f"{command_start}改名预设": "修改指定预设的名字",
+                }}, "前缀": {"des": "查看和管理前缀", "funcs": {
+                    f"{command_start}所有前缀": "列出所有前缀的的名称和缩略的内容",
+                    f"{command_start}查询前缀": "查询指定前缀的具体详尽内容",
+                    f"{command_start}添加前缀": "添加新的前缀",
+                    f"{command_start}删除前缀": "删除指定前缀",
+                    f"{command_start}改名前缀": "修改指定前缀的名字",
+                }}, "账户信息": {"des": "用来实现跨平台(qq,tg等)同账户身份,同步你的数据", "funcs": {
+                    f"{command_start}用户信息": "查询当前用户的通用用户的用户名和密钥.(5秒后撤回,但建议私聊使用)",
+                    f"{command_start}更改绑定": "将当前平台账户绑定到指定通用账户,实现跨平台数据互通",
+                }}, "webui": {"des": "管理webui", "funcs": {
+                    f"{command_start}开启webui": "默认开启,打开webui,并返回webui开启的端口(管理员可用)",
+                    f"{command_start}关闭webui": "请在使用webui后关闭(管理员可用)",
+                }}
+            }
+            pic_bytes = await menu_to_pic(help_dict, 800)
             with open(Super_Msg_Path, "wb") as f:
                 f.write(pic_bytes)
             get_super_pic()
@@ -89,23 +97,30 @@ async def help_(
         await send_img(pic_bytes, matcher, bot, event)
         await matcher.finish()
     else:
-        help_dict = {
-            f"{PRIVATE_COMMAND}bot名称\n+询问的问题": "与指定属于自己的bot对话\n(可使用'回复'来连续对话)",
-            f"{PUBLIC_COMMAND}bot名称\n+询问的问题": "与指定属于公共的bot对话\n(可使用'回复'来连续对话)",
-            f"{PRIVATE_COMMAND}所有bot": "查询所有的可用的属于自己的bot",
-            f"{PUBLIC_COMMAND}所有bot": "查询所有的可用的公共的bot",
-            f"{PRIVATE_COMMAND}创建bot": "创建新的属于自己的bot",
-            f"{PRIVATE_COMMAND}改名bot": "更改自己的bot的名称",
-            f"{PRIVATE_COMMAND}删除bot": "删除指定自己的bot",
-            f"{command_start}所有预设": "给出所有预设的名称",
-            f"{command_start}查询预设": "查询指定预设的内容",
-            f"{command_start}所有前缀": "给出所有前缀的名称",
-            f"{command_start}查询前缀": "查询指定前缀的内容",
-            f"{command_start}用户信息": "查询当前平台账户的通用账户的用户名和密钥.(建议私聊使用)",
-            f"{command_start}更改绑定": "将当前平台账户绑定到指定通用账户,实现跨平台数据互通",
-        }
         if not Generated_Help_Msg_Pic:
-            pic_bytes = await menu_to_pic(help_dict, 800, font_size=30)
+            help_dict = {
+                "私有bot": {"des": "使用和管理自己独有的bot的命令,私有bot只有主人可使用,其他人无法使用", "funcs": {
+                    f"{PRIVATE_COMMAND}bot名称+询问的问题": "与指定属于自己的bot对话\n(可使用'回复'某bot最后一个答案来连续和它对话)\n(可回复'清除历史','刷新对话'来清除bot的对话记忆)",
+                    f"{PRIVATE_COMMAND}所有bot": "查询所有的可用的私有的bot,以获取bot名称和相关信息",
+                    f"{PRIVATE_COMMAND}创建bot": "创建新的私有的bot",
+                    f"{PRIVATE_COMMAND}改名bot": "更改自己的bot的名称",
+                    f"{PRIVATE_COMMAND}删除bot": "删除指定自己的bot",
+                }},
+                "公有bot": {"des": "使用公有bot的命令", "funcs": {
+                    f"{PUBLIC_COMMAND}bot名称+询问的问题": "与指定属于公共的bot对话\n(可使用'回复'某bot最后一个答案来连续和它对话)\n(可回复'清除历史','刷新对话'来清除bot的对话记忆)",
+                    f"{PUBLIC_COMMAND}所有bot": "查询所有的可用的公共的bot,以获取bot名称和相关信息",
+                }}, "预设": {"des": "预设将在一次和bot的连续对话开始时发送给bot进行初始化,清除对话历史后也将重新初始化", "funcs": {
+                    f"{command_start}所有预设": "列出所有预设的名称和缩略的内容",
+                    f"{command_start}查询预设": "查询指定预设的具体详尽内容",
+                }}, "前缀": {"des": "前缀在每次和bot对话时都会附带在消息前面", "funcs": {
+                    f"{command_start}所有前缀": "列出所有前缀的的名称和缩略的内容",
+                    f"{command_start}查询前缀": "查询指定前缀的具体详尽内容",
+                }}, "账户信息": {"des": "用来实现跨平台(qq,tg等)同账户身份,同步你的数据", "funcs": {
+                    f"{command_start}用户信息": "查询当前用户的通用用户的用户名和密钥.(5秒后撤回,但建议私聊使用)",
+                    f"{command_start}更改绑定": "将当前平台账户绑定到指定通用账户,实现跨平台数据互通",
+                }}
+            }
+            pic_bytes = await menu_to_pic(help_dict, 800)
             with open(Help_Msg_Path, "wb") as f:
                 f.write(pic_bytes)
             get_help_pic()
@@ -229,7 +244,7 @@ Prompt_Msg_Path.touch()
 async def all_prompts_(bot: Bot, matcher: Matcher, event: MessageEvent):
     prompts_dict = prompts.show_list()
     if not prompts.Generated:
-        pic_bytes = await menu_to_pic(menu=prompts_dict, headline="预设列表", width=800,
+        pic_bytes = await list_to_pic(prompts_dict, headline="预设列表", width=800,
                                       description="下面只展示了前200个字符")
         prompts.generate_pic()
         with open(Prompt_Msg_Path, "wb") as f:
@@ -435,7 +450,7 @@ Prefix_Msg_Path.touch()
 async def all_prefixes_(bot: Bot, matcher: Matcher, event: MessageEvent):
     prefixes_dict = prefixes.show_list()
     if not prefixes.Generated:
-        pic_bytes = await menu_to_pic(menu=prefixes_dict, headline="前缀列表", width=800,
+        pic_bytes = await list_to_pic(prefixes_dict, headline="前缀列表", width=800,
                                       description="下面只展示了前200个字符")
         prefixes.generate_pic()
         with open(Prefix_Msg_Path, "wb") as f:

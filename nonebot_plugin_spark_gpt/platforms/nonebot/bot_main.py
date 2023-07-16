@@ -23,7 +23,7 @@ from ...common.mytypes import BotInfo, BotData
 from ...common.prefix_data import prefixes
 from ...common.prompt_data import prompts
 from ...common.user_data import common_users
-from ...utils.render import menu_to_pic
+from ...utils.render import list_to_pic
 from ...utils.utils import is_valid_string
 
 REFRESH_KEYWORDS = [
@@ -124,7 +124,7 @@ async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_Sta
         )
     )
     if not Generated_Source_Pic:
-        pic_bytes = await menu_to_pic(menu=source_des_dict, width=700, headline="来源列表", description="",
+        pic_bytes = await list_to_pic(source_des_dict, width=700, headline="来源列表", description="",
                                       font_size=20)
         get_source_pic()
         with open(Source_Msg_Path, "wb") as f:
@@ -208,7 +208,7 @@ async def new_bot___(
         )
 
         if not prompts.Generated:
-            pic_bytes = await menu_to_pic(menu=prompts_dict, headline="预设列表", width=800,
+            pic_bytes = await list_to_pic(prompts_dict, headline="预设列表", width=800,
                                           description="下面只展示了前200个字符")
             prompts.generate_pic()
             with open(Prompt_Msg_Path, "wb") as f:
@@ -271,7 +271,7 @@ async def new_bot____(
             )
         )
         if not prefixes.Generated:
-            pic_bytes = await menu_to_pic(menu=prefixes_dict, headline="前缀列表", width=800,
+            pic_bytes = await list_to_pic(prefixes_dict, headline="前缀列表", width=800,
                                           description="下面只展示了前200个字符")
             prefixes.generate_pic()
             with open(Prefix_Msg_Path, "wb") as f:

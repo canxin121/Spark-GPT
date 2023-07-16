@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .back {
+            background-color: #d4baad29;
+        }
+
+        html {
+            font-family: "Custom Font";
+            font-size: 27px;
+        }
+
+        @font-face {
+            font-family: "Custom Font";
+            src: url("{{font_path}}");
+        }
+
+        .box {
+            font-family: "Custom Font";
+            display: flex;
+            padding-bottom: 20px;
+            padding-top: 20px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .index {
+            font-family: "Custom Font";
+            width: 30px;
+            height: 30px;
+            background: #E3EDCD;
+            color: #000000;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .left {
+            font-family: "Custom Font";
+            flex: 0.5;
+            font-size: 30px;
+            font-weight: bolder;
+            color: #000000;
+            padding: 6px;
+            border-radius: 20px;
+            text-align: center;
+            border:2px solid black;
+        }
+
+        .right {
+            font-family: "Custom Font";
+            flex: 3;
+            font-size: {{ font_size }}px;
+            font-weight: normal;
+            color: black;
+            background: #fff;
+            border-radius: 10px;
+            border: 2px solid #efefef;
+            position: relative;
+            text-align: center;
+            white-space: pre-wrap;
+        }
+
+        .right:before {
+            font-family: "Custom Font";
+            content: "";
+            position: absolute;
+            left: -15px;
+            top: -15px;
+            width: calc(100% + 30px);
+            height: calc(100% + 30px);
+            border-radius: 10px;
+            z-index: -1;
+            background: var(--pseudo-color);
+        }
+
+        h1 {
+            font-family: "Custom Font";
+            text-align: center;
+        }
+
+        .description {
+            display: block;
+            font-size: 25px !important;
+            font-weight: normal;
+            color: black;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body class="back">
+<h1>{{ headline }}</h1>
+<div class="description">{{ description }}</div>
+{% for key, value in list.items() %}
+    <div class="box">
+        <div class="index">{{ loop.index }}</div>
+        <div class="left">{{ key }}</div>
+        <div class="right">{{ value }}</div>
+    </div>
+{% endfor %}
+
+
+<script>
+    var leftColors = [
+        ["#ffd7d7", "#ffdfdf"],
+        ["#fff0c2", "#fff7e6"],
+        ["#e2f0d9", "#f0fff0"],
+        ["#d4ebf2", "#f0ffff"],
+        ["#d8d0f0", "#f0f0ff"],
+
+        ["#ffccc2", "#ffe7df"],
+        ["#fffbd0", "#ffffe0"],
+        ["#d9eadf", "#e9ffed"],
+        ["#c9ddf5", "#e0f2ff"],
+        ["#e8d9fa", "#f0e8ff"],
+
+
+    ]
+    var rightColors = [
+        ["#ffcecc", "#ffd7d9"],
+        ["#ffffc8", "#ffffd7"],
+        ["#c8e8c9", "#e0ffde"],
+        ["#c7dff1", "#d6ecff"],
+        ["#eedbff", "#ebd4ff"],
+
+        ["#fcd1cc", "#ffc5c8"],
+        ["#ffffaf", "#ffffce"],
+        ["#b7dfb9", "#cef7d0"],
+        ["#a8cae3", "#cbe5ff"],
+        ["#edd4fa", "#dfb6fa"],
+    ]
+
+    var items = document.getElementsByClassName("box");
+
+    for (var i = 0; i < items.length; i++) {
+
+        var left = items[i].getElementsByClassName("left")[0];
+        var right = items[i].getElementsByClassName("right")[0];
+
+
+        var leftColor = leftColors[i % leftColors.length];
+        var rightColor = rightColors[i % rightColors.length];
+
+        left.style.background = "linear-gradient(to right, " + leftColor[0] + ", " + leftColor[1] + ")";
+        right.style.background = "linear-gradient(to right, " + rightColor[0] + ", " + rightColor[1] + ")";
+        right.style.borderColor = "linear-gradient(to right, " + rightColor[0] + ", " + rightColor[1] + ")";
+        right.style.setProperty("--pseudo-color", "linear-gradient(to right, " + rightColor[0] + ", " + rightColor[1] + ")");
+
+    }
+
+</script>
+
+</body>
+</html>

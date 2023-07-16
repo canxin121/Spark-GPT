@@ -8,21 +8,6 @@
         {{  css  }}
     </style>
     <style>
-        .html {
-            font-family: "Custom Font" !important;
-            font-size: 27px !important;
-            border: 3px solid #ccc !important;
-            border-radius: 8px !important;
-            background-color: rgba(199, 237, 204, 0.89) !important;
-        }
-        .body {
-            font-family: "Custom Font" !important;
-            font-size: 27px !important;
-            border: 3px solid #ccc !important;
-            border-radius: 8px !important;
-            background-color: #C7EDCC !important;
-        }
-
         @font-face {
             font-family: "Custom Font" !important;
             src: url("{{font_path}}") !important;
@@ -32,12 +17,14 @@
             font-family: "Custom Font" !important;
             white-space: pre-line !important;
             box-sizing: border-box !important;
-            min-width: 200px !important;
-            max-width: 980px !important;
             margin: 0 auto !important;
-            background-color: #C7EDCC !important;
             padding: 8px !important;
+            border:solid;
             border-radius: 8px !important;
+        }
+        .markdown-body table {
+            font-family: "Custom Font" !important;
+            display:inline-table !important;
         }
 
         @media (max-width: 767px) {
@@ -48,8 +35,8 @@
         }
 
         .markdown-body::after {
-            content: "Spark GPT 1.1.7";
-            font-size: 10px!important;
+            content: "Spark GPT 1.1.8";
+            font-size: 10px !important;
             font-weight: bold;
             color: black;
         }
