@@ -200,7 +200,7 @@ async def new_bot___(
             or state["able_source_dict"][state["source_index"]] == "通义千问"
     ):
         prompts_dict = prompts.show_list()
-        msg = '请设置这个bot的预设\n预设是每次对话开始时向bot首先静默发送过去的内容\n如果不使用预设,请输入"无"或"无预设"\n如果使用本地预设,请输入预设前的数字索引,如使用自己的预设直接发送即可\n输入"算了"或"取消"可以结束当前操作'
+        msg = '请设置这个bot的预设\n预设是每次连续对话开始时发送初始化过去的内容,清除bot的对话历史后也会重新初始化\n\n如果不使用预设,请输入"无"或"无预设"\n如果使用本地预设,请输入预设前的数字索引\n如使用自己的预设直接发送即可\n\n输入"算了"或"取消"可以结束当前操作\n本地预设列表图片将在下面发送:'
         state["replys"].append(
             await send_message(
                 msg, matcher, bot, event,
@@ -263,7 +263,7 @@ async def new_bot____(
         state["prefix_nickname"]
     except Exception:
         prefixes_dict = prefixes.show_list()
-        msg = f'请设置这个bot的前缀\n前缀是指每次对话时都在你的问题前添加一些要求内容,来使boy的回答符合要求\n如果不使用前缀,请输入"无"或"无前缀"\n如果使用本地前缀,请发送前缀前的数字索引,如使用自己的前缀直接发送即可\n输入"算了"或"取消"可以结束当前操作'
+        msg = f'请设置这个bot的前缀\n前缀是指每次对话时都在你的问题前自动添加的一些内容\n\n如果不使用前缀,请输入"无"或"无前缀"\n如果使用本地前缀,请发送前缀前的数字索引,如使用自己的前缀直接发送即可\n\n输入"算了"或"取消"可以结束当前操作\n本地前缀列表图片将在下面发送:'
 
         state["replys"].append(
             await send_message(
