@@ -263,7 +263,7 @@ async def new_bot____(
         state["prefix_nickname"]
     except Exception:
         prefixes_dict = prefixes.show_list()
-        msg = f'请设置这个bot的前缀\n前缀是指每次对话时都在你的问题前自动添加的一些内容\n\n如果不使用前缀,请输入"无"或"无前缀"\n如果使用本地前缀,请发送前缀前的数字索引,如使用自己的前缀直接发送即可\n\n输入"算了"或"取消"可以结束当前操作\n本地前缀列表图片将在下面发送:'
+        msg = f'请设置这个bot的前缀\n前缀是指每次对话时都在你的问题前自动添加的一些内容\n\n如果不使用前缀,请输入"无"或"无前缀"\n如果使用本地前缀,请发送前缀前的数字索引\n如果使用自己的前缀直接发送即可\n\n输入"算了"或"取消"可以结束当前操作\n本地前缀列表图片将在下面发送:'
 
         state["replys"].append(
             await send_message(
