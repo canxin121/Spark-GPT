@@ -63,7 +63,7 @@ class Config(BaseModel):
                 "url_able": "True",
                 "wait_msg_able": "True",
                 "num_limit": "500",
-                "pic_width": "1800",
+                "pic_width": "700",
                 "private_command": "/",
                 "public_command": ".",
             },
