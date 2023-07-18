@@ -84,7 +84,7 @@ class Poe_Bot:
     @run_sync
     def chat_break(self):
         detail_error = "未知错误"
-        retry = 3
+        retry = 1
         if not CLIENT:
             try:
                 self.new_client()
@@ -98,11 +98,11 @@ class Poe_Bot:
             except Exception as e:
                 detail_error = str(e)
                 logger.error(f"Poe在清除会话记录时error:{detail_error}")
-                if retry % 1 == 0:
-                    try:
-                        self.new_client()
-                    except Exception as e:
-                        raise e
+                # # if retry % 1 == 0:
+                #     try:
+                #         self.new_client()
+                #     except Exception as e:
+                #         raise e
                 retry -= 1
         error = f"Poe在清除会话记录时出错次数超过上限:{detail_error}"
         raise Exception(error)
@@ -114,7 +114,7 @@ class Poe_Bot:
                 self.new_client()
             except Exception as e:
                 raise e
-        retry = 3
+        retry = 1
         while retry > 0:
             detail_error = "未知错误"
             try:
@@ -124,11 +124,11 @@ class Poe_Bot:
             except Exception as e:
                 detail_error = str(e)
                 logger.error(f"Poe在询问时error:{str(detail_error)}")
-                if retry % 1 == 0:
-                    try:
-                        self.new_client()
-                    except Exception as e:
-                        raise e
+                # if retry % 1 == 0:
+                #     try:
+                #         self.new_client()
+                #     except Exception as e:
+                #         raise e
                 retry -= 1
         error = f"Poe在询问时错误次数超过上限:{detail_error}"
         logger.error(error)
@@ -144,7 +144,7 @@ class Poe_Bot:
         generated_uuid = uuid.uuid4()
         random_handle = generated_uuid.hex.replace("-", "")[0:15]
         self.botdata.handle = random_handle
-        retry = 3
+        retry = 1
         detail_error = "未知错误"
         while retry > 0:
             try:
@@ -171,7 +171,7 @@ class Poe_Bot:
 
     def new_client(self):
         global CLIENT
-        retry = 3
+        retry = 1
         detail_error = "未知错误"
         while retry > 0:
             try:

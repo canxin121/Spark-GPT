@@ -3,21 +3,22 @@ from pathlib import Path
 import aiofiles
 import markdown
 from nonebot import require
+from jinja2 import Environment, FileSystemLoader
 
 require("nonebot_plugin_htmlrender")
 from nonebot_plugin_htmlrender import html_to_pic
 
-from jinja2 import Environment, FileSystemLoader
+require("nonebot_plugin_templates")
+from nonebot_plugin_templates.templates_render import Font_Path
+
 
 TEMPLATES_PATH = Path(__file__).parent / "templates"
 env = Environment(
     extensions=["jinja2.ext.loopcontrols"],
-    loader=FileSystemLoader(str(Path(__file__).parent / "templates")),
+    loader=FileSystemLoader(str(TEMPLATES_PATH)),
     enable_async=True,
 )
 text_template = env.get_template("markdown.html")
-
-Font_Path = (TEMPLATES_PATH / "PingFang.ttf").as_uri()
 
 
 async def read_file(path: str) -> str:
@@ -29,10 +30,7 @@ async def read_tpl(path: str) -> str:
     return await read_file(f"{TEMPLATES_PATH}/{path}")
 
 
-async def md_to_pic(
-        md: str,
-        width: int = 600,
-):
+async def md_to_pic(md: str, width: int = 600, font_path: str = Font_Path):
     md = markdown.markdown(
         md,
         extensions=[
@@ -59,8 +57,10 @@ async def md_to_pic(
 
     css = await read_tpl("markdown.css") + await read_tpl("pygments-default.css")
     html = await text_template.render_async(
-        md=md, font_path=Font_Path, css=css, extra=extra
+        md=md, font_path=font_path, css=css, extra=extra
     )
+    with open(Path() / "temp.html", "w") as f:
+        f.write(html)
     return await html_to_pic(
         html=html,
         viewport={"width": width, "height": 10},

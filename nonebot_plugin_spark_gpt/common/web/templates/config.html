@@ -121,13 +121,21 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
 <!-- 使用JavaScript动态设置sidebar的高度 -->
-<script> (function () {
-    var sidebar = document.querySelector('.sidebar');
-    var sidebarHeight = sidebar.offsetHeight;
+<script>
+(function() {
+  const sidebar = document.querySelector('.sidebar');
+  const main = document.querySelector('.main');
 
-    var main = document.querySelector('.main');
-    main.style.height = sidebarHeight + 'px';
-})(); </script>
+  const sidebarHeight = sidebar.offsetHeight; 
+  const mainHeight = main.offsetHeight;
+
+  const maxHeight = Math.max(sidebarHeight, mainHeight);
+
+  sidebar.style.height = maxHeight + 'px';
+  main.style.height = maxHeight + 'px';
+
+})();
+</script>
 
 {% if saved %}
     <script> $(document).ready(function () {
