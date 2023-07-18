@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional
 
 import aiofiles
 import markdown
@@ -16,8 +15,6 @@ env = Environment(
     loader=FileSystemLoader(str(Path(__file__).parent / "templates")),
     enable_async=True,
 )
-list_template = env.get_template("list.html")
-menu_template = env.get_template("menus.html")
 text_template = env.get_template("markdown.html")
 
 Font_Path = (TEMPLATES_PATH / "PingFang.ttf").as_uri()

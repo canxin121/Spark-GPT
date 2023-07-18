@@ -8,6 +8,11 @@ from nonebot.params import ArgStr, CommandArg
 from nonebot.params import CommandStart
 from nonebot.plugin import on_command
 from nonebot.typing import T_State
+
+from nonebot import require
+
+require("nonebot_plugin_templates")
+
 from nonebot_plugin_templates.template_types import *
 from nonebot_plugin_templates.templates_render import menu_render, colorlist_render
 

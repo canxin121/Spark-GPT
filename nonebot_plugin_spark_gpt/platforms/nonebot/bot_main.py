@@ -1,10 +1,12 @@
 from pathlib import Path
 
+from nonebot import require
 from nonebot.exception import MatcherException
 from nonebot.matcher import Matcher
 from nonebot.params import ArgStr
 from nonebot.plugin import on_message
 from nonebot.typing import T_State
+require("nonebot_plugin_templates")
 from nonebot_plugin_templates.templates_render import colorlist_render
 
 from .utils import get_question_chatbot
