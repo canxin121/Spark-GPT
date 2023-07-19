@@ -34,7 +34,7 @@ def load_config():
         logger.warning(f"加载Poe配置时warn:{str(e)},无法使用Poe")
 
     try:
-        subscrid = config.get_config(source="Poe配置", config_name="cookie")
+        subscrid = config.get_config(source="Poe配置", config_name="subscribed")
         if subscrid != "True":
             SUBSCRIBE_ABLE = False
             logger.warning(f"加载Poe配置时info:poe设定为未订阅,无法使用poe的订阅功能")
@@ -42,7 +42,7 @@ def load_config():
         SUBSCRIBE_ABLE = False
         logger.warning(f"加载Poe配置时info:poe设定为未订阅,无法使用poe的订阅功能")
     try:
-        WHITE_LIST = config.get_config(source="Poe配置", config_name="whitelist")
+        WHITE_LIST += config.get_config(source="Poe配置", config_name="whitelist")
     except Exception as e:
         logger.warning(f"加载Poe配置时warn:{str(e)},订阅功能白名单用户无法正常获取")
 
@@ -52,7 +52,7 @@ load_config()
 
 class Poe_Bot:
     def __init__(
-            self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData
+            self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData,
     ):
         self.lock = asyncio.Lock()
         self.nickname = bot_info.nickname

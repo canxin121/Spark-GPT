@@ -35,6 +35,8 @@ BOT_DICT = {
     "claude ai": Claude_Bot,
     "poe chatgpt": Poe_Bot,
     "poe claude": Poe_Bot,
+    "poe claude-2-100k": Poe_Bot,
+    "poe chatgpt4": Poe_Bot,
     "bard": Bard_Bot,
     "通义千问": TongYiQianWen_Bot,
 }
