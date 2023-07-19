@@ -8,6 +8,8 @@ PLATFORM = Literal["OneBot V11", "Telegram", "Kaiheila", "Discord"]
 SOURCE = Literal[
     "poe chatgpt",
     "poe claude",
+    "poe chatgpt4",
+    "poe claude-2-100k",
     "chatgpt web",
     "slack claude",
     "claude ai",

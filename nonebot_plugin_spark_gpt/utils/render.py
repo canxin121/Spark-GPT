@@ -59,8 +59,8 @@ async def md_to_pic(md: str, width: int = 600, font_path: str = Font_Path):
     html = await text_template.render_async(
         md=md, font_path=font_path, css=css, extra=extra
     )
-    with open(Path() / "temp.html", "w") as f:
-        f.write(html)
+    # with open(Path() / "temp.html", "w") as f:
+    #     f.write(html)
     return await html_to_pic(
         html=html,
         viewport={"width": width, "height": 10},

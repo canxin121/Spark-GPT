@@ -19,7 +19,7 @@ def get_able_source():
     from .bard import ABLE as BARD_ABLE
     from .spark_desk import ABLE as SPARKDESK_ABLE
     from .tongyiqianwen import ABLE as TongYiQianWen_ABLE
-
+    from .poe import SUBSCRIBE_ABLE as POE_SUBSCRIBE_ABLE
     able_dict = {
         "poe chatgpt": {
             "able": POE_ABLE,
@@ -28,6 +28,14 @@ def get_able_source():
         "poe claude": {
             "able": POE_ABLE,
             "des": "poe网站的claude,支持预设最长约2000字,支持前缀但字数不宜过多",
+        },
+        "poe chatgpt4": {
+            "able": POE_SUBSCRIBE_ABLE,
+            "des": "poe网站的chatgpt4,仅限已定阅用户使用,仅限白名单用户对话使用,支持预设最长约2000字,支持前缀但字数不宜过多",
+        },
+        "poe claude-2-100k": {
+            "able": POE_SUBSCRIBE_ABLE,
+            "des": "poe网站的claude-2-100k,仅限已定阅用户使用,仅限白名单用户对话使用,支持预设最长约2000字,支持前缀但字数不宜过多",
         },
         "chatgpt web": {
             "able": CHATGPTWEB_ABLE,

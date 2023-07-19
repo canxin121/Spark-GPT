@@ -44,6 +44,7 @@ CONFIG_NAMES = (
         "public_command",
         "private_command",
         "wait_msg_able",
+        "subscribed"
     ],
 )
 
@@ -96,6 +97,8 @@ class Config(BaseModel):
             "Poe配置": {
                 "cookie": "",
                 "proxy": "",
+                "subscribed": "False",
+                "whitelist": "[""]"
             },
             "Bard配置": {
                 "__Secure-1PSID": "",

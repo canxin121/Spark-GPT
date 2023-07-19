@@ -67,6 +67,8 @@ COMMENTS = (
         "Poe配置": {
             "cookie": "获取方式为打开https://poe.com/,登录后F12打开开发者工具,在应用程序->cookie中复制p-b项的值,如l_recO0QgugqEyfgMbBc-g%3D%3D",
             "proxy": "访问POE官网时使用的代理链接,请按照协议://地址:端口的格式填写",
+            "whitelist": "允许使用gpt4和claude2 100k的用户的列表,注意填写的是通用用户id,不是qq号或某平台id",
+            "subscribed": "账号是否为订阅账户,只有订阅账户才可使用gpt4 和 claude2 100k,否则将报错"
         },
         "Bard配置": {
             "__Secure-1PSID": "获取方式:打开Bard网页,打开开发者工具中的应用程序,选择其中的cookie,并且复制其中的__Secure-1PSID一项的值复制到这里",

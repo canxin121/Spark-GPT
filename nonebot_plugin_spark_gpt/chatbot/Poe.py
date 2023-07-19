@@ -4,7 +4,7 @@ import uuid
 from nonebot.log import logger
 from nonebot.utils import run_sync
 
-import poe
+from .utils import poe
 from ..common.config import config
 from ..common.mytypes import CommonUserInfo, BotData, BotInfo
 from ..common.user_data import common_users
@@ -12,12 +12,15 @@ from ..common.user_data import common_users
 COOKIE = ""
 PROXY = ""
 ABLE = True
+SUBSCRIBE_ABLE = True
 CLIENT = None
+WHITE_LIST = ""
 
 
 def load_config():
-    global COOKIE, PROXY, ABLE
+    global COOKIE, PROXY, ABLE, SUBSCRIBE_ABLE, WHITE_LIST
     ABLE = True
+    SUBSCRIBE_ABLE = True
     try:
         PROXY = config.get_config(source="Poe配置", config_name="proxy")
     except Exception as e:
@@ -27,7 +30,21 @@ def load_config():
         COOKIE = config.get_config(source="Poe配置", config_name="cookie")
     except Exception as e:
         ABLE = False
+        SUBSCRIBE_ABLE = False
         logger.warning(f"加载Poe配置时warn:{str(e)},无法使用Poe")
+
+    try:
+        subscrid = config.get_config(source="Poe配置", config_name="cookie")
+        if subscrid != "True":
+            SUBSCRIBE_ABLE = False
+            logger.warning(f"加载Poe配置时info:poe设定为未订阅,无法使用poe的订阅功能")
+    except Exception as e:
+        SUBSCRIBE_ABLE = False
+        logger.warning(f"加载Poe配置时info:poe设定为未订阅,无法使用poe的订阅功能")
+    try:
+        WHITE_LIST = config.get_config(source="Poe配置", config_name="whitelist")
+    except Exception as e:
+        logger.warning(f"加载Poe配置时warn:{str(e)},订阅功能白名单用户无法正常获取")
 
 
 load_config()
@@ -45,8 +62,21 @@ class Poe_Bot:
 
         if self.source == "poe claude":
             self.base_model = "a2"
-        else:
+        elif self.source == "poe chatgpt":
             self.base_model = "chinchilla"
+        elif self.source == "poe chatgpt4":
+            if not SUBSCRIBE_ABLE:
+                raise Exception("Poe账户未订阅,无法使用订阅功能")
+            if self.common_userinfo.user_id not in WHITE_LIST:
+                raise Exception("你不在poe订阅功能白名单内,无法使用订阅功能")
+            self.base_model = "beaver"
+        else:
+            if not SUBSCRIBE_ABLE:
+                raise Exception("Poe账户未订阅,无法使用订阅功能")
+            if self.common_userinfo.user_id not in WHITE_LIST:
+                raise Exception("你不在poe订阅功能白名单内,无法使用订阅功能")
+            self.base_model = "a2_2"
+
         if not COOKIE:
             raise Exception("Poe的配置cookie没有填写,无法使用")
 
@@ -54,6 +84,11 @@ class Poe_Bot:
         return hash((self.common_userinfo.user_id, self.nickname))
 
     async def ask(self, question: str):
+        if self.botdata.source == "poe chatgpt4" or self.botdata.source == "poe claude-2-100k":
+            if not SUBSCRIBE_ABLE:
+                raise Exception("Poe账户未订阅,无法使用订阅功能")
+            if not self.common_userinfo.user_id in WHITE_LIST:
+                raise Exception("你不在poe订阅功能白名单内,无法使用订阅功能")
         if self.botdata.prefix:
             question += self.botdata.prefix + "\n" + question
         if not self.botdata.handle:
@@ -66,6 +101,11 @@ class Poe_Bot:
             raise e
 
     async def refresh(self):
+        if self.botdata.source == "poe chatgpt4" or self.botdata.source == "poe claude-2-100k":
+            if not SUBSCRIBE_ABLE:
+                raise Exception("Poe账户未订阅,无法使用订阅功能")
+            if self.common_userinfo.user_id not in WHITE_LIST:
+                raise Exception("你不在poe订阅功能白名单内,无法使用订阅功能")
         if not self.botdata.handle:
             try:
                 await self.new_bot()
