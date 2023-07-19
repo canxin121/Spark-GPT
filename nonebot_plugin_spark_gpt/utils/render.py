@@ -2,15 +2,14 @@ from pathlib import Path
 
 import aiofiles
 import markdown
-from nonebot import require
 from jinja2 import Environment, FileSystemLoader
+from nonebot import require
 
 require("nonebot_plugin_htmlrender")
 from nonebot_plugin_htmlrender import html_to_pic
 
 require("nonebot_plugin_templates")
 from nonebot_plugin_templates.templates_render import Font_Path
-
 
 TEMPLATES_PATH = Path(__file__).parent / "templates"
 env = Environment(
@@ -31,6 +30,8 @@ async def read_tpl(path: str) -> str:
 
 
 async def md_to_pic(md: str, width: int = 600, font_path: str = Font_Path):
+    if md.count("```") % 2 == 1:
+        md += "  \n```"
     md = markdown.markdown(
         md,
         extensions=[

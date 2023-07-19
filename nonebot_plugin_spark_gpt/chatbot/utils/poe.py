@@ -527,7 +527,7 @@ class Client:
         #         raise RuntimeError("Timed out waiting for other messages to send.")
 
         # None indicates that a message is still in progress
-        self.active_messages["pending"] = None
+        # self.active_messages["pending"] = None
 
         # reconnect websocket
         while self.ws_error:
@@ -548,9 +548,9 @@ class Client:
                 "sdid": self.device_id,
                 "withChatBreak": with_chat_break,
             })
-            del self.active_messages["pending"]
+            # del self.active_messages["pending"]
         except Exception as e:
-            del self.active_messages["pending"]
+            # del self.active_messages["pending"]
             raise e
 
         if not message_data["data"]["messageEdgeCreate"]["message"]:
