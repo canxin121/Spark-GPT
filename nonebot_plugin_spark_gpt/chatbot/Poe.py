@@ -1,10 +1,9 @@
 import asyncio
 import uuid
 
+from async_poe_client import Poe_Client
 from nonebot.log import logger
-from nonebot.utils import run_sync
 
-from .utils import poe
 from ..common.config import config
 from ..common.mytypes import CommonUserInfo, BotData, BotInfo
 from ..common.user_data import common_users
@@ -15,6 +14,11 @@ ABLE = True
 SUBSCRIBE_ABLE = True
 CLIENT = None
 WHITE_LIST = ""
+
+
+async def init_client():
+    global CLIENT
+    CLIENT = await Poe_Client(COOKIE, PROXY).create()
 
 
 def load_config():
@@ -37,10 +41,10 @@ def load_config():
         subscrid = config.get_config(source="Poe配置", config_name="subscribed")
         if subscrid != "True":
             SUBSCRIBE_ABLE = False
-            logger.warning(f"加载Poe配置时info:poe设定为未订阅,无法使用poe的订阅功能")
-    except Exception as e:
+            logger.warning("加载Poe配置时info:poe设定为未订阅,无法使用poe的订阅功能")
+    except Exception:
         SUBSCRIBE_ABLE = False
-        logger.warning(f"加载Poe配置时info:poe设定为未订阅,无法使用poe的订阅功能")
+        logger.warning("加载Poe配置时info:poe设定为未订阅,无法使用poe的订阅功能")
     try:
         WHITE_LIST += config.get_config(source="Poe配置", config_name="whitelist")
     except Exception as e:
@@ -61,22 +65,22 @@ class Poe_Bot:
         self.source = bot_data.source
 
         if self.source == "poe claude":
-            self.base_model = "a2"
+            self.botdata.model = "a2"
         elif self.source == "poe chatgpt":
-            self.base_model = "chinchilla"
+            self.botdata.model = "chinchilla"
         elif self.source == "poe chatgpt4":
             if not SUBSCRIBE_ABLE:
                 raise Exception("Poe账户未订阅,无法使用订阅功能")
             if self.common_userinfo.user_id not in WHITE_LIST:
                 raise Exception("你不在poe订阅功能白名单内,无法使用订阅功能")
-            self.base_model = "beaver"
+            self.botdata.model = "beaver"
         else:
             if not SUBSCRIBE_ABLE:
                 raise Exception("Poe账户未订阅,无法使用订阅功能")
             if self.common_userinfo.user_id not in WHITE_LIST:
                 raise Exception("你不在poe订阅功能白名单内,无法使用订阅功能")
-            self.base_model = "a2_2"
-
+            self.botdata.model = "a2_2"
+        common_users.save_userdata(self.common_userinfo)
         if not COOKIE:
             raise Exception("Poe的配置cookie没有填写,无法使用")
 
@@ -84,23 +88,36 @@ class Poe_Bot:
         return hash((self.common_userinfo.user_id, self.nickname))
 
     async def ask(self, question: str):
+        global CLIENT
+        if CLIENT is None:
+            CLIENT = await Poe_Client(COOKIE, PROXY).create()
         if self.botdata.source == "poe chatgpt4" or self.botdata.source == "poe claude-2-100k":
             if not SUBSCRIBE_ABLE:
                 raise Exception("Poe账户未订阅,无法使用订阅功能")
-            if not self.common_userinfo.user_id in WHITE_LIST:
+            if self.common_userinfo.user_id not in WHITE_LIST:
                 raise Exception("你不在poe订阅功能白名单内,无法使用订阅功能")
+        if question in ["1", "2", "3"] and (
+                self.botdata.handle in CLIENT.bots.keys() and "Suggestion" in CLIENT.bots[self.botdata.handle] and
+                CLIENT.bots[self.botdata.handle]["Suggestion"]):
+            question = CLIENT.bots[self.botdata.handle]["Suggestion"][int(question) - 1]
         if self.botdata.prefix:
             question += self.botdata.prefix + "\n" + question
         if not self.botdata.handle:
             await self.refresh()
         try:
-            answer = await self.chat(question)
-
+            answer = ''
+            async for message in CLIENT.ask_stream(url_botname=self.botdata.handle, question=question,
+                                                   suggest_able=True):
+                answer += message
             return answer
         except Exception as e:
-            raise e
+            logger.error(f"Poe询问时出错:{str(e)}")
+            raise Exception(f"Poe询问时出错:{str(e)}")
 
     async def refresh(self):
+        global CLIENT
+        if CLIENT is None:
+            CLIENT = await Poe_Client(COOKIE, PROXY).create()
         if self.botdata.source == "poe chatgpt4" or self.botdata.source == "poe claude-2-100k":
             if not SUBSCRIBE_ABLE:
                 raise Exception("Poe账户未订阅,无法使用订阅功能")
@@ -108,124 +125,22 @@ class Poe_Bot:
                 raise Exception("你不在poe订阅功能白名单内,无法使用订阅功能")
         if not self.botdata.handle:
             try:
-                await self.new_bot()
-                await self.chat(self.botdata.prompt)
+                generated_uuid = uuid.uuid4()
+                self.botdata.handle = generated_uuid.hex.replace("-", "")[0:15]
+                await CLIENT.create_bot(self.botdata.handle, "无", base_model=self.botdata.model,
+                                        suggested_replies=True)
+                if self.botdata.prompt:
+                    await CLIENT.send_message(self.botdata.handle, self.botdata.prompt)
+                common_users.save_userdata(self.common_userinfo)
             except Exception as e:
-                raise e
+                logger.error(f"Poe刷新对话时出错:{str(e)}")
+                raise Exception(f"Poe刷新对话时出错:{str(e)}")
         else:
             try:
-                await self.chat_break()
-                await self.chat(self.botdata.prompt)
+                await CLIENT.send_chat_break(self.botdata.handle)
+                if self.botdata.prompt:
+                    await CLIENT.send_message(self.botdata.handle, self.botdata.prompt)
             except Exception as e:
-                raise e
-
+                logger.error(f"Poe刷新对话时出错:{str(e)}")
+                raise Exception(f"Poe刷新对话时出错:{str(e)}")
         return
-
-    @run_sync
-    def chat_break(self):
-        detail_error = "未知错误"
-        retry = 1
-        if not CLIENT:
-            try:
-                self.new_client()
-            except Exception as e:
-                raise e
-        while retry > 0:
-            error = "未知错误"
-            try:
-                CLIENT.send_chat_break(self.botdata.handle)
-                return
-            except Exception as e:
-                detail_error = str(e)
-                logger.error(f"Poe在清除会话记录时error:{detail_error}")
-                # # if retry % 1 == 0:
-                #     try:
-                #         self.new_client()
-                #     except Exception as e:
-                #         raise e
-                retry -= 1
-        error = f"Poe在清除会话记录时出错次数超过上限:{detail_error}"
-        raise Exception(error)
-
-    @run_sync
-    def chat(self, question: str):
-        if not CLIENT:
-            try:
-                self.new_client()
-            except Exception as e:
-                raise e
-        retry = 1
-        while retry > 0:
-            detail_error = "未知错误"
-            try:
-                for chunk in CLIENT.send_message(self.botdata.handle, question):
-                    pass
-                return chunk["text"]
-            except Exception as e:
-                detail_error = str(e)
-                logger.error(f"Poe在询问时error:{str(detail_error)}")
-                # if retry % 1 == 0:
-                #     try:
-                #         self.new_client()
-                #     except Exception as e:
-                #         raise e
-                retry -= 1
-        error = f"Poe在询问时错误次数超过上限:{detail_error}"
-        logger.error(error)
-        raise Exception(error)
-
-    @run_sync
-    def new_bot(self):
-        if not CLIENT:
-            try:
-                self.new_client()
-            except Exception as e:
-                raise e
-        generated_uuid = uuid.uuid4()
-        random_handle = generated_uuid.hex.replace("-", "")[0:15]
-        self.botdata.handle = random_handle
-        retry = 1
-        detail_error = "未知错误"
-        while retry > 0:
-            try:
-                CLIENT.create_bot(
-                    self.botdata.handle,
-                    "在吗",
-                    base_model=self.base_model,
-                )
-                common_users.save_userdata(common_userinfo=self.common_userinfo)
-                return
-            except Exception as e:
-                detail_error = str(e)
-                logger.error(f"Poe在创建新的bot时报错:{detail_error}")
-                if retry == 1:
-                    try:
-                        self.new_client()
-                    except Exception as e:
-                        raise e
-                retry -= 1
-
-        error = f"Poe在创建新的bot时报错次数超出上限:{detail_error}"
-        logger.error(error)
-        raise Exception(error)
-
-    def new_client(self):
-        global CLIENT
-        retry = 1
-        detail_error = "未知错误"
-        while retry > 0:
-            try:
-                if PROXY:
-                    CLIENT = poe.Client(token=COOKIE, proxy=PROXY)
-                    return
-                else:
-                    CLIENT = poe.Client(token=COOKIE)
-                    return
-            except Exception as e:
-                detail_error = str(e)
-                retry -= 1
-                error = f"Poe在生成新的Client时报错:{detail_error}"
-                logger.error(error)
-        error = f"Poe在生成新的Client时报错次数超出上限:{detail_error}"
-        logger.error(error)
-        raise Exception(error)

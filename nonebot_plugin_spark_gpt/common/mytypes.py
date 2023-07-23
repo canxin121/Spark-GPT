@@ -26,6 +26,7 @@ class BotData(BaseModel):
 
     """poe"""
     handle: Optional[str]
+    model: Optional[str]
     """chatgpt web"""
     conversation_id: Optional[str]
     parent_id: Optional[str]

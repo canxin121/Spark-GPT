@@ -93,6 +93,7 @@ class ChatGPT_web_Bot:
             if not self.authorization:
                 raise Exception("Token获取失败,请检查配置或API是否可用")
         retry = 3
+        detail_error = "未知错误"
         while retry > 0:
             try:
                 if PROXIES:
@@ -171,7 +172,7 @@ class ChatGPT_web_Bot:
                         if not data_list:
                             raise Exception("ChatGPT 服务器未返回任何内容")
                         idx = -1
-                        while data_list[idx]["error"]:
+                        while "error" not in data_list[idx].keys():
                             idx -= 1
                         answer_json = data_list[idx]
                         answer_text = answer_json["message"]["content"]["parts"][0]
@@ -181,9 +182,10 @@ class ChatGPT_web_Bot:
 
                         return answer_text
             except Exception as e:
-                logger.error(f"ChatGPT web在发送请求时出错:{str(e)}")
+                detail_error = str(e) if str(e) else "未知错误"
+                logger.error(f"ChatGPT web在发送请求时出错:{detail_error}")
                 retry -= 1
-        raise Exception("ChatGPT在发送请求时错误次数超过上限")
+        raise Exception(f"ChatGPT在发送请求时错误次数超过上限:{detail_error}")
 
     async def refresh_session(self) -> None:
         global SESSION_TOKEN

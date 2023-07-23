@@ -4,7 +4,6 @@ PRIVATE_COMMAND = "/"
 PUBLIC_COMMAND = "."
 Generated_Help_Msg_Pic = False
 Generated_Super_Msg_Pic = False
-Generated_Source_Pic = False
 
 PICABLE = "Auto"
 NUMLIMIT = 850
@@ -55,8 +54,3 @@ def get_help_pic():
 def get_super_pic():
     global Generated_Super_Msg_Pic
     Generated_Super_Msg_Pic = True
-
-
-def get_source_pic():
-    global Generated_Source_Pic
-    Generated_Source_Pic = True

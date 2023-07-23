@@ -44,7 +44,8 @@ CONFIG_NAMES = (
         "public_command",
         "private_command",
         "wait_msg_able",
-        "subscribed"
+        "subscribed",
+        "__Secure-1PSIDTS"
     ],
 )
 
@@ -102,6 +103,7 @@ class Config(BaseModel):
             },
             "Bard配置": {
                 "__Secure-1PSID": "",
+                "__Secure-1PSIDTS": "",
                 "proxy": "",
             },
             "通义千问配置": {

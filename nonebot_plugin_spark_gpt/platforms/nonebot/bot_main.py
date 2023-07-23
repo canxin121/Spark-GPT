@@ -6,6 +6,7 @@ from nonebot.matcher import Matcher
 from nonebot.params import ArgStr
 from nonebot.plugin import on_message
 from nonebot.typing import T_State
+
 require("nonebot_plugin_templates")
 from nonebot_plugin_templates.templates_render import colorlist_render
 
@@ -98,8 +99,8 @@ Source_Msg_Path.touch()
 
 @new_bot.handle()
 async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_State):
-    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND, Generated_Source_Pic, get_source_pic
-
+    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
+    from ...chatbot.load_config import Generated_Source_Pic, get_source_pic
     raw_message = event.get_plaintext()
     if not raw_message.startswith(
             (f"{PRIVATE_COMMAND}创建bot", f"{PUBLIC_COMMAND}创建bot")

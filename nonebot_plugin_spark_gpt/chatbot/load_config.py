@@ -9,6 +9,8 @@ from .tongyiqianwen import load_config as load_tongyiqianwen_config
 from ..common.config import CONFIG_SOURCE
 from ..common.load_config import load_command_config
 
+Generated_Source_Pic = False
+
 
 def get_able_source():
     from .chatgpt_web import ABLE as CHATGPTWEB_ABLE
@@ -110,8 +112,15 @@ CONFIG_DICT = {
 
 
 def load_config(source: CONFIG_SOURCE):
+    global Generated_Source_Pic
+    Generated_Source_Pic = False
     config_func = CONFIG_DICT.get(source)
     if config_func:
         config_func()
     else:
         raise Exception(f"load_config时error: 无效的配置源: {source}")
+
+
+def get_source_pic():
+    global Generated_Source_Pic
+    Generated_Source_Pic = True

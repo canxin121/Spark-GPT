@@ -72,6 +72,7 @@ COMMENTS = (
         },
         "Bard配置": {
             "__Secure-1PSID": "获取方式:打开Bard网页,打开开发者工具中的应用程序,选择其中的cookie,并且复制其中的__Secure-1PSID一项的值复制到这里",
+            "__Secure-1PSIDTS": "获取方式:打开Bard网页,打开开发者工具中的应用程序,选择其中的cookie,并且复制其中的__Secure-1PSIDTS一项的值复制到这里",
             "proxy": "访问Bard官网时使用的代理链接,请按照协议://地址:端口的格式填写",
         },
         "通义千问配置": {

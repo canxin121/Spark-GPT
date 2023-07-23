@@ -21,7 +21,7 @@
 </p>
 <div align="left">
 
-## 最新版本号1.2.1
+## 最新版本号1.2.3
 # 详细教程-> [![残心文档库](source/doc.png)](https://canxin121.github.io/docs/docs/Spark_GPT.html)  
   
 ---
@@ -29,7 +29,7 @@
 
 ## 功能特性
 
-- 汇聚众多来源的gpt(poe(chatgpt+claude),chatgpt网页版,Newbing,slack claude,讯飞星火,通义千问),支持多平台(tg,kook(
+- 汇聚众多来源的gpt(poe(chatgpt+claude),chatgpt网页版,Newbing,Sdyney bing,slack claude,claude ai,讯飞星火,通义千问),支持多平台(tg,kook(
   原开黑啦),qq(gocq),discord)使用且不同平台用户数据绑定互通
 - 支持人格预设和前缀系统,支持文转图文转链接,支持每个用户创建不同来源不同人格的bot,同时支持公用共同的bot
 - 注重提示词工程,通过提示词工程可以实现角色扮演,要求回复格式,如实现EitherChoice的对比功能

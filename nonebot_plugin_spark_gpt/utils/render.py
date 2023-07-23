@@ -30,6 +30,7 @@ async def read_tpl(path: str) -> str:
 
 
 async def md_to_pic(md: str, width: int = 600, font_path: str = Font_Path):
+    md = md.replace("\n", "  \n")
     if md.count("```") % 2 == 1:
         md += "  \n```"
     md = markdown.markdown(
