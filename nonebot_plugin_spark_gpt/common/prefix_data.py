@@ -20,7 +20,7 @@ class prefixes(BaseModel):
         }
         try:
             self.load()
-        except Exception as e:
+        except Exception:
             # logger.error(str(e))
             pass
 
@@ -37,7 +37,8 @@ class prefixes(BaseModel):
 
     def show_list(self):
         """获取所有的prefixes的名称"""
-        return {k: v[:200] for k, v in self.prefixes.items()}
+        from ..common.load_config import SHOW_NUM
+        return {k: v[:SHOW_NUM] for k, v in self.prefixes.items()}
 
     def show_prefix(self, prefix_name: str):
         """获取指定prefix的预设内容"""

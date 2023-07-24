@@ -2,14 +2,13 @@ import asyncio
 from pathlib import Path
 from typing import Annotated
 
+from nonebot import require
 from nonebot.exception import MatcherException
 from nonebot.matcher import Matcher
 from nonebot.params import ArgStr, CommandArg
 from nonebot.params import CommandStart
 from nonebot.plugin import on_command
 from nonebot.typing import T_State
-
-from nonebot import require
 
 require("nonebot_plugin_templates")
 
@@ -61,7 +60,7 @@ async def help_(
         if not Generated_Super_Msg_Pic:
             menu = Menu("私有bot", des="使用和管理自己独有的bot的命令,私有bot只有主人可使用,其他人无法使用",
                         funcs=Funcs(Func(f"{PRIVATE_COMMAND}bot名称+询问的问题",
-                                         "与指定属于自己的bot对话\n(可使用'回复'某bot最后一个答案来连续和它对话)\n(可回复'清除历史','刷新对话'来清除bot的对话记忆)") +
+                                         "与指定属于自己的bot对话\n(可使用'回复'某bot最后一个答案来连续和它对话)\n(可回复'清除历史','刷新对话'来清除bot的对话记忆)\n(可以通过发送'创造','平衡','精确'切换bing模式)") +
                                     Func(f"{PRIVATE_COMMAND}所有bot",
                                          "查询所有的可用的私有的bot,以获取bot名称和相关信息") +
                                     Func(f"{PRIVATE_COMMAND}创建bot", "创建新的私有的bot") +
@@ -70,7 +69,7 @@ async def help_(
             menu += Menu("公有bot", des="使用和管理公有的bot的命令",
                          funcs=Funcs(
                              Func(f"{PUBLIC_COMMAND}bot名称+询问的问题",
-                                  "与指定属于公共的bot对话\n(可使用'回复'某bot最后一个答案来连续和它对话)\n(可回复'清除历史','刷新对话'来清除bot的对话记忆)") +
+                                  "与指定属于公共的bot对话\n(可使用'回复'某bot最后一个答案来连续和它对话)\n(可回复'清除历史','刷新对话'来清除bot的对话记忆)\n(可以通过发送'创造','平衡','精确'切换bing模式)") +
                              Func(f"{PUBLIC_COMMAND}所有bot", "查询所有的可用的公共的bot,以获取bot名称和相关信息") +
                              Func(f"{PUBLIC_COMMAND}创建bot", "创建新的公用的bot") +
                              Func(f"{PUBLIC_COMMAND}改名bot", "更改公用的bot的名称") +
@@ -110,7 +109,7 @@ async def help_(
         if not Generated_Help_Msg_Pic:
             menu = Menu("私有bot", des="使用和管理自己独有的bot的命令,私有bot只有主人可使用,其他人无法使用",
                         funcs=Funcs(Func(f"{PRIVATE_COMMAND}bot名称+询问的问题",
-                                         "与指定属于自己的bot对话\n(可使用'回复'某bot最后一个答案来连续和它对话)\n(可回复'清除历史','刷新对话'来清除bot的对话记忆)") +
+                                         "与指定属于自己的bot对话\n(可使用'回复'某bot最后一个答案来连续和它对话)\n(可回复'清除历史','刷新对话'来清除bot的对话记忆)\n(可以通过发送'创造','平衡','精确'切换bing模式)") +
                                     Func(f"{PRIVATE_COMMAND}所有bot",
                                          "查询所有的可用的私有的bot,以获取bot名称和相关信息") +
                                     Func(f"{PRIVATE_COMMAND}创建bot", "创建新的私有的bot") +
@@ -119,7 +118,7 @@ async def help_(
             menu += Menu("公有bot", des="使用和管理公有的bot的命令",
                          funcs=Funcs(
                              Func(f"{PUBLIC_COMMAND}bot名称+询问的问题",
-                                  "与指定属于公共的bot对话\n(可使用'回复'某bot最后一个答案来连续和它对话)\n(可回复'清除历史','刷新对话'来清除bot的对话记忆)") +
+                                  "与指定属于公共的bot对话\n(可使用'回复'某bot最后一个答案来连续和它对话)\n(可回复'清除历史','刷新对话'来清除bot的对话记忆)\n(可以通过发送'创造','平衡','精确'切换bing模式)") +
                              Func(f"{PUBLIC_COMMAND}所有bot", "查询所有的可用的公共的bot,以获取bot名称和相关信息")))
             menu += Menu("预设", des="查看和管理预设",
                          funcs=Funcs(

@@ -8,21 +8,18 @@ from ..common.config import config
 from ..common.mytypes import CommonUserInfo, BotData, BotInfo
 from ..common.user_data import common_users
 
-COOKIE = ""
+P_B = ""
+FORMKEY = ""
 PROXY = ""
 ABLE = True
 SUBSCRIBE_ABLE = True
+SUGGEST_ABLE = True
 CLIENT = None
 WHITE_LIST = ""
 
 
-async def init_client():
-    global CLIENT
-    CLIENT = await Poe_Client(COOKIE, PROXY).create()
-
-
 def load_config():
-    global COOKIE, PROXY, ABLE, SUBSCRIBE_ABLE, WHITE_LIST
+    global P_B, FORMKEY, PROXY, ABLE, SUBSCRIBE_ABLE, WHITE_LIST, SUGGEST_ABLE
     ABLE = True
     SUBSCRIBE_ABLE = True
     try:
@@ -31,15 +28,29 @@ def load_config():
         logger.info(f"加载Poe配置时warn:{str(e)},如果你已经配置了分流或全局代理,请无视此warn")
 
     try:
-        COOKIE = config.get_config(source="Poe配置", config_name="cookie")
+        P_B = config.get_config(source="Poe配置", config_name="p_b")
     except Exception as e:
         ABLE = False
         SUBSCRIBE_ABLE = False
         logger.warning(f"加载Poe配置时warn:{str(e)},无法使用Poe")
-
     try:
-        subscrid = config.get_config(source="Poe配置", config_name="subscribed")
-        if subscrid != "True":
+        FORMKEY = config.get_config(source="Poe配置", config_name="formkey")
+    except Exception as e:
+        ABLE = False
+        SUBSCRIBE_ABLE = False
+        logger.warning(f"加载Poe配置时warn:{str(e)},无法使用Poe")
+    try:
+        arg = config.get_config(source="Poe配置", config_name="suggest_able")
+        if arg == "True":
+            SUGGEST_ABLE = True
+        else:
+            SUGGEST_ABLE = False
+    except Exception as e:
+        SUGGEST_ABLE = False
+        logger.warning(f"加载Poe配置时warn:{str(e)},没有建议回复")
+    try:
+        subscribed = config.get_config(source="Poe配置", config_name="subscribed")
+        if subscribed != "True":
             SUBSCRIBE_ABLE = False
             logger.warning("加载Poe配置时info:poe设定为未订阅,无法使用poe的订阅功能")
     except Exception:
@@ -81,7 +92,7 @@ class Poe_Bot:
                 raise Exception("你不在poe订阅功能白名单内,无法使用订阅功能")
             self.botdata.model = "a2_2"
         common_users.save_userdata(self.common_userinfo)
-        if not COOKIE:
+        if not P_B and FORMKEY:
             raise Exception("Poe的配置cookie没有填写,无法使用")
 
     def __hash__(self) -> int:
@@ -90,7 +101,7 @@ class Poe_Bot:
     async def ask(self, question: str):
         global CLIENT
         if CLIENT is None:
-            CLIENT = await Poe_Client(COOKIE, PROXY).create()
+            CLIENT = await Poe_Client(P_B, FORMKEY, PROXY).create()
         if self.botdata.source == "poe chatgpt4" or self.botdata.source == "poe claude-2-100k":
             if not SUBSCRIBE_ABLE:
                 raise Exception("Poe账户未订阅,无法使用订阅功能")
@@ -117,7 +128,7 @@ class Poe_Bot:
     async def refresh(self):
         global CLIENT
         if CLIENT is None:
-            CLIENT = await Poe_Client(COOKIE, PROXY).create()
+            CLIENT = await Poe_Client(P_B, FORMKEY, PROXY).create()
         if self.botdata.source == "poe chatgpt4" or self.botdata.source == "poe claude-2-100k":
             if not SUBSCRIBE_ABLE:
                 raise Exception("Poe账户未订阅,无法使用订阅功能")
@@ -128,7 +139,7 @@ class Poe_Bot:
                 generated_uuid = uuid.uuid4()
                 self.botdata.handle = generated_uuid.hex.replace("-", "")[0:15]
                 await CLIENT.create_bot(self.botdata.handle, "无", base_model=self.botdata.model,
-                                        suggested_replies=True)
+                                        suggested_replies=SUGGEST_ABLE)
                 if self.botdata.prompt:
                     await CLIENT.send_message(self.botdata.handle, self.botdata.prompt)
                 common_users.save_userdata(self.common_userinfo)

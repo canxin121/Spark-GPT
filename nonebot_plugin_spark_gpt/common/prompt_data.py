@@ -28,7 +28,7 @@ class Prompts(BaseModel):
         }
         try:
             self.load()
-        except Exception as e:
+        except Exception:
             # logger.error(str(e))
             pass
 
@@ -53,7 +53,8 @@ class Prompts(BaseModel):
 
     def show_list(self):
         """获取所有的prompts的名称"""
-        return {k: v[:200] for k, v in self.prompts.items()}
+        from ..common.load_config import SHOW_NUM
+        return {k: v[:SHOW_NUM] for k, v in self.prompts.items()}
 
     def change(self, prompt_name: str, prompt: str):
         self.Generated = False

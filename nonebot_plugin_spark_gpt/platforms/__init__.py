@@ -1,1 +1,2 @@
-from . import nonebot
+from . import bot_main
+from . import config_main

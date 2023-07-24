@@ -17,38 +17,6 @@ CONFIG_SOURCE = (
         "Claude Ai配置",
     ],
 )
-CONFIG_NAMES = (
-    Literal[
-        "__Secure-1PSID",
-        "superusers",
-        "cookie",
-        "proxy",
-        "pic_able",
-        "url_able",
-        "suggest_able",
-        "num_limit",
-        "mode",
-        "wss_link",
-        "cookie",
-        "fd",
-        "GtToken",
-        "sid",
-        "session token",
-        "model",
-        "api_url",
-        "channel_id",
-        "claude_id",
-        "slack_user_token",
-        "XSRF_TOKEN",
-        "pic_width",
-        "public_command",
-        "private_command",
-        "wait_msg_able",
-        "subscribed",
-        "__Secure-1PSIDTS"
-    ],
-)
-
 
 class Config(BaseModel):
     path: Path = Field(None, description="配置文件的存储路径")
@@ -68,6 +36,7 @@ class Config(BaseModel):
                 "pic_width": "700",
                 "private_command": "/",
                 "public_command": ".",
+                "show_num": "50"
             },
             "Newbing配置": {
                 "cookie": "",
@@ -96,7 +65,9 @@ class Config(BaseModel):
                 "proxy": "",
             },
             "Poe配置": {
-                "cookie": "",
+                "p_b": "",
+                "formkey": "",
+                "suggest_able":"True",
                 "proxy": "",
                 "subscribed": "False",
                 "whitelist": "[""]"
@@ -116,7 +87,7 @@ class Config(BaseModel):
         self.save()
 
     def change_config(
-            self, source: CONFIG_SOURCE, config_name: CONFIG_NAMES, config: str
+            self, source: CONFIG_SOURCE, config_name: str, config: str
     ):
         """修改配置项"""
         if source in self.config.keys():
@@ -132,7 +103,7 @@ class Config(BaseModel):
             raise Exception("没有这个来源的配置")
         self.save()
 
-    def get_config(self, source: CONFIG_SOURCE, config_name: CONFIG_NAMES):
+    def get_config(self, source: CONFIG_SOURCE, config_name: str):
         """获取配置项"""
         if source in self.config.keys():
             if config_name in self.config[source].keys():
@@ -160,7 +131,7 @@ class Config(BaseModel):
                     for key in data[eachdict].keys():
                         if key in self.config[eachdict].keys():
                             self.config[eachdict][key] = data[eachdict][key]
-        except Exception as e:
+        except Exception:
             # logger.error(str(e))
             pass
 

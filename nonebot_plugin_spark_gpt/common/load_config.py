@@ -10,7 +10,7 @@ NUMLIMIT = 850
 URLABLE = "True"
 WAIT_MSG_ABLE = "True"
 PIC_WIDTH = 1800
-
+SHOW_NUM = 20
 CONFIG_DICT = {
     "private_command": None,
     "public_command": None,
@@ -18,7 +18,8 @@ CONFIG_DICT = {
     "pic_width": 1800,
     "wait_msg_able": "True",
     "num_limit": 800,
-    "url_able": False
+    "url_able": False,
+    "show_name": 50
 }
 
 
@@ -26,12 +27,13 @@ def load_command_config():
     def get_config(key):
         return config.get_config("总控配置", key) or CONFIG_DICT[key]
 
-    global PRIVATE_COMMAND, PUBLIC_COMMAND, Generated_Help_Msg_Pic, PICABLE, NUMLIMIT, URLABLE, PIC_WIDTH, SPECIALPIC_WIDTH, WAIT_MSG_ABLE, Generated_Super_Msg_Pic, Generated_Source_Pic
+    global PRIVATE_COMMAND, PUBLIC_COMMAND, Generated_Help_Msg_Pic, SHOW_NUM, PICABLE, NUMLIMIT, URLABLE, PIC_WIDTH, SPECIALPIC_WIDTH, WAIT_MSG_ABLE, Generated_Super_Msg_Pic, Generated_Source_Pic
     PRIVATE_COMMAND = get_config("private_command")
     PUBLIC_COMMAND = get_config("public_command")
     PICABLE = get_config("pic_able")
     PIC_WIDTH = int(get_config("pic_width"))
     WAIT_MSG_ABLE = get_config("wait_msg_able")
+    SHOW_NUM = int(get_config("show_num"))
     Generated_Help_Msg_Pic = False
     Generated_Super_Msg_Pic = False
     Generated_Source_Pic = False

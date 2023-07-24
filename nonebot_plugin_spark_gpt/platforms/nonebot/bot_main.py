@@ -117,7 +117,7 @@ async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_Sta
     state["able_source_dict"], source_des_dict = get_able_source()
 
     state["replys"] = []
-    msg = f"请输入要创建的bot的来源的序号\n输入'算了'或'取消'可以结束当前操作\n可选项如下图:"
+    msg = "请输入要创建的bot的来源的序号\n输入'算了'或'取消'可以结束当前操作\n可选项如下图:"
 
     state["replys"].append(
         await send_message(
@@ -147,6 +147,10 @@ async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_Sta
     )
 
 
+Prompt_Msg_Path = Path(__file__).parent / "PromptMsg.jpeg"
+Prompt_Msg_Path.touch()
+
+
 @new_bot.got("source_index")
 async def new_bot__(
         matcher: Matcher,
@@ -165,40 +169,6 @@ async def new_bot__(
         await delete_messages(bot, event, state["replys"])
         await matcher.finish()
 
-    state["replys"].append(
-        await send_message(
-            "请为这个新bot设置一个独一无二的昵称\n只允许使用中文,英文,数字组成\n输入'算了'或'取消'可以结束当前操作",
-            matcher,
-            bot,
-            event,
-        )
-    )
-
-
-Prompt_Msg_Path = Path(__file__).parent / "PromptMsg.jpeg"
-Prompt_Msg_Path.touch()
-
-
-@new_bot.got("bot_nickname")
-async def new_bot___(
-        matcher: Matcher,
-        event: MessageEvent,
-        state: T_State,
-        bot: Bot,
-        args: str = ArgStr("bot_nickname"),
-):
-    await if_close(event, matcher, bot, state["replys"])
-
-    bot_nickname = str(args).replace("\n", "").replace("\r", "").replace(" ", "")
-
-    if not is_valid_string(bot_nickname):
-        msg = "bot的名称不能包含特殊字符,只允许中文英文和数字,请重新开始"
-        await send_message(msg, matcher, bot, event)
-        await delete_messages(bot, event, state["replys"])
-        await matcher.finish()
-    else:
-        state["bot_nickname"] = bot_nickname
-
     if not (
             state["able_source_dict"][state["source_index"]] == "bing"
             or state["able_source_dict"][state["source_index"]] == "bard"
@@ -214,7 +184,7 @@ async def new_bot___(
 
         if not prompts.Generated:
             pic_bytes = await colorlist_render(prompts_dict, headline="预设列表", width=800,
-                                               description="下面只展示了前200个字符")
+                                               description="")
             prompts.generate_pic()
             with open(Prompt_Msg_Path, "wb") as f:
                 f.write(pic_bytes)
@@ -271,7 +241,7 @@ async def new_bot____(
         state["prefix_nickname"]
     except Exception:
         prefixes_dict = prefixes.show_list()
-        msg = f'请设置这个bot的前缀\n前缀是指每次对话时都在你的问题前自动添加的一些内容\n\n如果不使用前缀,请输入"无"或"无前缀"\n如果使用本地前缀,请发送前缀前的数字索引\n如果使用自己的前缀直接发送即可\n\n输入"算了"或"取消"可以结束当前操作\n本地前缀列表图片将在下面发送:'
+        msg = '请设置这个bot的前缀\n前缀是指每次对话时都在你的问题前自动添加的一些内容\n\n如果不使用前缀,请输入"无"或"无前缀"\n如果使用本地前缀,请发送前缀前的数字索引\n如果使用自己的前缀直接发送即可\n\n输入"算了"或"取消"可以结束当前操作\n本地前缀列表图片将在下面发送:'
 
         state["replys"].append(
             await send_message(
@@ -280,7 +250,7 @@ async def new_bot____(
         )
         if not prefixes.Generated:
             pic_bytes = await colorlist_render(prefixes_dict, headline="前缀列表", width=800,
-                                               description="下面只展示了前200个字符")
+                                               description="")
             prefixes.generate_pic()
             with open(Prefix_Msg_Path, "wb") as f:
                 f.write(pic_bytes)
@@ -320,30 +290,120 @@ async def new_bot______(
         except Exception:
             await send_message("没有这个本地前缀数字索引", matcher, bot, event)
             await matcher.finish()
+    state["prefix"] = prefix
+    state["prefix_nickname"] = prefix_nickname
 
-    common_userinfo = state["common_userinfo"]
-    bot_nickname = state["bot_nickname"]
-
-    prompt_nickname = state["prompt_nickname"]
-    prompt = state["prompt"]
-
-    botinfo = BotInfo(nickname=bot_nickname, owner=common_userinfo)
-    try:
-        temp_bots.add_new_bot(
-            common_userinfo=common_userinfo,
-            botinfo=botinfo,
-            botdata=BotData(
-                nickname=bot_nickname,
-                prompt_nickname=prompt_nickname,
-                prompt=prompt,
-                prefix_nickname=prefix_nickname,
-                prefix=prefix,
-                source=state["able_source_dict"][state["source_index"]],
-            ),
+    state["replys"].append(
+        await send_message(
+            "请为这个新bot设置一个独一无二的昵称\n只允许使用中文,英文,数字组成\n输入'算了'或'取消'可以结束当前操作",
+            matcher,
+            bot,
+            event,
         )
-        pre_command = state["pre_command"]
-        msg = f"成功添加了bot,使用命令{pre_command}{bot_nickname}加上你要询问的内容即可使用该bot"
+    )
+
+
+@new_bot.got("bot_nickname")
+async def new_bot___(
+        matcher: Matcher,
+        event: MessageEvent,
+        state: T_State,
+        bot: Bot,
+        args: str = ArgStr("bot_nickname"),
+):
+    await if_close(event, matcher, bot, state["replys"])
+
+    bot_nickname = str(args).replace("\n", "").replace("\r", "").replace(" ", "")
+
+    if not is_valid_string(bot_nickname):
+        msg = "bot的名称不能包含特殊字符,只允许中文英文和数字,请重新开始"
         await send_message(msg, matcher, bot, event)
+        await delete_messages(bot, event, state["replys"])
+        await matcher.finish()
+    else:
+        prefix = state["prefix"]
+        prefix_nickname = state["prefix_nickname"]
+        common_userinfo = state["common_userinfo"]
+
+        prompt_nickname = state["prompt_nickname"]
+        prompt = state["prompt"]
+
+        botinfo = BotInfo(nickname=bot_nickname, owner=common_userinfo)
+        try:
+            temp_bots.add_new_bot(
+                common_userinfo=common_userinfo,
+                botinfo=botinfo,
+                botdata=BotData(
+                    nickname=bot_nickname,
+                    prompt_nickname=prompt_nickname,
+                    prompt=prompt,
+                    prefix_nickname=prefix_nickname,
+                    prefix=prefix,
+                    source=state["able_source_dict"][state["source_index"]],
+                ),
+            )
+            pre_command = state["pre_command"]
+            msg = f"成功添加了bot,使用命令{pre_command}{bot_nickname}加上你要询问的内容即可使用该bot"
+            await send_message(msg, matcher, bot, event)
+            await matcher.finish()
+        except MatcherException:
+            await delete_messages(bot, event, state["replys"])
+            raise
+        except Exception as e:
+            await send_message(str(e), matcher, bot, event)
+            await matcher.finish()
+
+
+delete_bot = on_message(priority=1, block=False)
+
+
+@delete_bot.handle()
+async def delete_bot_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_State):
+    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
+
+    if not event.get_plaintext().startswith(
+            (f"{PRIVATE_COMMAND}删除bot", f"{PUBLIC_COMMAND}删除bot")
+    ):
+        await matcher.finish()
+    if event.get_plaintext().startswith(PRIVATE_COMMAND):
+        state["common_userinfo"] = set_common_userinfo(event, bot)
+        plain_message = (
+            event.get_plaintext()
+            .replace(f"{PRIVATE_COMMAND}删除bot", "")
+            .replace(" ", "")
+        )
+    else:
+        await if_super_user(event, bot, matcher)
+        state["common_userinfo"] = set_public_common_userinfo(bot)
+        plain_message = (
+            event.get_plaintext().replace(f"{PUBLIC_COMMAND}删除bot", "").replace(" ", "")
+        )
+    state["replys"] = []
+    if not plain_message:
+        msg = "请输入bot的昵称,区分大小写\n输入'取消'或'算了'可以结束当前操作"
+        state["replys"].append(await send_message(msg, matcher, bot, event))
+
+    else:
+        matcher.set_arg("bot", plain_message)
+
+
+@delete_bot.got("bot")
+async def delete_bot__(
+        matcher: Matcher,
+        state: T_State,
+        bot: Bot,
+        event: MessageEvent,
+        args: str = ArgStr("bot"),
+):
+    await if_close(event, matcher, bot, state["replys"])
+    bot_name = str(args).replace("\n", "")
+    common_userinfo = state["common_userinfo"]
+    try:
+        common_users.delete_bot(
+            common_userinfo=common_userinfo,
+            botinfo=BotInfo(nickname=bot_name, owner=common_userinfo),
+        )
+        await send_message("成功删除了该bot", matcher, bot, event)
         await matcher.finish()
     except MatcherException:
         await delete_messages(bot, event, state["replys"])

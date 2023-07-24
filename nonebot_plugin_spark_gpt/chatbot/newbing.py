@@ -73,8 +73,9 @@ class Newbing_Bot:
         raise Exception(error)
 
     async def ask(self, question):
-        if question in ["creative", "创造", "balanced", "均衡", "precise", "精确"]:
+        if question in ["creative", "创造", "balanced", "平衡", "precise", "精确"]:
             self.change_style(question)
+            return f"成功切换为{question}模式"
         if not self.chatbot:
             await self.refresh()
         if question in ["1", "2", "3"] and self.botdata.last_suggests:

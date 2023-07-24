@@ -8,6 +8,8 @@ from .spark_desk import load_config as load_spark_desk_config
 from .tongyiqianwen import load_config as load_tongyiqianwen_config
 from ..common.config import CONFIG_SOURCE
 from ..common.load_config import load_command_config
+from ..common.prefix_data import prefixes
+from ..common.prompt_data import prompts
 
 Generated_Source_Pic = False
 
@@ -86,6 +88,8 @@ def get_able_source():
 
 
 def load_all_config():
+    prompts.Generated = False
+    prefixes.Generated = False
     load_command_config()
     load_bard_config()
     load_newbing_config()
