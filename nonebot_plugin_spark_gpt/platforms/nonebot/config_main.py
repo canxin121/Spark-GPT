@@ -13,7 +13,7 @@ from nonebot.typing import T_State
 require("nonebot_plugin_templates")
 
 from nonebot_plugin_templates.template_types import *
-from nonebot_plugin_templates.templates_render import menu_render, colorlist_render
+from nonebot_plugin_templates.templates_render import menu_render, dict_render
 
 from .userlinks import users
 from .utils import (
@@ -257,8 +257,7 @@ Prompt_Msg_Path.touch()
 async def all_prompts_(bot: Bot, matcher: Matcher, event: MessageEvent):
     prompts_dict = prompts.show_list()
     if not prompts.Generated:
-        pic_bytes = await colorlist_render(prompts_dict, headline="预设列表", width=800,
-                                           description="下面只展示了前200个字符")
+        pic_bytes = await dict_render(prompts_dict, title="预设列表", width=600)
         prompts.generate_pic()
         with open(Prompt_Msg_Path, "wb") as f:
             f.write(pic_bytes)
@@ -463,8 +462,7 @@ Prefix_Msg_Path.touch()
 async def all_prefixes_(bot: Bot, matcher: Matcher, event: MessageEvent):
     prefixes_dict = prefixes.show_list()
     if not prefixes.Generated:
-        pic_bytes = await colorlist_render(prefixes_dict, headline="前缀列表", width=800,
-                                           description="下面只展示了前200个字符")
+        pic_bytes = await dict_render(prefixes_dict, title="前缀列表", width=600)
         prefixes.generate_pic()
         with open(Prefix_Msg_Path, "wb") as f:
             f.write(pic_bytes)

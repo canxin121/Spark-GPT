@@ -8,7 +8,7 @@ from nonebot.plugin import on_message
 from nonebot.typing import T_State
 
 require("nonebot_plugin_templates")
-from nonebot_plugin_templates.templates_render import colorlist_render
+from nonebot_plugin_templates.templates_render import dict_render
 
 from .utils import get_question_chatbot
 from .utils import (
@@ -128,8 +128,7 @@ async def new_bot_(event: MessageEvent, matcher: Matcher, bot: Bot, state: T_Sta
         )
     )
     if not Generated_Source_Pic:
-        pic_bytes = await colorlist_render(source_des_dict, width=700, headline="来源列表", description="",
-                                           font_size=20)
+        pic_bytes = await dict_render(source_des_dict, width=450, title="来源列表")
         get_source_pic()
         with open(Source_Msg_Path, "wb") as f:
             f.write(pic_bytes)
@@ -183,8 +182,7 @@ async def new_bot__(
         )
 
         if not prompts.Generated:
-            pic_bytes = await colorlist_render(prompts_dict, headline="预设列表", width=800,
-                                               description="")
+            pic_bytes = await dict_render(prompts_dict, title="预设列表", width=600)
             prompts.generate_pic()
             with open(Prompt_Msg_Path, "wb") as f:
                 f.write(pic_bytes)
@@ -249,8 +247,7 @@ async def new_bot____(
             )
         )
         if not prefixes.Generated:
-            pic_bytes = await colorlist_render(prefixes_dict, headline="前缀列表", width=800,
-                                               description="")
+            pic_bytes = await dict_render(prefixes_dict, title="前缀列表", width=600)
             prefixes.generate_pic()
             with open(Prefix_Msg_Path, "wb") as f:
                 f.write(pic_bytes)
@@ -353,7 +350,6 @@ async def new_bot___(
             await send_message(str(e), matcher, bot, event)
             await matcher.finish()
 
-
 delete_bot = on_message(priority=1, block=False)
 
 
@@ -407,66 +403,6 @@ async def delete_bot__(
         await matcher.finish()
     except MatcherException:
         await delete_messages(bot, event, state["replys"])
-        raise
-    except Exception as e:
-        await send_message(str(e), matcher, bot, event)
-        await matcher.finish()
-
-
-delete_bot = on_message(priority=1, block=False)
-
-
-@delete_bot.handle()
-async def delete_bot_(matcher: Matcher, event: MessageEvent, bot: Bot, state: T_State):
-    from ...common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
-
-    if not event.get_plaintext().startswith(
-            (f"{PRIVATE_COMMAND}删除bot", f"{PUBLIC_COMMAND}删除bot")
-    ):
-        await matcher.finish()
-    if event.get_plaintext().startswith(PRIVATE_COMMAND):
-        state["common_userinfo"] = set_common_userinfo(event, bot)
-        plain_message = (
-            event.get_plaintext()
-            .replace(f"{PRIVATE_COMMAND}删除bot", "")
-            .replace(" ", "")
-        )
-    else:
-        await if_super_user(event, bot, matcher)
-        state["common_userinfo"] = set_public_common_userinfo(bot)
-        plain_message = (
-            event.get_plaintext().replace(f"{PUBLIC_COMMAND}删除bot", "").replace(" ", "")
-        )
-    state["replys"] = []
-    if not plain_message:
-        msg = "请输入bot的昵称,区分大小写\n输入'取消'或'算了'可以结束当前操作"
-        state["replys"].append(await send_message(msg, matcher, bot, event))
-
-    else:
-        matcher.set_arg("bot", plain_message)
-
-
-@delete_bot.got("bot")
-async def delete_bot__(
-        matcher: Matcher,
-        state: T_State,
-        bot: Bot,
-        event: MessageEvent,
-        args: str = ArgStr("bot"),
-):
-    await if_close(event, matcher, bot, state["replys"])
-    bot_name = str(args).replace("\n", "")
-    common_userinfo = state["common_userinfo"]
-    try:
-        common_users.delete_bot(
-            common_userinfo=common_userinfo,
-            botinfo=BotInfo(nickname=bot_name, owner=common_userinfo),
-        )
-        await send_message("成功删除了该bot", matcher, bot, event)
-        await matcher.finish()
-    except MatcherException:
-        await delete_messages(bot, event, state["replys"])
-        raise
     except Exception as e:
         await send_message(str(e), matcher, bot, event)
         await matcher.finish()

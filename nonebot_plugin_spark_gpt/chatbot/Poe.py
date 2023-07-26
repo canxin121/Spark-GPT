@@ -31,14 +31,11 @@ def load_config():
         P_B = config.get_config(source="Poe配置", config_name="p_b")
     except Exception as e:
         ABLE = False
-        SUBSCRIBE_ABLE = False
         logger.warning(f"加载Poe配置时warn:{str(e)},无法使用Poe")
     try:
         FORMKEY = config.get_config(source="Poe配置", config_name="formkey")
     except Exception as e:
-        ABLE = False
-        SUBSCRIBE_ABLE = False
-        logger.warning(f"加载Poe配置时warn:{str(e)},无法使用Poe")
+        logger.warning(f"加载Poe配置时warn:{str(e)},必须安装node.js才可以自动提取formkey,否则报错无法使用")
     try:
         arg = config.get_config(source="Poe配置", config_name="suggest_able")
         if arg == "True":
@@ -67,7 +64,10 @@ load_config()
 
 class Poe_Bot:
     def __init__(
-            self, common_userinfo: CommonUserInfo, bot_info: BotInfo, bot_data: BotData,
+        self,
+        common_userinfo: CommonUserInfo,
+        bot_info: BotInfo,
+        bot_data: BotData,
     ):
         self.lock = asyncio.Lock()
         self.nickname = bot_info.nickname
@@ -102,23 +102,31 @@ class Poe_Bot:
         global CLIENT
         if CLIENT is None:
             CLIENT = await Poe_Client(P_B, FORMKEY, PROXY).create()
-        if self.botdata.source == "poe chatgpt4" or self.botdata.source == "poe claude-2-100k":
+        if (
+            self.botdata.source == "poe chatgpt4"
+            or self.botdata.source == "poe claude-2-100k"
+        ):
             if not SUBSCRIBE_ABLE:
                 raise Exception("Poe账户未订阅,无法使用订阅功能")
             if self.common_userinfo.user_id not in WHITE_LIST:
                 raise Exception("你不在poe订阅功能白名单内,无法使用订阅功能")
         if question in ["1", "2", "3"] and (
-                self.botdata.handle in CLIENT.bots.keys() and "Suggestion" in CLIENT.bots[self.botdata.handle] and
-                CLIENT.bots[self.botdata.handle]["Suggestion"]):
+            self.botdata.handle in CLIENT.bots.keys()
+            and "Suggestion" in CLIENT.bots[self.botdata.handle]
+            and CLIENT.bots[self.botdata.handle]["Suggestion"]
+        ):
             question = CLIENT.bots[self.botdata.handle]["Suggestion"][int(question) - 1]
         if self.botdata.prefix:
             question += self.botdata.prefix + "\n" + question
         if not self.botdata.handle:
             await self.refresh()
         try:
-            answer = ''
-            async for message in CLIENT.ask_stream(url_botname=self.botdata.handle, question=question,
-                                                   suggest_able=True):
+            answer = ""
+            async for message in CLIENT.ask_stream(
+                url_botname=self.botdata.handle,
+                question=question,
+                suggest_able=SUGGEST_ABLE,
+            ):
                 answer += message
             return answer
         except Exception as e:
@@ -129,7 +137,10 @@ class Poe_Bot:
         global CLIENT
         if CLIENT is None:
             CLIENT = await Poe_Client(P_B, FORMKEY, PROXY).create()
-        if self.botdata.source == "poe chatgpt4" or self.botdata.source == "poe claude-2-100k":
+        if (
+            self.botdata.source == "poe chatgpt4"
+            or self.botdata.source == "poe claude-2-100k"
+        ):
             if not SUBSCRIBE_ABLE:
                 raise Exception("Poe账户未订阅,无法使用订阅功能")
             if self.common_userinfo.user_id not in WHITE_LIST:
@@ -138,8 +149,12 @@ class Poe_Bot:
             try:
                 generated_uuid = uuid.uuid4()
                 self.botdata.handle = generated_uuid.hex.replace("-", "")[0:15]
-                await CLIENT.create_bot(self.botdata.handle, "无", base_model=self.botdata.model,
-                                        suggested_replies=SUGGEST_ABLE)
+                await CLIENT.create_bot(
+                    self.botdata.handle,
+                    "无",
+                    base_model=self.botdata.model,
+                    suggested_replies=True,
+                )
                 if self.botdata.prompt:
                     await CLIENT.send_message(self.botdata.handle, self.botdata.prompt)
                 common_users.save_userdata(self.common_userinfo)

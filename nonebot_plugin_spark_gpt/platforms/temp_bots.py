@@ -129,13 +129,14 @@ class Temp_Bots(BaseModel):
             self, common_userinfo: CommonUserInfo, text: str
     ) -> tuple[str, CHATBOT]:
         """由原始的命令加bot名加问题得到问题和可调用的chatbot"""
+        from ..common.load_config import PRIVATE_COMMAND, PUBLIC_COMMAND
         try:
             botinfo, botdata = common_users.get_bot_by_text(common_userinfo, text)
-        except Exception as e:
+        except Exception:
             raise
 
-        question = text.replace(f"/{botinfo.nickname}", "").replace(
-            f".{botinfo.nickname}", ""
+        question = text.replace(f"{PRIVATE_COMMAND}{botinfo.nickname}", "").replace(
+            f"{PUBLIC_COMMAND}{botinfo.nickname}", ""
         )
         try:
             bot = self.get_bot_by_botinfo(
