@@ -36,7 +36,7 @@ COMMENTS = (
             "private_command": "私人的bot的控制和使用前缀,默认‘/’",
             "public_command": "公用的bot的控制和使用前缀,默认‘.’",
             "pic_width": "文字转图片的宽度",
-            "show_name": "预设展示图和前缀展示图右侧显示的数字的多少"
+            "show_num": "预设列表和前缀列表展示的字数",
         },
         "Newbing配置": {
             "cookie": "Newbing的cookie json,获取方法为登录微软账号并打开到bing聊天界面,使用浏览器扩展 cookie editor将cookie导出为json格式并粘贴到此处",
@@ -67,11 +67,11 @@ COMMENTS = (
         },
         "Poe配置": {
             "p_b": "获取方式为打开https://poe.com/,登录后F12打开开发者工具,在应用程序->cookie中复制p-b项的值,如l_recO0QgugqEyfgMbBc-g%3D%3D",
-            "formkey": "获取方式为打开https://poe.com/,登录后F12打开开发者工具,打开网络,然后向一个bot发消息,提取请求头中的formkey",
+            "formkey": "如果你没有安装node.js,请填写此项:获取方式为打开https://poe.com/,登录后F12打开开发者工具,打开网络,然后向一个bot发消息,提取请求头中的formkey",
             "suggest_able": "是否开启建议回复",
             "proxy": "访问POE官网时使用的代理链接,请按照协议://地址:端口的格式填写",
             "whitelist": "允许使用gpt4和claude2 100k的用户的列表,注意填写的是通用用户id,不是qq号或某平台id",
-            "subscribed": "账号是否为订阅账户,只有订阅账户才可使用gpt4 和 claude2 100k,否则将报错"
+            "subscribed": "账号是否为订阅账户,只有订阅账户才可使用gpt4 和 claude2 100k,否则将报错,True为是,任意值为否",
         },
         "Bard配置": {
             "__Secure-1PSID": "获取方式:打开Bard网页,打开开发者工具中的应用程序,选择其中的cookie,并且复制其中的__Secure-1PSID一项的值复制到这里",
