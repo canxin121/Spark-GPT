@@ -1,6 +1,5 @@
 import asyncio
 import json
-import re
 import uuid
 
 import httpx
@@ -129,15 +128,21 @@ class Claude_Bot:
                         "attachments": [],
                     },
             ) as response:
-                answer = ""
                 async for chunk in response.aiter_text():
-                    match = re.search(r'"completion":"(.*?)",', chunk)
-                    if match:
-                        new_answer = match.group(1)
-                        add = new_answer[len(answer):]
-                        answer = new_answer
-                        yield add
-
+                    try:
+                        answer = ""
+                        for data in chunk.split("data: "):
+                            try:
+                                if data:
+                                    json_data = json.loads(data)
+                                    answer += json_data["completion"]
+                                else:
+                                    continue
+                            except:
+                                continue
+                        yield answer
+                    except:
+                        pass
     async def get_organization_uuid(self):
         global ORGANIZATION_UUID
         retry = 3

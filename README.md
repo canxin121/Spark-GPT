@@ -21,7 +21,7 @@
 </p>
 <div align="left">
 
-## 最新版本号1.2.3
+## 最新版本号1.2.6
 # 详细教程-> [![残心文档库](source/doc.png)](https://canxin121.github.io/docs/docs/Spark_GPT.html)  
   
 ---

@@ -67,7 +67,7 @@ COMMENTS = (
         },
         "Poe配置": {
             "p_b": "获取方式为打开https://poe.com/,登录后F12打开开发者工具,在应用程序->cookie中复制p-b项的值,如l_recO0QgugqEyfgMbBc-g%3D%3D",
-            "formkey": "如果你没有安装node.js,请填写此项:获取方式为打开https://poe.com/,登录后F12打开开发者工具,打开网络,然后向一个bot发消息,提取请求头中的formkey",
+            "formkey": "目前必须填写才可使用,获取方式为打开https://poe.com/,登录后F12打开开发者工具,打开网络,然后向一个bot发消息,提取请求头中的formkey",
             "suggest_able": "是否开启建议回复",
             "proxy": "访问POE官网时使用的代理链接,请按照协议://地址:端口的格式填写",
             "whitelist": "允许使用gpt4和claude2 100k的用户的列表,注意填写的是通用用户id,不是qq号或某平台id",

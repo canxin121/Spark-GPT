@@ -35,7 +35,8 @@ def load_config():
     try:
         FORMKEY = config.get_config(source="Poe配置", config_name="formkey")
     except Exception as e:
-        logger.warning(f"加载Poe配置时warn:{str(e)},必须安装node.js才可以自动提取formkey,否则报错无法使用")
+        ABLE = False
+        logger.warning(f"加载Poe配置时warn:{str(e)},目前必须填写,否则无法使用")
     try:
         arg = config.get_config(source="Poe配置", config_name="suggest_able")
         if arg == "True":
