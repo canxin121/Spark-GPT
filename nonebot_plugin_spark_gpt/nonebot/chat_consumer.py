@@ -6,7 +6,7 @@ from ..type_store import common_config
 from ..type_store.msgs_link import msg_links
 from ..utils.extractor import extract_image, QCU
 
-chat_consumer = on_message()
+chat_consumer = on_message(block=False)
 
 
 @chat_consumer.handle()

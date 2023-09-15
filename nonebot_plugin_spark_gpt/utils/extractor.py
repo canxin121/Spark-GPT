@@ -8,7 +8,7 @@ from nonebot.internal.params import Depends
 from nonebot.params import Event
 from nonebot_plugin_alconna import UniMsg, Reply
 from nonebot_plugin_bind.utils import get_user
-
+from nonebot.exception import SkippedException
 from ..type_store.msgs_link import msg_links
 from ..type_store.user_chat import users, User, public_user
 
@@ -98,8 +98,7 @@ def GetQuestionChatUser():
             full_prefix = f"{prefix}{chat.name}"
             if msg.startswith(full_prefix):
                 return msg[len(full_prefix):], chat, user
-        return False
-
+        raise SkippedException
     return Depends(dependency)
 
 
