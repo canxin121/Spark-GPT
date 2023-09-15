@@ -6,11 +6,10 @@ authors = ["canxin121 <1969730106@qq.com>"]
 readme = "README.md"
 packages = [
     { include = "nonebot_plugin_spark_gpt" },
-    { include = "nonebot_plugin_saa" },
 ]
 
 [tool.poetry.dependencies]
-nonebot-plugin-alconna = ">=0.22.4"
+nonebot-plugin-alconna = ">=0.22.7"
 nonebot-plugin-htmlrender = ">=0.2.1"
 nonebot-plugin-templates = ">=0.1.6"
 nonebot-plugin-bind = ">=0.2.0"
@@ -19,7 +18,7 @@ python = ">=3.8"
 aiofiles = ">=23.2.1"
 aiohttp = ">=3.8.5"
 async-bing-client = ">=0.1.6"
-async-poe-client = ">=0.3.4"
+async-poe-client = ">=0.3.6"
 async-claude-client = ">=0.1.2"
 jinja2 = ">=3.1.2"
 markdown = ">=3.4.4"

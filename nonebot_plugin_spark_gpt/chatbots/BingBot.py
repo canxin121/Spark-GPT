@@ -14,10 +14,10 @@ from async_bing_client import (
     Image,
     Limit,
 )
-from nonebot_plugin_saa import Image as SaaImage
-from nonebot_plugin_saa import MessageFactory
-from nonebot_plugin_saa import Text as SaaText
-from nonebot_plugin_spark_gpt.type_store.msgs_link import msg_links
+from ..nonebot_plugin_saa import Image as SaaImage
+from ..nonebot_plugin_saa import MessageFactory
+from ..nonebot_plugin_saa import Text as SaaText
+from ..nonebot_plugin_spark_gpt.type_store.msgs_link import msg_links
 
 from . import register_chatbot
 from .BaseChatBot import BaseChatBot, Permission
