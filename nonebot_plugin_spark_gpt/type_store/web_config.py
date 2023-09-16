@@ -22,7 +22,7 @@ def common_config() -> "Common":
 class Common(WebUiConfigModel):
     __config_name__ = "一般配置"
     superusers: list[str] = Field(
-        default=[], description="填写你的bind id(请填写str类型,['1','2']),使用/bind info查询"
+        default=[], description="填写你的bind id(请填写str类型,['1','2']),使用bindinfo命令查询"
     )
     wait_msg_able: bool = Field(
         default=True, description='是否发送"正在思考/刷新,请稍等",默认True为发送,False为不发送'

@@ -157,17 +157,17 @@ class BingBot(BaseChatBot):
             if limit_text:
                 full_answer += limit_text
             message = []
-
+            pic_bool = bool((self.auto_pic and len(full_answer) > self.num_limit) or self.pic)
             # 并行来文转图并获取url
             async def md_to_pic_task(s, width=common_config().pic_width):
-                if (self.auto_pic and len(full_answer) > self.num_limit) or self.pic:
+                if pic_bool:
                     pic = await md_to_pic(s, width)
                     return SaaImage(pic)
                 else:
                     return SaaText(s)
 
             async def get_url_task(s):
-                if self.url:
+                if pic_bool and self.url:
                     url = await get_url(s)
                     return SaaText(url)
 
