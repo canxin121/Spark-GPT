@@ -2,16 +2,10 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Annotated, Tuple, Dict, Optional, Any  # noqa: F401
+from typing import  Dict, Optional, Any  # noqa: F401
 
-from nonebot import Bot
-from nonebot.internal.params import Depends
-from nonebot.params import Event
-from nonebot_plugin_alconna import UniMsg, Reply
-from nonebot_plugin_bind.utils import get_user
 from pydantic import BaseModel
 
-from .msgs_link import msg_links
 from .web_config import common_config
 from ..chatbots import chatbots
 from ..utils import md_to_pic

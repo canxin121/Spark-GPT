@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from typing import Annotated, Tuple, Dict, Optional, Any  # noqa: F401
+from typing import Annotated, Tuple,  Any  # noqa: F401
 
 from nonebot import Bot
-from nonebot import get_driver
 from nonebot.internal.params import Depends
 from nonebot.params import Event
 from nonebot_plugin_alconna import UniMsg, Reply
