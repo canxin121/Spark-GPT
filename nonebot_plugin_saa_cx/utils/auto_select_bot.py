@@ -54,7 +54,6 @@ def get_bot_by_id(adapter_name: SupportedAdapters, id: str) -> Optional[Bot]:
         raise RuntimeError(f"get bot id of {adapter_name} is not supported")
     return BOT_CACHE_DICT[adapter_name].get(id)
 
-
 driver = get_driver()
 
 
@@ -99,8 +98,6 @@ def register_list_targets(adapter: SupportedAdapters):
 
 async def refresh_bots():
     """刷新缓存的 Bot 数据"""
-    BOT_CACHE.clear()
-    BOT_CACHE_DICT.clear()
     for bot in list(get_bots().values()):
         adapter_name = extract_adapter_type(bot)
 
@@ -112,8 +109,6 @@ async def refresh_bots():
 
 async def init_bots():
     """初始化bot_id和bot的对应关系"""
-    BOT_CACHE.clear()
-    BOT_CACHE_DICT.clear()
     for bot in list(get_bots().values()):
         adapter_name = extract_adapter_type(bot)
 

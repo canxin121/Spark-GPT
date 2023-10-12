@@ -6,7 +6,6 @@ from typing import cast, Literal, Union, Optional, List, Sequence, Any
 import anyio
 from nonebot import logger
 from nonebot.adapters import Bot, Event
-from nonebot.adapters.telegram.model import MessageEntity, InputMedia
 
 
 from ..types import Text, Image, Reply, Mention
@@ -20,10 +19,13 @@ from ..utils import (
     register_get_bot_id,
     register_ms_adapter,
     assamble_message_factory,
-    register_target_extractor, Receipt, get_bot_id,
+    register_target_extractor,
+    Receipt,
+    get_bot_id,
 )
 
 try:
+    from nonebot.adapters.telegram.model import MessageEntity, InputMedia
     from nonebot.adapters.telegram import Bot as BotTG
     from nonebot.adapters.telegram.message import File, Entity, UnCombinFile
     from nonebot.adapters.telegram import Message, MessageSegment
@@ -40,9 +42,8 @@ try:
 
     MessageFactory.register_adapter_message(SupportedAdapters.telegram, Message)
 
-
     def build_entities_form_msg(
-        message: Sequence[MessageSegment]
+        message: Sequence[MessageSegment],
     ) -> Optional[List[MessageEntity]]:
         return (
             (
@@ -64,11 +65,9 @@ try:
             else None
         )
 
-
     @register_telegram(Text)
     def _text(t: Text) -> MessageSegment:
         return Entity.text(t.data["text"])
-
 
     @register_telegram(Image)
     async def _image(i: Image) -> MessageSegment:
@@ -79,7 +78,6 @@ try:
             image = image.getvalue()
         return File.photo(image)
 
-
     @register_telegram(Mention)
     async def _mention(m: Mention) -> MessageSegment:
         user_id = m.data["user_id"]
@@ -89,11 +87,9 @@ try:
             else Entity.text_link("用户 ", f"tg://user?id={user_id}")
         )
 
-
     @register_telegram(Reply)
     async def _reply(r: Reply) -> MessageSegment:
         return MessageSegment("reply", cast(dict, r.data))
-
 
     @register_target_extractor(PrivateMessageEvent)
     @register_target_extractor(GroupMessageEvent)
@@ -102,7 +98,6 @@ try:
         assert isinstance(event, MessageEvent)
         return TargetTelegramCommon(chat_id=event.chat.id)
 
-
     @register_target_extractor(ForumTopicMessageEvent)
     def _extract_forum_msg_event(event: Event) -> TargetTelegramForum:
         assert isinstance(event, ForumTopicMessageEvent)
@@ -110,7 +105,6 @@ try:
             chat_id=event.chat.id,
             message_thread_id=event.message_thread_id,
         )
-
 
     def build_mention_from_event(event: MessageEvent) -> MessageSegment:
         # has user
@@ -134,7 +128,6 @@ try:
         # no user
         return Entity.text("")
 
-
     class TelegramReceipt(Receipt):
         sent_msg: Any
         sent_type: Literal["text", "image"]
@@ -144,11 +137,11 @@ try:
         adapter_name = adapter
 
         @property
-        def message_id(self) -> Union[str, list[str]]:
+        def message_id(self) -> Union[str, List[str]]:
             if isinstance(self.sent_msg, list):
-                return [f'{msg.message_id}.{self.chat_id}' for msg in self.sent_msg]
+                return [f"{msg.message_id}.{self.chat_id}" for msg in self.sent_msg]
             else:
-                return f'{self.sent_msg.message_id}.{self.chat_id}'
+                return f"{self.sent_msg.message_id}.{self.chat_id}"
 
         async def revoke(self):
             bot = self._get_bot()
@@ -172,7 +165,12 @@ try:
             else:
                 await del_msg_with_retry(self.message_id.split(".")[0])
 
-        async def edit(self, msg: MessageFactory[MessageSegmentFactory], at_sender=False, reply=False):  # noqa: E501
+        async def edit(
+            self,
+            msg: MessageFactory[MessageSegmentFactory],
+            at_sender=False,
+            reply=False,
+        ):  # noqa: E501
             bot = self._get_bot()
             if isinstance(msg, MessageSegmentFactory):
                 msg = MessageFactory([msg])
@@ -184,9 +182,14 @@ try:
                     message_segment = await message_segment_factory.build(bot)
                     message_to_send += message_segment
             if self.reply_to_msg_id and reply:
-                message_to_send = await Reply(self.reply_to_msg_id).build(bot) + message_to_send
+                message_to_send = (
+                    await Reply(self.reply_to_msg_id).build(bot) + message_to_send
+                )
             if self.mention_user_id and at_sender:
-                message_to_send = await MessageFactory(self.mention_user_id).build(bot) + message_to_send  # noqa: E501
+                message_to_send = (
+                    await MessageFactory(self.mention_user_id).build(bot)
+                    + message_to_send
+                )  # noqa: E501
 
             # 处理 Message 的编辑
             # 分离各类型 seg
@@ -207,9 +210,14 @@ try:
                     for index, message_id in enumerate(message_ids):
                         if index < len(images):
                             await bot.edit_message_media(
-                                media=InputMedia(type=images[index].type, media=images[index].data["file"],
-                                                 caption=str(entities),
-                                                 caption_entities=build_entities_form_msg(message_to_send)),
+                                media=InputMedia(
+                                    type=images[index].type,
+                                    media=images[index].data["file"],
+                                    caption=str(entities),
+                                    caption_entities=build_entities_form_msg(
+                                        message_to_send
+                                    ),
+                                ),
                                 chat_id=self.chat_id,
                                 message_id=message_ids[index].split(".")[0],
                             )
@@ -223,9 +231,12 @@ try:
                     if len(images) > 1:
                         logger.error("Saa在编辑消息时对于单图片的Tg消息,也只能编辑为单图片的消息")
                     await bot.edit_message_media(
-                        media=InputMedia(type=images[0].type, media=images[0].data["file"],
-                                         caption=str(entities),
-                                         caption_entities=build_entities_form_msg(message_to_send)),
+                        media=InputMedia(
+                            type=images[0].type,
+                            media=images[0].data["file"],
+                            caption=str(entities),
+                            caption_entities=build_entities_form_msg(message_to_send),
+                        ),
                         chat_id=self.chat_id,
                         message_id=self.message_id.split(".")[0],
                     )
@@ -238,7 +249,6 @@ try:
                     text=str(entities),
                     entities=build_entities_form_msg(message_to_send),
                 )
-
 
     @register_sender(SupportedAdapters.telegram)
     async def send(
@@ -267,7 +277,11 @@ try:
             )
         else:
             full_msg = msg
-        params = {"sent_type": "text", "mention_user_id": event.get_user_id(), "reply_to_msg_id": event.message_id}
+        params = {
+            "sent_type": "text",
+            "mention_user_id": event.get_user_id(),
+            "reply_to_msg_id": event.message_id,
+        }
 
         message_to_send = Message()
         reply_to_message_id = None
@@ -301,9 +315,13 @@ try:
             message_thread_id=message_thread_id,
             reply_to_message_id=reply_to_message_id,
         )
-        return TelegramReceipt(bot_id=get_bot_id(bot), sent_msg=sent_msg, message_id=sent_msg.message_id,
-                               chat_id=chat_id, **params)
-
+        return TelegramReceipt(
+            bot_id=get_bot_id(bot),
+            sent_msg=sent_msg,
+            message_id=sent_msg.message_id,
+            chat_id=chat_id,
+            **params,
+        )
 
     @register_get_bot_id(adapter)
     def _get_id(bot: Bot):

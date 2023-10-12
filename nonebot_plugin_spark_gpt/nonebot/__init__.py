@@ -1,7 +1,7 @@
 from arclet.alconna import Alconna, Args, Option, Arparma  # noqa: F401
 from nonebot_plugin_alconna import on_alconna
 
-from ..nonebot_plugin_saa import MessageFactory, Image
+from nonebot_plugin_saa_cx import MessageFactory, Image
 from . import (
     chat_consumer,
     chat_manager,

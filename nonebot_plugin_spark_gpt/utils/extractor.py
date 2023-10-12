@@ -68,7 +68,7 @@ A_User = Annotated[User, GetUser()]
 def GetQuestionChatUser():
     async def dependency(bot: Bot, event: Event, unimsg: UniMsg):
         from ..type_store.web_config import common_config
-
+        user = None
         msg = event.get_plaintext()
         common_config = common_config()
         if msg.startswith(common_config.private_command):
@@ -93,10 +93,11 @@ def GetQuestionChatUser():
                     return event.get_plaintext(), chat, public_user
                 except Exception:
                     pass
-        for _, chat in user.bots.items():
-            full_prefix = f"{prefix}{chat.name}"
-            if msg.startswith(full_prefix):
-                return msg[len(full_prefix):], chat, user
+        if user:
+            for _, chat in user.bots.items():
+                full_prefix = f"{prefix}{chat.name}"
+                if msg.startswith(full_prefix):
+                    return msg[len(full_prefix):], chat, user
         raise SkippedException
     return Depends(dependency)
 

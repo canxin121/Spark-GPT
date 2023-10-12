@@ -4,7 +4,7 @@ from asyncio import ensure_future
 from arclet.alconna import Alconna, Subcommand, Option, Args
 from nonebot.exception import FinishedException
 from nonebot_plugin_alconna import on_alconna, AlconnaMatch, Match, AlcResult
-from ..nonebot_plugin_saa import MessageFactory, Image, Text
+from nonebot_plugin_saa_cx import MessageFactory, Image, Text
 
 from ..const import menus
 from ..type_store import prompt_config, common_config

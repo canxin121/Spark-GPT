@@ -1,7 +1,7 @@
 from nonebot import on_message, Bot
 from nonebot.params import Event
 
-from ..nonebot_plugin_saa import MessageFactory, Text
+from nonebot_plugin_saa_cx import MessageFactory, Text
 from ..type_store import common_config
 from ..type_store.msgs_link import msg_links
 from ..utils.extractor import extract_image, QCU

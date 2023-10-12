@@ -1,7 +1,7 @@
 from arclet.alconna import Args, Option, Alconna, Subcommand
 from nonebot.exception import FinishedException
 from nonebot_plugin_alconna import on_alconna, AlcResult
-from ..nonebot_plugin_saa import MessageFactory, Text, Image
+from nonebot_plugin_saa_cx import MessageFactory, Text, Image
 from nonebot_plugin_spark_gpt.const import menus
 
 from ..chatbots import chatbots
@@ -93,7 +93,7 @@ async def chat_add(arp: AlcResult, user: A_User):
     num_limit = create_params.get("num_limit", 500)
     pic = create_params.get("pic", False)
     url = create_params.get("url", True)
-    stream = create_params.get("stream", True)
+    stream = create_params.get("stream", False)
     public = arp.result.find("add.public")
 
     if not (name or model):

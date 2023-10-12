@@ -14,9 +14,9 @@ from async_bing_client import (
     Image,
     Limit,
 )
-from ..nonebot_plugin_saa import Image as SaaImage
-from ..nonebot_plugin_saa import MessageFactory
-from ..nonebot_plugin_saa import Text as SaaText
+from nonebot_plugin_saa_cx import Image as SaaImage
+from nonebot_plugin_saa_cx import MessageFactory
+from nonebot_plugin_saa_cx import Text as SaaText
 from ..type_store.msgs_link import msg_links
 
 from . import register_chatbot
@@ -157,7 +157,10 @@ class BingBot(BaseChatBot):
             if limit_text:
                 full_answer += limit_text
             message = []
-            pic_bool = bool((self.auto_pic and len(full_answer) > self.num_limit) or self.pic)
+            pic_bool = bool(
+                (self.auto_pic and len(full_answer) > self.num_limit) or self.pic
+            )
+
             # 并行来文转图并获取url
             async def md_to_pic_task(s, width=common_config().pic_width):
                 if pic_bool:

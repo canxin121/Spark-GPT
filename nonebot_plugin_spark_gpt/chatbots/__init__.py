@@ -11,7 +11,7 @@ def register_chatbot(cls):
     return cls
 
 
-from . import  PoeBot,ChatGPTApiBot,ChatGPTWebBot,BingBot,ClaudeAiBot,SlackClaudeBot  # noqa: E402, F401
+from . import  ChatGPTApiBot,ChatGPTWebBot,BingBot,ClaudeAiBot,SlackClaudeBot  # noqa: E402, F401
 
 
 class ChatBots:

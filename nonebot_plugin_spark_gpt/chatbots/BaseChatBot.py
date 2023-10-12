@@ -2,7 +2,7 @@ import asyncio
 from enum import Enum
 from typing import Optional, AsyncGenerator
 
-from ..nonebot_plugin_saa import MessageFactory, Text, Image
+from nonebot_plugin_saa_cx import MessageFactory, Text, Image
 from pydantic import BaseModel
 
 from ..type_store.web_config import common_config

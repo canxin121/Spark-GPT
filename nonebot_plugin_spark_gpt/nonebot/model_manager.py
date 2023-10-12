@@ -1,6 +1,6 @@
 from arclet.alconna import Alconna, Subcommand
 from nonebot_plugin_alconna import on_alconna
-from ..nonebot_plugin_saa import MessageFactory, Text, Image
+from nonebot_plugin_saa_cx import MessageFactory, Text, Image
 from nonebot_plugin_spark_gpt.const import menus
 
 from ..chatbots import chatbots

@@ -9,7 +9,8 @@ class SupportedAdapters(StrEnum):
     telegram = "Telegram"
     feishu = "Feishu"
     discord = "Discord"
-
+    red = "RedProtocol"
+    
     fake = "fake"  # for nonebug
 
 
